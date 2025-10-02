@@ -146,6 +146,30 @@
   margin-top: 24px;
   text-align: center;
 
+  .download-history-button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
   p {
     color: #718096;
     font-size: 14px;

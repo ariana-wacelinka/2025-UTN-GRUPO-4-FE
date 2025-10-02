@@ -12,7 +12,6 @@ import { AuthService, LoginCredentials } from '../../services/auth.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  // CA1 y CA2: Campos de email y contraseña
   credentials: LoginCredentials = {
     email: '',
     password: ''
@@ -27,10 +26,6 @@ export class LoginComponent {
     private router: Router
   ) {}
 
-  /**
-   * CA3: Maneja el login guardando los datos en txt
-   * CA14: Guarda el resultado en una cookie
-   */
   onLogin(): void {
     if (!this.validateForm()) {
       return;
@@ -43,11 +38,10 @@ export class LoginComponent {
       next: (response) => {
         this.loading = false;
         if (response.success) {
-          // Redirigir según el tipo de usuario
           if (response.user?.tipo === 'empresa') {
-            this.router.navigate(['/ofertas']); // Empresas ven ofertas
+            this.router.navigate(['/ofertas']);
           } else {
-            this.router.navigate(['/']); // Alumnos van al home
+            this.router.navigate(['/']);
           }
         } else {
           this.errorMessage = response.message || 'Error al iniciar sesión';
@@ -92,5 +86,20 @@ export class LoginComponent {
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  downloadLoginHistory(): void {
+    const history = this.authService.getLoginHistory();
+    const txtContent = history.map(login => 
+      `Email: ${login.email}\nFecha: ${login.timestamp}\n-------------------\n`
+    ).join('\n');
+
+    const blob = new Blob([txtContent], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'login_history.txt';
+    link.click();
+    window.URL.revokeObjectURL(url);
   }
 }

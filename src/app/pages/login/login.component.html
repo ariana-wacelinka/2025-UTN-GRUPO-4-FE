@@ -6,7 +6,6 @@
     </div>
 
     <form class="login-form" (ngSubmit)="onLogin()">
-      <!-- CA1: Campo de email -->
       <div class="form-group">
         <label for="email">Email</label>
         <input
@@ -21,7 +20,6 @@
         />
       </div>
 
-      <!-- CA2: Campo de contraseña -->
       <div class="form-group">
         <label for="password">Contraseña</label>
         <div class="password-input-wrapper">
@@ -46,12 +44,10 @@
         </div>
       </div>
 
-      <!-- Mensaje de error -->
       <div class="error-message" *ngIf="errorMessage">
         {{ errorMessage }}
       </div>
 
-      <!-- CA3: Botón que guarda los datos en txt -->
       <button
         type="submit"
         class="login-button"
@@ -63,6 +59,13 @@
     </form>
 
     <div class="login-footer">
+      <button 
+        type="button" 
+        class="download-history-button"
+        (click)="downloadLoginHistory()"
+      >
+        📥 Descargar Historial de Logins (TXT)
+      </button>
       <p>¿No tienes cuenta? <a href="#">Regístrate</a></p>
       <p><a href="#">¿Olvidaste tu contraseña?</a></p>
     </div>
