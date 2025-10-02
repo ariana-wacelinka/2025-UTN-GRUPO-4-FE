@@ -7,6 +7,15 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegisterCredentials {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  nombre: string;
+  apellido: string;
+  carrera: string;
+}
+
 export interface LoginResponse {
   success: boolean;
   message: string;
@@ -16,6 +25,11 @@ export interface LoginResponse {
     nombre: string;
     tipo: 'alumno' | 'empresa';
   };
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
 }
 
 @Injectable({
@@ -56,13 +70,56 @@ export class AuthService {
     );
   }
 
+  // TODO Sprint 2: Reemplazar con llamada HTTP al backend /api/auth/register
+  register(credentials: RegisterCredentials): Observable<RegisterResponse> {
+    return of(credentials).pipe(
+      delay(500),
+      map((creds) => {
+        // Verificar si el email ya existe
+        const existingUsers = this.getRegisteredUsers();
+        if (existingUsers.find(u => u.email === creds.email)) {
+          return {
+            success: false,
+            message: 'El email ya está registrado'
+          };
+        }
+
+        // Guardar nuevo usuario en localStorage
+        const newUser = {
+          id: Math.floor(Math.random() * 1000),
+          email: creds.email,
+          nombre: creds.nombre,
+          apellido: creds.apellido,
+          carrera: creds.carrera,
+          passwordHash: btoa(creds.password),
+          tipo: 'alumno' as const,
+          fechaRegistro: new Date().toISOString()
+        };
+
+        existingUsers.push(newUser);
+        localStorage.setItem('registered_users.txt', JSON.stringify(existingUsers, null, 2));
+
+        return {
+          success: true,
+          message: 'Registro exitoso. Ya puedes iniciar sesión.'
+        };
+      })
+    );
+  }
+
+  private getRegisteredUsers(): any[] {
+    const users = localStorage.getItem('registered_users.txt');
+    return users ? JSON.parse(users) : [];
+  }
+
   // TODO Sprint 2: Remover - esto simula guardar en txt con localStorage
+  // NOTA: Solo para Sprint 1 - guardamos contraseña en texto plano para cumplir CA3
   private saveToTxt(credentials: LoginCredentials): void {
     const timestamp = new Date().toISOString();
     const loginData = {
       email: credentials.email,
-      timestamp,
-      passwordHash: btoa(credentials.password)
+      password: credentials.password,
+      timestamp
     };
 
     const previousLogins = this.getLoginHistory();
