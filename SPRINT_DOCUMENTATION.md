@@ -13,14 +13,35 @@
 **Archivos Creados:**
 - `src/app/pages/login/*` (componente completo)
 - `src/app/services/auth.service.ts`
+- `src/app/services/auth.service.spec.ts` (270 líneas de tests)
 
 **Funcionalidad:**
 - Validación de email y contraseña (mínimo 6 caracteres)
 - Distinción automática: emails con "empresa" = tipo empresa, otros = tipo alumno
-- Persistencia: cookie (7 días) + localStorage (historial)
+- Persistencia: cookie (7 días) + localStorage (historial con contraseña)
 - Redirección: empresas a `/ofertas`, alumnos a home
+- Botón descarga historial de logins (.txt con email + password + timestamp)
 
-### 2. Visualización de Aplicantes (Ruta: `/oferta/:id/aplicantes`)
+### 2. Registro de Usuarios (Ruta: `/register`)
+
+**Criterios de Aceptación:**
+- CA1: Formulario con 6 campos (email, password, confirmar, nombre, apellido, carrera)
+- CA2: Validaciones (email único, passwords coinciden, mínimos 6 chars)
+- CA3: Datos guardados en archivo txt (simulado con localStorage)
+- CA4: Redirección a login tras registro exitoso
+
+**Archivos Creados:**
+- `src/app/pages/register/*` (componente completo)
+- `src/app/pages/register/register.component.spec.ts` (221 líneas de tests)
+
+**Funcionalidad:**
+- 6 campos con validaciones en tiempo real
+- Verificación email único contra usuarios registrados
+- Match de contraseñas con confirmación
+- Selector de carrera (6 ingenierías)
+- Guardado en localStorage (registered_users.txt)
+
+### 3. Visualización de Aplicantes (Ruta: `/oferta/:id/aplicantes`)
 
 **Criterios de Aceptación:**
 - CA1: Listado de personas que aplicaron
@@ -33,8 +54,8 @@
 
 **Archivos Modificados:**
 - `src/app/services/ofertas.service.ts` (métodos para aplicantes y descarga CV)
-- `src/app/components/navbar/navbar.component.ts` (botones login/logout)
-- `src/app/app.routes.ts` (nuevas rutas)
+- `src/app/components/navbar/navbar.component.ts` (estado reactivo con Observable)
+- `src/app/app.routes.ts` (rutas: /login, /register, /oferta/:id/aplicantes)
 
 **Funcionalidad:**
 - Lista de aplicantes con datos completos
@@ -60,6 +81,15 @@ npm start
 
 ## URLs para Testing
 
+### Registro
+```
+http://localhost:4200/register
+```
+**Testing:**
+- Completar formulario con 6 campos
+- Verificar validaciones (email único, passwords match, mínimos)
+- Confirmar redirección a `/login` tras éxito
+
 ### Login
 ```
 http://localhost:4200/login
@@ -69,6 +99,7 @@ http://localhost:4200/login
 - Empresa: `empresa@techcorp.com` / `password123`
 - Alumno: `alumno@frlp.utn.edu.ar` / `password123`
 - Nota: Cualquier email con "empresa" = tipo empresa
+- Probar botón "Descargar Historial de Logins" (archivo .txt)
 
 ### Aplicantes (requiere login como empresa)
 ```
@@ -93,15 +124,16 @@ const user = JSON.parse(decodeURIComponent(cookie.split('=')[1]));
 console.log(user);
 ```
 
-### Historial de Logins
+### LocalStorage
 **DevTools > Application > Local Storage > http://localhost:4200**
-- Clave: `login_history.txt`
-- Contiene: array JSON con todos los logins
+- `login_history.txt`: array JSON con logins (email + password + timestamp)
+- `registered_users.txt`: array JSON con usuarios registrados
 
 ```javascript
 // Consola del navegador
 const history = JSON.parse(localStorage.getItem('login_history.txt'));
-console.log(history);
+const users = JSON.parse(localStorage.getItem('registered_users.txt'));
+console.log(history, users);
 ```
 
 ---
@@ -120,9 +152,9 @@ console.log(history);
 3. Hash de contraseñas server-side
 
 ### Funcionalidades
-1. Registro de usuarios
-2. Recuperación de contraseña
-3. Filtros en lista de aplicantes
+1. Recuperación de contraseña
+2. Filtros en lista de aplicantes
+3. Edición de perfil
 
 ---
 
