@@ -1,0 +1,341 @@
+.aplicantes-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+// Header
+.header {
+  margin-bottom: 32px;
+
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 16px 0;
+  }
+
+  .btn-volver {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5568;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #f7fafc;
+      border-color: #cbd5e0;
+    }
+  }
+}
+
+// Loading
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #718096;
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  p {
+    margin-top: 16px;
+    font-size: 16px;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Error
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+
+  .error-card {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+
+    h2 {
+      color: #e53e3e;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: #718096;
+      margin-bottom: 24px;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+// Stats
+.stats-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  color: white;
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .stat-number {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+  }
+}
+
+// Lista de aplicantes
+.aplicantes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.aplicante-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .aplicante-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+
+    .aplicante-nombre {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+      margin: 0;
+      cursor: pointer;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: #764ba2;
+        text-decoration: underline;
+      }
+    }
+
+    .fecha-aplicacion {
+      font-size: 14px;
+      color: #718096;
+      white-space: nowrap;
+    }
+  }
+
+  .aplicante-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .info-label {
+        font-size: 12px;
+        color: #718096;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .info-value {
+        font-size: 16px;
+        color: #2d3748;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .aplicante-carta {
+    background: #f7fafc;
+    border-left: 4px solid #667eea;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+
+    h4 {
+      font-size: 14px;
+      color: #4a5568;
+      margin: 0 0 12px 0;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      font-size: 15px;
+      color: #2d3748;
+      line-height: 1.6;
+      margin: 0;
+    }
+  }
+
+  .aplicante-acciones {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+
+    .btn-descargar-cv {
+      background: #48bb78;
+      color: white;
+      box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
+
+      &:hover {
+        background: #38a169;
+        box-shadow: 0 4px 8px rgba(72, 187, 120, 0.4);
+        transform: translateY(-2px);
+      }
+    }
+
+    .btn-ver-perfil {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+
+      &:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .empty-icon {
+    font-size: 80px;
+    margin-bottom: 24px;
+  }
+
+  h2 {
+    font-size: 28px;
+    color: #2d3748;
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 16px;
+    color: #718096;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .aplicantes-container {
+    padding: 16px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .aplicante-card {
+    .aplicante-header {
+      flex-direction: column;
+      gap: 8px;
+
+      .fecha-aplicacion {
+        align-self: flex-start;
+      }
+    }
+
+    .aplicante-acciones {
+      flex-direction: column;
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  .stats-card .stat {
+    .stat-number {
+      font-size: 36px;
+    }
+  }
+}
