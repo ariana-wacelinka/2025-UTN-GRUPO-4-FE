@@ -51,11 +51,11 @@ export class AplicantesListaComponent implements OnInit {
   private cargarAplicantes(): void {
     this.loading = true;
     this.ofertasService.getAplicantesPorOferta(this.ofertaId).subscribe({
-      next: (data) => {
+      next: (data: AplicanteListaDTO) => {
         this.aplicantesData = data;
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         this.error = 'Error al cargar los aplicantes';
         this.loading = false;
         console.error('Error:', error);

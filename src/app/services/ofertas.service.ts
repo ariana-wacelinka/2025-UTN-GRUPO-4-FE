@@ -1,7 +1,8 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, delay } from 'rxjs';
 import { OfertaListaDTO, EstadoAplicacion, AplicacionDTO } from '../models/oferta.dto';
+import { AplicanteDTO, AplicanteListaDTO } from '../models/aplicante.dto';
 import { API_URL } from '../app.config';
 
 @Injectable({
@@ -49,6 +50,133 @@ export class OfertasService {
     a.download = `aplicacion_${aplicacion.ofertaId}_${aplicacion.usuarioId}.txt`;
     a.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  getAplicantesPorOferta(ofertaId: number): Observable<AplicanteListaDTO> {
+    // TODO: Reemplazar con: return this.http.get<AplicanteListaDTO>(`${this.apiUrl}/ofertas/${ofertaId}/aplicantes`);
+    return of(this.getMockAplicantes(ofertaId)).pipe(delay(500));
+  }
+
+  descargarCV(aplicante: AplicanteDTO): void {
+    // Mock: generar archivo txt con datos del CV
+    const contenido = `CURRICULUM VITAE
+
+Nombre: ${aplicante.nombre}
+Email: ${aplicante.email}
+Carrera: ${aplicante.carrera || 'No especificada'}
+Año de Ingreso: ${aplicante.anioIngreso || 'No especificado'}
+
+--- Carta de Presentación ---
+${aplicante.cartaPresentacion || 'No proporcionada'}
+
+--- Información Adicional ---
+Aplicó a oferta ID: ${aplicante.ofertaId}
+Fecha de aplicación: ${aplicante.fechaAplicacion}
+`;
+
+    const blob = new Blob([contenido], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = aplicante.cvFileName || `CV_${aplicante.nombre.replace(/\s/g, '_')}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private getMockAplicantes(ofertaId: number): AplicanteListaDTO {
+    const oferta = this.ofertas.find(o => o.id === ofertaId);
+    const titulo = oferta?.titulo || 'Oferta no encontrada';
+
+    const mockAplicantes: { [key: number]: AplicanteDTO[] } = {
+      1: [
+        {
+          id: 1,
+          usuarioId: 101,
+          nombre: 'Ariana Wacelinka',
+          email: 'wacelinka@example.com',
+          carrera: 'Ingeniería en Sistemas',
+          anioIngreso: 2020,
+          cvUrl: '/assets/documents/WACELINKA, Ariana.pdf',
+          cvFileName: 'WACELINKA_Ariana.pdf',
+          cartaPresentacion: 'Me interesa mucho esta posición porque...',
+          fechaAplicacion: '2025-09-15',
+          ofertaId: 1
+        },
+        {
+          id: 2,
+          usuarioId: 102,
+          nombre: 'Juan Pérez',
+          email: 'jperez@example.com',
+          carrera: 'Ingeniería en Sistemas',
+          anioIngreso: 2019,
+          cvFileName: 'PEREZ_Juan.pdf',
+          cartaPresentacion: 'Tengo 3 años de experiencia en Angular...',
+          fechaAplicacion: '2025-09-16',
+          ofertaId: 1
+        },
+        {
+          id: 3,
+          usuarioId: 103,
+          nombre: 'María González',
+          email: 'mgonzalez@example.com',
+          carrera: 'Ingeniería en Sistemas',
+          anioIngreso: 2021,
+          cvFileName: 'GONZALEZ_Maria.pdf',
+          cartaPresentacion: 'Me apasiona el desarrollo full stack...',
+          fechaAplicacion: '2025-09-17',
+          ofertaId: 1
+        }
+      ],
+      2: [
+        {
+          id: 4,
+          usuarioId: 104,
+          nombre: 'Carlos Rodríguez',
+          email: 'crodriguez@example.com',
+          carrera: 'Ingeniería en Sistemas',
+          anioIngreso: 2020,
+          cvFileName: 'RODRIGUEZ_Carlos.pdf',
+          cartaPresentacion: 'Especializado en React y frontend moderno...',
+          fechaAplicacion: '2025-09-18',
+          ofertaId: 2
+        },
+        {
+          id: 5,
+          usuarioId: 105,
+          nombre: 'Laura Martínez',
+          email: 'lmartinez@example.com',
+          carrera: 'Ingeniería en Sistemas',
+          anioIngreso: 2019,
+          cvFileName: 'MARTINEZ_Laura.pdf',
+          cartaPresentacion: 'Con experiencia en UI/UX y React...',
+          fechaAplicacion: '2025-09-19',
+          ofertaId: 2
+        }
+      ],
+      3: [
+        {
+          id: 6,
+          usuarioId: 106,
+          nombre: 'Diego Fernández',
+          email: 'dfernandez@example.com',
+          carrera: 'Ingeniería en Sistemas',
+          anioIngreso: 2018,
+          cvFileName: 'FERNANDEZ_Diego.pdf',
+          cartaPresentacion: '5 años de experiencia en Java y Spring Boot...',
+          fechaAplicacion: '2025-09-20',
+          ofertaId: 3
+        }
+      ]
+    };
+
+    const aplicantes = mockAplicantes[ofertaId] || [];
+
+    return {
+      ofertaId,
+      ofertaTitulo: titulo,
+      aplicantes,
+      totalAplicantes: aplicantes.length
+    };
   }
 
   private getMockOfertas(): OfertaListaDTO[] {
