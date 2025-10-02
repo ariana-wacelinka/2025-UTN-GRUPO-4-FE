@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { OfertaListaDTO, EstadoAplicacion } from '../../models/oferta.dto';
 import { OfertasService } from '../../services/ofertas.service';
 import { UsuarioService, Usuario } from '../../services/usuario.service';
+import { AuthService } from '../../services/auth.service';
 import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-dialog.component';
 
 @Component({
@@ -89,21 +90,33 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
           <mat-card class="modern-card action-card">
             <mat-card-content>
               <div class="action-buttons">
-                @if (oferta.estado === 'APLICADO') {
-                <button mat-raised-button class="applied-button" disabled>
-                  <mat-icon>check</mat-icon>
-                  Ya Aplicado
-                </button>
-                } @else {
+                @if (isEmpresa()) {
                 <button
                   mat-raised-button
-                  class="apply-button"
-                  color="primary"
-                  (click)="abrirDialogoAplicar()"
+                  class="view-applicants-button"
+                  color="accent"
+                  (click)="verAplicantes()"
                 >
-                  <mat-icon>send</mat-icon>
-                  Aplicar Ahora
+                  <mat-icon>group</mat-icon>
+                  Ver Aplicantes
                 </button>
+                } @else {
+                  @if (oferta.estado === 'APLICADO') {
+                  <button mat-raised-button class="applied-button" disabled>
+                    <mat-icon>check</mat-icon>
+                    Ya Aplicado
+                  </button>
+                  } @else {
+                  <button
+                    mat-raised-button
+                    class="apply-button"
+                    color="primary"
+                    (click)="abrirDialogoAplicar()"
+                  >
+                    <mat-icon>send</mat-icon>
+                    Aplicar Ahora
+                  </button>
+                  }
                 }
 
                 <!-- <button mat-stroked-button class="save-button">
@@ -376,6 +389,22 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
         padding: 16px !important;
       }
 
+      .view-applicants-button {
+        background: var(--primary-gradient) !important;
+        color: var(--white) !important;
+        font-weight: 600 !important;
+        text-transform: none !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        font-size: 1rem !important;
+        box-shadow: 0 8px 24px rgba(103, 58, 183, 0.3) !important;
+      }
+
+      .view-applicants-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(103, 58, 183, 0.4) !important;
+      }
+
       .save-button {
         border: 2px solid var(--border-light) !important;
         color: var(--text-muted) !important;
@@ -486,6 +515,7 @@ export class OfertaDetalleComponent implements OnInit {
     private router: Router,
     private ofertasService: OfertasService,
     private usuarioService: UsuarioService,
+    private authService: AuthService,
     private dialog: MatDialog
   ) {}
 
@@ -522,5 +552,15 @@ export class OfertaDetalleComponent implements OnInit {
         this.oferta.estado = EstadoAplicacion.APLICADO;
       }
     });
+  }
+
+  verAplicantes(): void {
+    if (this.oferta) {
+      this.router.navigate(['/oferta', this.oferta.id, 'aplicantes']);
+    }
+  }
+
+  isEmpresa(): boolean {
+    return this.authService.isEmpresa();
   }
 }
