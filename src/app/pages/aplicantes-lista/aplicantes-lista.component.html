@@ -1,0 +1,96 @@
+<div class="aplicantes-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="btn-volver" (click)="volverAOfertas()">
+      ← Volver a ofertas
+    </button>
+    <h1 *ngIf="aplicantesData">Aplicantes para "{{ aplicantesData.ofertaTitulo }}"</h1>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando aplicantes...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <div class="error-card">
+      <h2>⚠️ Error</h2>
+      <p>{{ error }}</p>
+      <button class="btn-primary" (click)="volverAOfertas()">Volver a ofertas</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !error && aplicantesData" class="content">
+    <!-- Stats -->
+    <div class="stats-card">
+      <div class="stat">
+        <span class="stat-number">{{ aplicantesData.totalAplicantes }}</span>
+        <span class="stat-label">Aplicantes totales</span>
+      </div>
+    </div>
+
+    <!-- CA1: Listado de aplicantes -->
+    <div class="aplicantes-lista" *ngIf="aplicantesData.aplicantes.length > 0">
+      <div class="aplicante-card" *ngFor="let aplicante of aplicantesData.aplicantes">
+        <div class="aplicante-header">
+          <!-- CA3: Nombre como link al perfil -->
+          <h3 class="aplicante-nombre" (click)="verPerfil(aplicante)">
+            {{ aplicante.nombre }}
+          </h3>
+          <span class="fecha-aplicacion">
+            Aplicó el {{ formatearFecha(aplicante.fechaAplicacion) }}
+          </span>
+        </div>
+
+        <div class="aplicante-info">
+          <div class="info-item">
+            <span class="info-label">📧 Email:</span>
+            <span class="info-value">{{ aplicante.email }}</span>
+          </div>
+          <div class="info-item" *ngIf="aplicante.carrera">
+            <span class="info-label">🎓 Carrera:</span>
+            <span class="info-value">{{ aplicante.carrera }}</span>
+          </div>
+          <div class="info-item" *ngIf="aplicante.anioIngreso">
+            <span class="info-label">📅 Año de Ingreso:</span>
+            <span class="info-value">{{ aplicante.anioIngreso }}</span>
+          </div>
+        </div>
+
+        <div class="aplicante-carta" *ngIf="aplicante.cartaPresentacion">
+          <h4>Carta de Presentación:</h4>
+          <p>{{ aplicante.cartaPresentacion }}</p>
+        </div>
+
+        <div class="aplicante-acciones">
+          <!-- CA2: Botón para descargar CV -->
+          <button 
+            class="btn-descargar-cv" 
+            (click)="descargarCV(aplicante, $event)"
+            title="Descargar CV de {{ aplicante.nombre }}"
+          >
+            📄 Descargar CV
+          </button>
+          
+          <button 
+            class="btn-ver-perfil" 
+            (click)="verPerfil(aplicante)"
+            title="Ver perfil completo"
+          >
+            👤 Ver Perfil Completo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="aplicantesData.aplicantes.length === 0">
+      <div class="empty-icon">📭</div>
+      <h2>No hay aplicantes todavía</h2>
+      <p>Aún no se han recibido aplicaciones para esta oferta.</p>
+    </div>
+  </div>
+</div>
