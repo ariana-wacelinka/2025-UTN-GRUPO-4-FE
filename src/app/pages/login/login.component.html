@@ -1,0 +1,70 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>Iniciar Sesión</h1>
+      <p>Accede a la bolsa de trabajo de la FRLP</p>
+    </div>
+
+    <form class="login-form" (ngSubmit)="onLogin()">
+      <!-- CA1: Campo de email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="credentials.email"
+          placeholder="tu.email@ejemplo.com"
+          required
+          [disabled]="loading"
+          autocomplete="email"
+        />
+      </div>
+
+      <!-- CA2: Campo de contraseña -->
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <div class="password-input-wrapper">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            name="password"
+            [(ngModel)]="credentials.password"
+            placeholder="Tu contraseña"
+            required
+            [disabled]="loading"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+            [disabled]="loading"
+          >
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Mensaje de error -->
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <!-- CA3: Botón que guarda los datos en txt -->
+      <button
+        type="submit"
+        class="login-button"
+        [disabled]="loading"
+      >
+        <span *ngIf="!loading">Iniciar Sesión</span>
+        <span *ngIf="loading">Cargando...</span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p>¿No tienes cuenta? <a href="#">Regístrate</a></p>
+      <p><a href="#">¿Olvidaste tu contraseña?</a></p>
+    </div>
+  </div>
+</div>
