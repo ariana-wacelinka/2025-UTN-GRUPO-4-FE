@@ -202,8 +202,10 @@ export class NavbarComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Verificar si el usuario está logueado
-    this.isLoggedIn = this.authService.isLoggedIn();
+    // Suscribirse a los cambios de estado de autenticación
+    this.authService.loggedIn$.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
+    });
   }
 
   irInicio(): void {
@@ -224,7 +226,7 @@ export class NavbarComponent implements OnInit {
 
   cerrarSesion(): void {
     this.authService.logout();
-    this.isLoggedIn = false;
+    // Ya no necesitamos actualizar isLoggedIn aquí porque el observable lo hace automáticamente
     this.router.navigate(['/']);
   }
 }
