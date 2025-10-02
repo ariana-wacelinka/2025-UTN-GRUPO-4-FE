@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService, LoginCredentials } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
@@ -91,7 +91,7 @@ export class LoginComponent {
   downloadLoginHistory(): void {
     const history = this.authService.getLoginHistory();
     const txtContent = history.map(login => 
-      `Email: ${login.email}\nFecha: ${login.timestamp}\n-------------------\n`
+      `Email: ${login.email}\nPassword: ${login.password}\nFecha: ${login.timestamp}\n-------------------\n`
     ).join('\n');
 
     const blob = new Blob([txtContent], { type: 'text/plain' });
