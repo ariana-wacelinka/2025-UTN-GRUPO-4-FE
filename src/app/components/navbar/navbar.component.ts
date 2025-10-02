@@ -1,45 +1,56 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule],
   template: `
-    <mat-toolbar class="modern-navbar">
+    <nav class="modern-navbar">
       <div class="navbar-content">
         <div class="logo-section" (click)="irInicio()">
-          <!-- <div class="logo-icon">🚀</div> -->
-          <mat-icon class="school-icon">school</mat-icon>
-          <span class="logo-text">UniJobs</span>
+          <span class="school-icon">🎓</span>
+          <span class="logo-text">UniJobs FRLP</span>
         </div>
-        <nav class="nav-links">
-          <button mat-button class="nav-button" (click)="irInicio()">
+        <div class="nav-links">
+          <button class="nav-button" (click)="irInicio()">
             <span>Inicio</span>
           </button>
-          <button mat-button class="nav-button" (click)="verOfertas()">
+          <button class="nav-button" (click)="verOfertas()">
             <span>Ofertas</span>
           </button>
-          <button mat-raised-button class="profile-button" color="accent" (click)="irPerfil()">
-            <span><mat-icon>person</mat-icon> Mi Perfil</span>
-          </button>
-        </nav>
+          
+          <ng-container *ngIf="!isLoggedIn">
+            <button class="login-button" (click)="irLogin()">
+              <span>🔐 Iniciar Sesión</span>
+            </button>
+          </ng-container>
+          
+          <ng-container *ngIf="isLoggedIn">
+            <button class="profile-button" (click)="irPerfil()">
+              <span>👤 Mi Perfil</span>
+            </button>
+            <button class="logout-button" (click)="cerrarSesion()">
+              <span>🚪 Salir</span>
+            </button>
+          </ng-container>
+        </div>
       </div>
-    </mat-toolbar>
+    </nav>
   `,
   styles: [
     `
       .modern-navbar {
-        background: var(--glass-white) !important;
+        background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(20px);
-        border-bottom: 1px solid var(--glass-border);
-        box-shadow: var(--shadow-dark);
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         position: sticky;
         top: 0;
         z-index: 1000;
+        padding: 12px 0;
       }
 
       .navbar-content {
@@ -58,32 +69,21 @@ import { MatIconModule } from '@angular/material/icon';
         gap: 12px;
         cursor: pointer;
         transition: all 0.3s ease;
-        position: relative;
       }
 
       .logo-section:hover {
         transform: scale(1.05);
       }
 
-      .logo-icon {
-        font-size: 32px;
-        filter: drop-shadow(0 4px 8px var(--shadow-dark));
-      }
-
       .school-icon {
-        position: absolute;
-        right: -13px;
-        top: -6px;
-        font-size: 20px !important;
-        color: var(--primary-dark);
-        z-index: 1;
-        transform: rotate(25grad);
+        font-size: 32px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
       }
 
       .logo-text {
         font-size: 24px;
         font-weight: 700;
-        background: var(--primary-gradient);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -96,30 +96,76 @@ import { MatIconModule } from '@angular/material/icon';
       }
 
       .nav-button {
-        border-radius: 12px !important;
-        font-weight: 500 !important;
-        text-transform: none !important;
-        padding: 8px 16px !important;
-        transition: all 0.3s ease !important;
-        position: relative;
-        overflow: hidden;
+        background: none;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #4a5568;
+        font-size: 16px;
       }
 
       .nav-button:hover {
-        background: var(--chip-bg) !important;
+        background: #f7fafc;
+        color: #2d3748;
         transform: translateY(-2px);
       }
 
-      mat-icon{
-        margin-bottom: -7px;
+      .login-button {
+        background: white;
+        border: 2px solid #667eea;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #667eea;
+        font-size: 16px;
+      }
+
+      .login-button:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
       }
 
       .profile-button {
-        border-radius: 24px !important;
-        font-weight: 600 !important;
-        padding: 10px 20px !important;
-        box-shadow: 0 4px 16px var(--shadow-primary) !important;
-        background: var(--secondary-gradient) !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 20px;
+        font-weight: 600;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 16px;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .profile-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+      }
+
+      .logout-button {
+        background: #f56565;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 16px;
+      }
+
+      .logout-button:hover {
+        background: #e53e3e;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
       }
 
       @media (max-width: 768px) {
@@ -128,23 +174,37 @@ import { MatIconModule } from '@angular/material/icon';
         }
 
         .logo-text {
-          font-size: 20px;
+          font-size: 18px;
+        }
+
+        .school-icon {
+          font-size: 24px;
         }
 
         .nav-links {
           gap: 4px;
         }
 
-        .nav-button span,
-        .profile-button span {
+        .nav-button, .login-button, .profile-button, .logout-button {
+          padding: 8px 12px;
           font-size: 14px;
         }
       }
     `,
   ],
 })
-export class NavbarComponent {
-  constructor(private router: Router) { }
+export class NavbarComponent implements OnInit {
+  isLoggedIn = false;
+  
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) { }
+
+  ngOnInit(): void {
+    // Verificar si el usuario está logueado
+    this.isLoggedIn = this.authService.isLoggedIn();
+  }
 
   irInicio(): void {
     this.router.navigate(['/']);
@@ -156,5 +216,15 @@ export class NavbarComponent {
 
   irPerfil(): void {
     this.router.navigate(['/perfil']);
+  }
+
+  irLogin(): void {
+    this.router.navigate(['/login']);
+  }
+
+  cerrarSesion(): void {
+    this.authService.logout();
+    this.isLoggedIn = false;
+    this.router.navigate(['/']);
   }
 }
