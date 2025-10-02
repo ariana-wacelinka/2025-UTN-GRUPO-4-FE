@@ -1,0 +1,137 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <h1>Crear Cuenta</h1>
+      <p>Únete a la bolsa de trabajo de la FRLP</p>
+    </div>
+
+    <form class="register-form" (ngSubmit)="onRegister()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input
+            type="text"
+            id="nombre"
+            name="nombre"
+            [(ngModel)]="credentials.nombre"
+            placeholder="Tu nombre"
+            required
+            [disabled]="loading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="apellido">Apellido</label>
+          <input
+            type="text"
+            id="apellido"
+            name="apellido"
+            [(ngModel)]="credentials.apellido"
+            placeholder="Tu apellido"
+            required
+            [disabled]="loading"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="credentials.email"
+          placeholder="tu.email@ejemplo.com"
+          required
+          [disabled]="loading"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="carrera">Carrera</label>
+        <select
+          id="carrera"
+          name="carrera"
+          [(ngModel)]="credentials.carrera"
+          required
+          [disabled]="loading"
+        >
+          <option value="">Selecciona tu carrera</option>
+          <option *ngFor="let carrera of carreras" [value]="carrera">
+            {{ carrera }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <div class="password-input-wrapper">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            name="password"
+            [(ngModel)]="credentials.password"
+            placeholder="Mínimo 6 caracteres"
+            required
+            [disabled]="loading"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+            [disabled]="loading"
+          >
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar Contraseña</label>
+        <div class="password-input-wrapper">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            id="confirmPassword"
+            name="confirmPassword"
+            [(ngModel)]="credentials.confirmPassword"
+            placeholder="Repite tu contraseña"
+            required
+            [disabled]="loading"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="toggleConfirmPasswordVisibility()"
+            [disabled]="loading"
+          >
+            {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <div class="success-message" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <button
+        type="submit"
+        class="register-button"
+        [disabled]="loading"
+      >
+        <span *ngIf="!loading">Registrarse</span>
+        <span *ngIf="loading">Registrando...</span>
+      </button>
+    </form>
+
+    <div class="register-footer">
+      <p>¿Ya tienes cuenta? <a [routerLink]="['/login']">Inicia Sesión</a></p>
+    </div>
+  </div>
+</div>
