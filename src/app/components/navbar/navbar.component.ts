@@ -2,17 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   template: `
     <nav class="modern-navbar">
       <div class="navbar-content">
         <div class="logo-section" (click)="irInicio()">
-          <span class="school-icon">🎓</span>
-          <span class="logo-text">UniJobs FRLP</span>
+          <mat-icon class="school-icon">school</mat-icon>
+          <span class="logo-text">UniJobs</span>
         </div>
         <div class="nav-links">
           <button class="nav-button" (click)="irInicio()">
@@ -21,13 +22,13 @@ import { AuthService } from '../../services/auth.service';
           <button class="nav-button" (click)="verOfertas()">
             <span>Ofertas</span>
           </button>
-          
+
           <ng-container *ngIf="!isLoggedIn">
             <button class="login-button" (click)="irLogin()">
               <span>🔐 Iniciar Sesión</span>
             </button>
           </ng-container>
-          
+
           <ng-container *ngIf="isLoggedIn">
             <button class="profile-button" (click)="irPerfil()">
               <span>👤 Mi Perfil</span>
@@ -69,21 +70,32 @@ import { AuthService } from '../../services/auth.service';
         gap: 12px;
         cursor: pointer;
         transition: all 0.3s ease;
+        position: relative;
       }
 
       .logo-section:hover {
         transform: scale(1.05);
       }
 
-      .school-icon {
+      .logo-icon {
         font-size: 32px;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        filter: drop-shadow(0 4px 8px var(--shadow-dark));
+      }
+
+      .school-icon {
+        position: absolute;
+        right: -13px;
+        top: -6px;
+        font-size: 20px !important;
+        color: var(--primary-dark);
+        z-index: 1;
+        transform: rotate(25grad);
       }
 
       .logo-text {
         font-size: 24px;
         font-weight: 700;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -185,7 +197,10 @@ import { AuthService } from '../../services/auth.service';
           gap: 4px;
         }
 
-        .nav-button, .login-button, .profile-button, .logout-button {
+        .nav-button,
+        .login-button,
+        .profile-button,
+        .logout-button {
           padding: 8px 12px;
           font-size: 14px;
         }
@@ -195,15 +210,12 @@ import { AuthService } from '../../services/auth.service';
 })
 export class NavbarComponent implements OnInit {
   isLoggedIn = false;
-  
-  constructor(
-    private router: Router,
-    private authService: AuthService
-  ) { }
+
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     // Suscribirse a los cambios de estado de autenticación
-    this.authService.loggedIn$.subscribe(loggedIn => {
+    this.authService.loggedIn$.subscribe((loggedIn) => {
       this.isLoggedIn = loggedIn;
     });
   }
