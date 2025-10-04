@@ -42,6 +42,7 @@
             {{ showPassword ? '👁️' : '👁️‍🗨️' }}
           </button>
         </div>
+        <p><a href="#">¿Olvidaste tu contraseña?</a></p>
       </div>
 
       <div class="error-message" *ngIf="errorMessage">
@@ -59,15 +60,7 @@
     </form>
 
     <div class="login-footer">
-      <button 
-        type="button" 
-        class="download-history-button"
-        (click)="downloadLoginHistory()"
-      >
-        📥 Descargar Historial de Logins (TXT)
-      </button>
       <p>¿No tienes cuenta? <a [routerLink]="['/register']">Regístrate</a></p>
-      <p><a href="#">¿Olvidaste tu contraseña?</a></p>
     </div>
   </div>
 </div>

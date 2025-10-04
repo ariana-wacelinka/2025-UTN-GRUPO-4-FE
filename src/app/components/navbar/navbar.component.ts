@@ -25,16 +25,16 @@ import { MatIcon, MatIconModule } from '@angular/material/icon';
 
           <ng-container *ngIf="!isLoggedIn">
             <button class="login-button" (click)="irLogin()">
-              <span>🔐 Iniciar Sesión</span>
+              <span>Iniciar Sesión</span>
             </button>
           </ng-container>
 
           <ng-container *ngIf="isLoggedIn">
             <button class="profile-button" (click)="irPerfil()">
-              <span>👤 Mi Perfil</span>
+              <span>Mi Perfil</span>
             </button>
             <button class="logout-button" (click)="cerrarSesion()">
-              <span>🚪 Salir</span>
+              <span><mat-icon>logout</mat-icon></span>
             </button>
           </ng-container>
         </div>
@@ -163,21 +163,18 @@ import { MatIcon, MatIconModule } from '@angular/material/icon';
       }
 
       .logout-button {
-        background: #f56565;
         border: none;
+        background-color: white;
         border-radius: 8px;
-        font-weight: 600;
-        padding: 10px 20px;
+        padding: 4px;
         cursor: pointer;
         transition: all 0.3s ease;
-        color: white;
-        font-size: 16px;
-      }
+        color: black;
 
-      .logout-button:hover {
-        background: #e53e3e;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        mat-icon {
+          margin-top: 10px;
+          font-size: 18px;
+        }
       }
 
       @media (max-width: 768px) {
@@ -211,7 +208,10 @@ import { MatIcon, MatIconModule } from '@angular/material/icon';
 export class NavbarComponent implements OnInit {
   isLoggedIn = false;
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) { }
 
   ngOnInit(): void {
     // Suscribirse a los cambios de estado de autenticación

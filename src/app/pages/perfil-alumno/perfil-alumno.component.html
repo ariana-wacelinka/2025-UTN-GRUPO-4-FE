@@ -127,6 +127,15 @@
                                 </mat-form-field>
                             </div>
 
+                            <mat-form-field appearance="outline" class="form-field full-width">
+                                <mat-label>Sobre Mí</mat-label>
+                                <textarea matInput formControlName="sobreMi" rows="4" maxlength="1000"></textarea>
+                                <mat-hint>{{f['sobreMi'].value?.length || 0}}/1000</mat-hint>
+                                <mat-error *ngIf="f['sobreMi'].invalid && f['sobreMi'].touched">
+                                    El texto "Sobre mí" no puede exceder 1000 caracteres
+                                </mat-error>
+                            </mat-form-field>
+
                             <!-- Información Académica -->
                             <h3 class="form-section-title">Información Académica</h3>
 
@@ -159,28 +168,6 @@
                                 <input matInput formControlName="universidad" required>
                                 <mat-error *ngIf="f['universidad'].invalid && f['universidad'].touched">
                                     La institución es requerida
-                                </mat-error>
-                            </mat-form-field>
-
-                            <!-- Descripciones -->
-                            <h3 class="form-section-title">Descripciones</h3>
-
-                            <mat-form-field appearance="outline" class="form-field full-width">
-                                <mat-label>Descripción Breve</mat-label>
-                                <textarea matInput formControlName="descripcion" rows="3" maxlength="500"
-                                    required></textarea>
-                                <mat-hint>{{f['descripcion'].value?.length || 0}}/500</mat-hint>
-                                <mat-error *ngIf="f['descripcion'].invalid && f['descripcion'].touched">
-                                    La descripción es requerida y no puede exceder 500 caracteres
-                                </mat-error>
-                            </mat-form-field>
-
-                            <mat-form-field appearance="outline" class="form-field full-width">
-                                <mat-label>Sobre Mí</mat-label>
-                                <textarea matInput formControlName="sobreMi" rows="4" maxlength="1000"></textarea>
-                                <mat-hint>{{f['sobreMi'].value?.length || 0}}/1000</mat-hint>
-                                <mat-error *ngIf="f['sobreMi'].invalid && f['sobreMi'].touched">
-                                    El texto "Sobre mí" no puede exceder 1000 caracteres
                                 </mat-error>
                             </mat-form-field>
 

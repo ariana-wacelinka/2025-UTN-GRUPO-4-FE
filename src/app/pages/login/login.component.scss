@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 95vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
 }
@@ -24,7 +24,7 @@
     font-size: 28px;
     font-weight: 700;
     color: #1a202c;
-    margin-bottom: 8px;
+    margin-bottom: -10px;
   }
 
   p {
@@ -43,6 +43,24 @@
       color: #2d3748;
       font-weight: 600;
       font-size: 14px;
+    }
+
+    p {
+      color: #718096;
+      font-size: 14px;
+      margin: 8px 0;
+
+      a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: #764ba2;
+          text-decoration: underline;
+        }
+      }
     }
 
     input {
@@ -145,30 +163,6 @@
 .login-footer {
   margin-top: 24px;
   text-align: center;
-
-  .download-history-button {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-  }
 
   p {
     color: #718096;
