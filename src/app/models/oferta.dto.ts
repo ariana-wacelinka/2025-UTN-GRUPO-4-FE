@@ -3,6 +3,12 @@ export enum EstadoAplicacion {
   NO_APLICADO = 'NO_APLICADO'
 }
 
+export enum Modalidad {
+  REMOTO = 'remoto',
+  HIBRIDO = 'híbrido',
+  PRESENCIAL = 'presencial'
+}
+
 export interface Empresa {
   id: number;
   nombre: string;
@@ -25,4 +31,14 @@ export interface OfertaListaDTO {
   atributos: string[]; // ejemplo: ["Java", "Spring Boot", "Docker"]
   estado: EstadoAplicacion;
   empresa: Empresa;
+}
+
+export interface CrearOfertaDTO {
+  titulo: string;
+  descripcion: string;
+  requisitos: string;
+  modalidad: Modalidad;
+  locacion: string;
+  pagoAprox?: string;
+  atributos: string[];
 }

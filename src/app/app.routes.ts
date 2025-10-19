@@ -6,6 +6,7 @@ import { PerfilAlumnoComponent } from './pages/perfil-alumno/perfil-alumno.compo
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { AplicantesListaComponent } from './pages/aplicantes-lista/aplicantes-lista.component';
+import { PublicarOfertaComponent } from './pages/publicar-oferta/publicar-oferta.component';
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent },
@@ -14,5 +15,6 @@ export const routes: Routes = [
   { path: 'ofertas', component: OfertasListaComponent },
   { path: 'oferta/:id', component: OfertaDetalleComponent },
   { path: 'oferta/:id/aplicantes', component: AplicantesListaComponent },
+  { path: 'publicar-oferta', component: PublicarOfertaComponent },
   { path: 'perfil', component: PerfilAlumnoComponent }
 ];

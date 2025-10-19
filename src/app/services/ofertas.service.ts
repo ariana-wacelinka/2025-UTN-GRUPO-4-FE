@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, delay } from 'rxjs';
-import { OfertaListaDTO, EstadoAplicacion, AplicacionDTO } from '../models/oferta.dto';
+import { OfertaListaDTO, EstadoAplicacion, AplicacionDTO, CrearOfertaDTO } from '../models/oferta.dto';
 import { AplicanteDTO, AplicanteListaDTO } from '../models/aplicante.dto';
 import { API_URL } from '../app.config';
 
@@ -55,6 +55,35 @@ export class OfertasService {
   getAplicantesPorOferta(ofertaId: number): Observable<AplicanteListaDTO> {
     // TODO: Reemplazar con: return this.http.get<AplicanteListaDTO>(`${this.apiUrl}/ofertas/${ofertaId}/aplicantes`);
     return of(this.getMockAplicantes(ofertaId)).pipe(delay(500));
+  }
+
+  crearOferta(oferta: CrearOfertaDTO): void {
+    const nuevaOferta: OfertaListaDTO = {
+      id: Math.max(...this.ofertas.map(o => o.id)) + 1,
+      titulo: oferta.titulo,
+      descripcion: oferta.descripcion,
+      requisitos: oferta.requisitos,
+      modalidad: oferta.modalidad,
+      locacion: oferta.locacion,
+      pagoAprox: oferta.pagoAprox || '',
+      atributos: oferta.atributos,
+      estado: EstadoAplicacion.NO_APLICADO,
+      empresa: { id: 1, nombre: 'Mi Empresa' }
+    };
+    
+    this.ofertas.push(nuevaOferta);
+    this.guardarOferta(nuevaOferta);
+  }
+
+  private guardarOferta(oferta: OfertaListaDTO): void {
+    const contenido = JSON.stringify(oferta, null, 2);
+    const blob = new Blob([contenido], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `oferta_${oferta.id}_${oferta.titulo.replace(/\s/g, '_')}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 
   descargarCV(aplicante: AplicanteDTO): void {
