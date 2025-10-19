@@ -33,8 +33,8 @@ import { AtributosService } from '../../services/atributos.service';
   ],
   template: `
     <div class="container">
-      <mat-card>
-        <mat-card-header>
+      <mat-card class="modern-card">
+        <mat-card-header class="header">
           <mat-card-title>Publicar Nueva Oferta</mat-card-title>
         </mat-card-header>
 
@@ -144,7 +144,7 @@ import { AtributosService } from '../../services/atributos.service';
           </form>
         </mat-card-content>
 
-        <mat-card-actions>
+        <mat-card-actions class="actions">
           <button
             mat-raised-button
             color="primary"
@@ -166,6 +166,10 @@ import { AtributosService } from '../../services/atributos.service';
         padding: 20px;
       }
 
+      .header {
+        margin-bottom: 4px;
+      }
+
       .create-offer-form {
         display: flex;
         flex-direction: column;
@@ -180,10 +184,11 @@ import { AtributosService } from '../../services/atributos.service';
         margin-bottom: 8px;
       }
 
-      mat-card-actions {
+      .actions {
         display: flex;
         gap: 12px;
         justify-content: flex-end;
+        margin-bottom: 8px;
       }
     `,
   ],
