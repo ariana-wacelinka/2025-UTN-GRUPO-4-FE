@@ -5,7 +5,7 @@ export enum EstadoAplicacion {
 
 export enum Modalidad {
   REMOTO = 'remoto',
-  HIBRIDO = 'híbrido',
+  HIBRIDO = 'hibrido',
   PRESENCIAL = 'presencial'
 }
 

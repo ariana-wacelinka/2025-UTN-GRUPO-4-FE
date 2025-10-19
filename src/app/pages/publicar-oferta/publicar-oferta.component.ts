@@ -84,7 +84,6 @@ import { AtributosService } from '../../services/atributos.service';
                   [(ngModel)]="atributoInput"
                   name="atributoInput"
                   (input)="buscarAtributos($event)"
-                  (keydown.enter)="agregarAtributoEnter($event)"
                   [matAutocomplete]="auto"
                 />
                 <mat-autocomplete
@@ -230,27 +229,19 @@ export class PublicarOfertaComponent implements OnInit {
   }
 
   seleccionarAtributo(event: any): void {
-    const atributo = event.option.value;
-    this.agregarAtributoALista(atributo);
+    const atributoSeleccionado = event.option.value;
+
+    if (atributoSeleccionado.startsWith('"') && atributoSeleccionado.endsWith('"')) {
+      // Extraer el nombre del atributo de 'Crear "NombreAtributo"'
+      const nombreAtributo = atributoSeleccionado.match(/"(.+)"/)?.[1] || '';
+      this.atributosService.crearAtributo(nombreAtributo).subscribe(nuevoAtributo => {
+        this.agregarAtributoALista(nuevoAtributo);
+      });
+    } else {
+      this.agregarAtributoALista(atributoSeleccionado);
+    }
+
     this.atributoInput = '';
-
-    const atributosChips = document.querySelector('.chips');
-    if (this.oferta.atributos.length === 0 && atributosChips) {
-      atributosChips.classList.remove('atributos-chips');
-    } else if (atributosChips) {
-      atributosChips.classList.add('atributos-chips');
-    }
-  }
-
-  agregarAtributoEnter(event: Event): void {
-    const keyboardEvent = event as KeyboardEvent;
-    keyboardEvent.preventDefault();
-    if (this.atributoInput.trim()) {
-      this.atributosService
-        .crearAtributo(this.atributoInput.trim())
-        .subscribe((atributo) => this.agregarAtributoALista(atributo));
-      this.atributoInput = '';
-    }
 
     const atributosChips = document.querySelector('.chips');
     if (this.oferta.atributos.length === 0 && atributosChips) {
