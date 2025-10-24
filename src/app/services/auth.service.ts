@@ -7,13 +7,21 @@ export interface LoginCredentials {
   password: string;
 }
 
+export enum UserRole {
+  STUDENT = 'STUDENT',
+  ORGANIZATION = 'ORGANIZATION'
+}
+
 export interface RegisterCredentials {
   email: string;
   password: string;
-  confirmPassword: string;
-  nombre: string;
-  apellido: string;
-  carrera: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  phone: string;
+  location: string;
+  description: string | null;
+  username: string;
 }
 
 export interface LoginResponse {
@@ -38,7 +46,7 @@ export interface RegisterResponse {
 export class AuthService {
   private readonly COOKIE_NAME = 'userSession';
   private readonly COOKIE_EXPIRY_DAYS = 7;
-  
+
   private loggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
   public loggedIn$ = this.loggedInSubject.asObservable();
 
@@ -72,7 +80,15 @@ export class AuthService {
 
   // TODO Sprint 2: Reemplazar con llamada HTTP al backend /api/auth/register
   register(credentials: RegisterCredentials): Observable<RegisterResponse> {
-    return of(credentials).pipe(
+    // Set username to email, role to STUDENT, and description to null automatically
+    const registerData = {
+      ...credentials,
+      username: credentials.email,
+      role: UserRole.STUDENT,
+      description: null
+    };
+
+    return of(registerData).pipe(
       delay(500),
       map((creds) => {
         // Verificar si el email ya existe
@@ -88,11 +104,14 @@ export class AuthService {
         const newUser = {
           id: Math.floor(Math.random() * 1000),
           email: creds.email,
-          nombre: creds.nombre,
-          apellido: creds.apellido,
-          carrera: creds.carrera,
+          firstName: creds.firstName,
+          lastName: creds.lastName,
+          phone: creds.phone,
+          location: creds.location,
+          description: creds.description,
+          username: creds.username,
+          role: creds.role,
           passwordHash: btoa(creds.password),
-          tipo: 'alumno' as const,
           fechaRegistro: new Date().toISOString()
         };
 
@@ -135,7 +154,7 @@ export class AuthService {
   private saveUserToCookie(user: any): void {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + this.COOKIE_EXPIRY_DAYS);
-    
+
     const cookieValue = JSON.stringify(user);
     const cookieString = `${this.COOKIE_NAME}=${encodeURIComponent(cookieValue)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
     document.cookie = cookieString;
@@ -144,7 +163,7 @@ export class AuthService {
   getCurrentUserFromCookie(): any | null {
     const cookies = document.cookie.split(';');
     const sessionCookie = cookies.find(c => c.trim().startsWith(`${this.COOKIE_NAME}=`));
-    
+
     if (sessionCookie) {
       const cookieValue = sessionCookie.split('=')[1];
       try {
@@ -167,7 +186,7 @@ export class AuthService {
 
   private extractNameFromEmail(email: string): string {
     const name = email.split('@')[0];
-    return name.split('.').map(part => 
+    return name.split('.').map(part =>
       part.charAt(0).toUpperCase() + part.slice(1)
     ).join(' ');
   }

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService, RegisterCredentials } from '../../services/auth.service';
+import { AuthService, RegisterCredentials, UserRole } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -15,11 +15,16 @@ export class RegisterComponent {
   credentials: RegisterCredentials = {
     email: '',
     password: '',
-    confirmPassword: '',
-    nombre: '',
-    apellido: '',
-    carrera: ''
+    firstName: '',
+    lastName: '',
+    role: UserRole.STUDENT,
+    phone: '',
+    location: '',
+    description: null,
+    username: ''
   };
+
+  confirmPassword = '';
 
   loading = false;
   errorMessage = '';
@@ -27,14 +32,7 @@ export class RegisterComponent {
   showPassword = false;
   showConfirmPassword = false;
 
-  carreras = [
-    'Ingeniería en Sistemas de Información',
-    'Ingeniería Electrónica',
-    'Ingeniería Mecánica',
-    'Ingeniería Civil',
-    'Ingeniería Química',
-    'Ingeniería Eléctrica'
-  ];
+
 
   constructor(
     private authService: AuthService,
@@ -91,30 +89,37 @@ export class RegisterComponent {
       return false;
     }
 
-    if (!this.credentials.confirmPassword) {
+    if (!this.confirmPassword) {
       this.errorMessage = 'Debes confirmar la contraseña';
       return false;
     }
 
-    if (this.credentials.password !== this.credentials.confirmPassword) {
+    if (this.credentials.password !== this.confirmPassword) {
       this.errorMessage = 'Las contraseñas no coinciden';
       return false;
     }
 
-    if (!this.credentials.nombre || this.credentials.nombre.trim().length < 2) {
+    if (!this.credentials.firstName || this.credentials.firstName.trim().length < 2) {
       this.errorMessage = 'El nombre debe tener al menos 2 caracteres';
       return false;
     }
 
-    if (!this.credentials.apellido || this.credentials.apellido.trim().length < 2) {
+    if (!this.credentials.lastName || this.credentials.lastName.trim().length < 2) {
       this.errorMessage = 'El apellido debe tener al menos 2 caracteres';
       return false;
     }
 
-    if (!this.credentials.carrera) {
-      this.errorMessage = 'Debes seleccionar una carrera';
+    if (!this.credentials.phone) {
+      this.errorMessage = 'El teléfono es requerido';
       return false;
     }
+
+    if (!this.credentials.location) {
+      this.errorMessage = 'La ubicación es requerida';
+      return false;
+    }
+
+
 
     return true;
   }
