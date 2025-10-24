@@ -12,7 +12,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { PerfilAlumnoService, PerfilAlumnoDTO, ActualizarPerfilDTO, IdiomaDTO } from '../../services/perfil-alumno.service';
+import { PerfilAlumnoService } from '../../../services/perfil-alumno.service';
+import { EstudianteDTO, ActualizarEstudianteDTO, IdiomaDTO } from '../../../models/aplicante.dto';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -39,7 +40,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   isEditing = false;
   editForm!: FormGroup;
-  perfilAlumno: PerfilAlumnoDTO | null = null;
+  perfilAlumno: EstudianteDTO | null = null;
   isLoading = false;
   selectedImageFile: File | null = null;
   selectedCVFile: File | null = null;
@@ -98,11 +99,11 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
 
   private cargarPerfil() {
     this.isLoading = true;
-    
+
     // Verificar si hay un userId en los query params (viene de ver aplicantes)
     this.route.queryParams.subscribe(params => {
       const userId = params['userId'];
-      
+
       if (userId) {
         // TODO Sprint 2: Reemplazar con llamada al backend
         // this.perfilService.getPerfilByUserId(userId).subscribe(...)
@@ -130,8 +131,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
    * Mock de perfiles de aplicantes
    * TODO Sprint 2: Eliminar y usar servicio real con backend
    */
-  private getMockPerfilByUserId(userId: number): PerfilAlumnoDTO {
-    const mockPerfiles: { [key: number]: PerfilAlumnoDTO } = {
+  private getMockPerfilByUserId(userId: number): EstudianteDTO {
+    const mockPerfiles: { [key: number]: EstudianteDTO } = {
       101: {
         id: 1,
         nombre: 'Ariana',
@@ -145,7 +146,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         anio: '3',
         universidad: 'UTN FRLP',
         descripcion: 'Estudiante apasionada por el desarrollo full-stack y las metodologías ágiles.',
-        sobreMi: 'Me especializo en Angular y Node.js. Participé en varios proyectos académicos y tengo experiencia en trabajo en equipo.',
         habilidades: ['Angular', 'TypeScript', 'Node.js', 'MongoDB', 'Git', 'Scrum'],
         idiomas: [
           { idioma: 'Español', nivel: 'Nativo' },
@@ -153,7 +153,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         ],
         linkedin: 'https://linkedin.com/in/ariana-wacelinka',
         github: 'https://github.com/ariana-wacelinka',
-        curriculumUrl: '/assets/documents/WACELINKA, Ariana.pdf'
+        cvUrl: '/assets/documents/WACELINKA, Ariana.pdf'
       },
       102: {
         id: 2,
@@ -168,7 +168,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         anio: '4',
         universidad: 'UTN FRLP',
         descripcion: 'Desarrollador full-stack con 3 años de experiencia en proyectos web.',
-        sobreMi: 'Apasionado por el desarrollo de aplicaciones escalables y el clean code.',
         habilidades: ['Angular', 'React', 'Java', 'Spring Boot', 'PostgreSQL', 'Docker'],
         idiomas: [
           { idioma: 'Español', nivel: 'Nativo' },
@@ -176,7 +175,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         ],
         linkedin: 'https://linkedin.com/in/juan-perez',
         github: 'https://github.com/juanperez',
-        curriculumUrl: '/assets/documents/PEREZ_Juan.pdf'
+        cvUrl: '/assets/documents/PEREZ_Juan.pdf'
       },
       103: {
         id: 3,
@@ -191,7 +190,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         anio: '2',
         universidad: 'UTN FRLP',
         descripcion: 'Estudiante enfocada en desarrollo frontend y UX/UI.',
-        sobreMi: 'Me encanta crear interfaces intuitivas y accesibles. Siempre aprendiendo nuevas tecnologías.',
         habilidades: ['Angular', 'HTML', 'CSS', 'SCSS', 'Figma', 'JavaScript'],
         idiomas: [
           { idioma: 'Español', nivel: 'Nativo' },
@@ -199,7 +197,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         ],
         linkedin: 'https://linkedin.com/in/maria-gonzalez',
         github: 'https://github.com/mariagonzalez',
-        curriculumUrl: '/assets/documents/GONZALEZ_Maria.pdf'
+        cvUrl: '/assets/documents/GONZALEZ_Maria.pdf'
       },
       104: {
         id: 4,
@@ -214,7 +212,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         anio: '3',
         universidad: 'UTN FRLP',
         descripcion: 'Desarrollador frontend especializado en React y ecosistema JavaScript moderno.',
-        sobreMi: 'Experiencia en desarrollo de SPAs y optimización de performance.',
         habilidades: ['React', 'JavaScript', 'TypeScript', 'Redux', 'Next.js', 'Tailwind CSS'],
         idiomas: [
           { idioma: 'Español', nivel: 'Nativo' },
@@ -223,7 +220,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         ],
         linkedin: 'https://linkedin.com/in/carlos-rodriguez',
         github: 'https://github.com/carlosrodriguez',
-        curriculumUrl: '/assets/documents/RODRIGUEZ_Carlos.pdf'
+        cvUrl: '/assets/documents/RODRIGUEZ_Carlos.pdf'
       },
       105: {
         id: 5,
@@ -238,7 +235,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         anio: '4',
         universidad: 'UTN FRLP',
         descripcion: 'Frontend developer con fuerte enfoque en UX/UI y accesibilidad.',
-        sobreMi: 'Me apasiona crear experiencias de usuario excepcionales y accesibles para todos.',
         habilidades: ['React', 'Vue.js', 'HTML', 'CSS', 'JavaScript', 'Figma', 'Adobe XD'],
         idiomas: [
           { idioma: 'Español', nivel: 'Nativo' },
@@ -246,7 +242,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         ],
         linkedin: 'https://linkedin.com/in/laura-martinez',
         github: 'https://github.com/lauramartinez',
-        curriculumUrl: '/assets/documents/MARTINEZ_Laura.pdf'
+        cvUrl: '/assets/documents/MARTINEZ_Laura.pdf'
       },
       106: {
         id: 6,
@@ -261,7 +257,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         anio: '5',
         universidad: 'UTN FRLP',
         descripcion: 'Backend developer senior con 5 años de experiencia en Java y Spring Boot.',
-        sobreMi: 'Especialista en arquitectura de microservicios y APIs RESTful escalables.',
         habilidades: ['Java', 'Spring Boot', 'PostgreSQL', 'Docker', 'Kubernetes', 'AWS', 'Redis'],
         idiomas: [
           { idioma: 'Español', nivel: 'Nativo' },
@@ -270,7 +265,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         ],
         linkedin: 'https://linkedin.com/in/diego-fernandez',
         github: 'https://github.com/diegofernandez',
-        curriculumUrl: '/assets/documents/FERNANDEZ_Diego.pdf'
+        cvUrl: '/assets/documents/FERNANDEZ_Diego.pdf'
       }
     };
 
@@ -306,7 +301,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       anio: this.perfilAlumno.anio,
       universidad: this.perfilAlumno.universidad,
       descripcion: this.perfilAlumno.descripcion,
-      sobreMi: this.perfilAlumno.sobreMi || '',
       linkedin: this.perfilAlumno.linkedin,
       github: this.perfilAlumno.github
     });
@@ -342,7 +336,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
           await this.perfilService.subirCV(this.selectedCVFile).toPromise();
         }
 
-        const datosActualizados: ActualizarPerfilDTO = {
+        const datosActualizados: ActualizarEstudianteDTO = {
           ...this.editForm.value,
           habilidades: this.habilidades.value,
           idiomas: this.idiomas.value
@@ -352,12 +346,10 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (perfilActualizado) => {
-              this.perfilAlumno = perfilActualizado;
               this.isEditing = false;
               this.isLoading = false;
               this.selectedImageFile = null;
               this.selectedCVFile = null;
-              this.imagePreview = this.perfilAlumno.imagen;
 
               this.snackBar.open('Perfil actualizado exitosamente', 'Cerrar', {
                 duration: 3000

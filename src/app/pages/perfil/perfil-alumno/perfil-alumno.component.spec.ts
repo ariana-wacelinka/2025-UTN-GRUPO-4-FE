@@ -12,14 +12,15 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 
 import { PerfilAlumnoComponent } from './perfil-alumno.component';
-import { PerfilAlumnoService, PerfilAlumnoDTO } from '../../services/perfil-alumno.service';
+import { EstudianteDTO } from '../../../models/aplicante.dto';
+import { PerfilAlumnoService } from '../../../services/perfil-alumno.service';
 
 describe('PerfilAlumnoComponent', () => {
   let component: PerfilAlumnoComponent;
   let fixture: ComponentFixture<PerfilAlumnoComponent>;
   let mockPerfilService: jasmine.SpyObj<PerfilAlumnoService>;
 
-  const mockPerfil: PerfilAlumnoDTO = {
+  const mockPerfil: EstudianteDTO = {
     id: 1,
     nombre: 'Test',
     apellido: 'User',
@@ -31,13 +32,12 @@ describe('PerfilAlumnoComponent', () => {
     anio: '4to año',
     universidad: 'Test University',
     descripcion: 'Test description',
-    sobreMi: 'Test about me section',
     habilidades: ['JavaScript', 'Angular'],
     idiomas: [{ idioma: 'Español', nivel: 'Nativo' }],
     telefono: '+54 123 456 789',
     ubicacion: 'Test City',
     fechaNacimiento: '01/01/2000',
-    curriculumUrl: '/assets/test-cv.pdf'
+    cvUrl: '/assets/test-cv.pdf'
   };
 
   beforeEach(async () => {

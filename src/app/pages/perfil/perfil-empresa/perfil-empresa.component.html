@@ -1,0 +1,252 @@
+<div class="perfil-container">
+    <div class="container-modern animate-fade-in">
+
+        <!-- Loading indicator -->
+        <div *ngIf="isLoading()" class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Cargando perfil de empresa...</p>
+        </div>
+
+        <!-- Contenido del perfil -->
+        <div *ngIf="!isLoading() && empresa()">
+
+            <!-- Header del perfil -->
+            <mat-card class="modern-card profile-header">
+                <div class="header-content">
+                    <div class="profile-image-section">
+                        <div class="image-container">
+                            <img [src]="imagePreview() || empresa()?.logo || getAvatarUrl(empresa()?.nombre || '')"
+                                [alt]="empresa()?.nombre" class="profile-image">
+
+                            <div *ngIf="isEditing()" class="image-hover-overlay">
+                                <input type="file" #imageInput accept="image/*"
+                                    (change)="onLogoSelectedInternal($event)" style="display: none">
+                                <div class="image-hover-content" (click)="imageInput.click()">
+                                    <mat-icon>camera_alt</mat-icon>
+                                    <span>Cambiar logo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-info">
+                        <div class="profile-info-header">
+                            <div class="profile-text">
+                                <h1 class="profile-name">{{ empresa()?.nombre }}</h1>
+                                <p class="profile-title">{{ empresa()?.sector }}</p>
+                                <p *ngIf="empresa()?.descripcion" class="profile-university">{{ empresa()?.descripcion
+                                    }}</p>
+                            </div>
+                            <div class="profile-actions">
+                                <!-- Social Links Compact -->
+                                <div *ngIf="socialLinksCompact().length > 0" class="social-links-compact">
+                                    <a *ngFor="let link of socialLinksCompact()" [href]="link.url" [title]="link.label"
+                                        target="_blank" rel="noopener noreferrer" class="social-link-icon">
+                                        <mat-icon>{{ link.icon }}</mat-icon>
+                                    </a>
+                                </div>
+                                <div class="contact-buttons">
+                                    <button *ngIf="!isEditing()" mat-raised-button color="primary" class="modern-button"
+                                        (click)="editarPerfil()">
+                                        <mat-icon>edit</mat-icon>
+                                        Editar Perfil
+                                    </button>
+                                    <button *ngIf="isEditing()" mat-raised-button color="primary" class="modern-button"
+                                        (click)="guardarCambios()">
+                                        <mat-icon>save</mat-icon>
+                                        Guardar Cambios
+                                    </button>
+                                    <button *ngIf="isEditing()" mat-stroked-button class="modern-button"
+                                        (click)="cancelarEdicion()">
+                                        <mat-icon>cancel</mat-icon>
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-card>
+
+            <!-- Formulario de edición -->
+            <div *ngIf="isEditing()" class="edit-form-container">
+                <mat-card class="modern-card edit-form">
+                    <mat-card-header>
+                        <mat-card-title class="section-title">
+                            <mat-icon class="section-icon">edit</mat-icon>
+                            Editar Información de la Empresa
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="editForm" class="edit-form-container">
+                            <!-- Información Básica -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Información Básica</h3>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Nombre de la Empresa</mat-label>
+                                        <input matInput formControlName="nombre" required>
+                                        <mat-error *ngIf="f['nombre'].invalid && f['nombre'].touched">
+                                            El nombre es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Sector</mat-label>
+                                        <mat-select formControlName="sector" required>
+                                            <mat-option *ngFor="let sector of sectoresDisponibles" [value]="sector">
+                                                {{ sector }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="f['sector'].invalid && f['sector'].touched">
+                                            El sector es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Tamaño</mat-label>
+                                        <mat-select formControlName="tamanio" required>
+                                            <mat-option *ngFor="let tamanio of tamaniosDisponibles" [value]="tamanio">
+                                                {{ tamanio }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="f['tamanio'].invalid && f['tamanio'].touched">
+                                            El tamaño es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Fecha de Fundación</mat-label>
+                                        <input matInput type="date" formControlName="fechaFundacion">
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Descripción</h3>
+                                <mat-form-field appearance="outline" class="form-field full-width">
+                                    <mat-label>Descripción</mat-label>
+                                    <textarea matInput formControlName="descripcion" rows="4"
+                                        maxlength="500"></textarea>
+                                    <mat-hint>{{f['descripcion'].value?.length || 0}}/500</mat-hint>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Información de Contacto -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Información de Contacto</h3>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Email</mat-label>
+                                        <input matInput formControlName="email" type="email">
+                                        <mat-error *ngIf="f['email'].invalid && f['email'].touched">
+                                            Ingrese un email válido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Teléfono</mat-label>
+                                        <input matInput formControlName="telefono">
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Ubicación</mat-label>
+                                        <input matInput formControlName="ubicacion">
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Sitio Web</mat-label>
+                                        <input matInput formControlName="sitioWeb">
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Redes Sociales -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Redes Sociales</h3>
+                                <div formGroupName="redesSociales" class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>LinkedIn</mat-label>
+                                        <input matInput formControlName="linkedin">
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Facebook</mat-label>
+                                        <input matInput formControlName="facebook">
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Twitter</mat-label>
+                                        <input matInput formControlName="twitter">
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="form-field">
+                                        <mat-label>Instagram</mat-label>
+                                        <input matInput formControlName="instagram">
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+            <!-- Vista normal (no edición) -->
+            <div *ngIf="!isEditing()" class="profile-content">
+
+                <!-- Información de Contacto -->
+                <mat-card class="modern-card" *ngIf="contactInfo()">
+                    <mat-card-header>
+                        <mat-card-title class="section-title">
+                            <mat-icon class="section-icon">{{ contactInfo()?.icon }}</mat-icon>
+                            {{ contactInfo()?.title }}
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="info-container">
+                            <div *ngFor="let item of contactInfo()?.items" class="info-item">
+                                <mat-icon class="info-icon">{{ item.icon }}</mat-icon>
+                                <div class="info-content">
+                                    <span class="info-label">{{ item.label }}</span>
+                                    <span class="info-value">{{ item.value }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- Equipo -->
+                <mat-card class="modern-card team-card"
+                    *ngIf="empresa()?.empleados && empresa()?.empleados!.length > 0">
+                    <mat-card-header>
+                        <mat-card-title class="section-title">
+                            <mat-icon class="section-icon">group</mat-icon>
+                            Nuestro Equipo
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="team-container">
+                            <div *ngFor="let empleado of empresa()?.empleados" class="team-member">
+                                <img [src]="empleado.imagen || getAvatarUrl(empleado.nombre + ' ' + empleado.apellido)"
+                                    [alt]="empleado.nombre + ' ' + empleado.apellido" class="member-image">
+                                <div class="member-info">
+                                    <h4>{{ empleado.nombre }} {{ empleado.apellido }}</h4>
+                                    <p *ngIf="empleado.carrera">{{ empleado.carrera }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>

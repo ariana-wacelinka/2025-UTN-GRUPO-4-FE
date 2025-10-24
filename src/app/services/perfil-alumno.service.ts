@@ -2,59 +2,16 @@ import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { API_URL } from '../app.config';
-
-export interface IdiomaDTO {
-    idioma: string;
-    nivel: string;
-}
-
-export interface PerfilAlumnoDTO {
-    id?: number;
-    nombre: string;
-    apellido: string;
-    imagen: string;
-    email: string;
-    linkedin: string;
-    github: string;
-    carrera: string;
-    anio: string;
-    universidad: string;
-    descripcion: string;
-    sobreMi: string;
-    habilidades: string[];
-    idiomas: IdiomaDTO[];
-    telefono: string;
-    ubicacion: string;
-    fechaNacimiento: string;
-    curriculumUrl: string;
-}
-
-export interface ActualizarPerfilDTO {
-    nombre: string;
-    apellido: string;
-    email: string;
-    telefono: string;
-    ubicacion: string;
-    fechaNacimiento: string;
-    carrera: string;
-    anio: string;
-    universidad: string;
-    descripcion: string;
-    sobreMi: string;
-    linkedin: string;
-    github: string;
-    habilidades: string[];
-    idiomas: IdiomaDTO[];
-}
+import { EstudianteDTO, ActualizarEstudianteDTO, IdiomaDTO } from '../models/aplicante.dto';
 
 @Injectable({
     providedIn: 'root'
 })
 export class PerfilAlumnoService {
-    private perfilSubject = new BehaviorSubject<PerfilAlumnoDTO | null>(null);
+    private perfilSubject = new BehaviorSubject<EstudianteDTO | null>(null);
     public perfil$ = this.perfilSubject.asObservable();
 
-    private mockPerfil: PerfilAlumnoDTO = {
+    private mockPerfil: EstudianteDTO = {
         id: 1,
         nombre: 'Ariana',
         apellido: 'Wacelinka',
@@ -66,7 +23,6 @@ export class PerfilAlumnoService {
         anio: '4to año',
         universidad: 'Universidad Tecnologica Nacional - Facultad Regional La Plata',
         descripcion: 'Estudiante apasionada por el desarrollo de software con experiencia en proyectos académicos y personales. Me especializo en desarrollo web full-stack y tengo particular interés en UX/UI y tecnologías emergentes.',
-        sobreMi: 'Soy una persona proactiva, responsable y siempre dispuesta a aprender nuevas tecnologías. Me gusta trabajar en equipo y enfrentar desafíos que me permitan crecer profesionalmente. En mi tiempo libre disfruto de la programación personal, leer sobre nuevas tecnologías y practicar deportes.',
         habilidades: [
             'JavaScript', 'TypeScript', 'Angular', 'React', 'Node.js',
             'Python', 'Java', 'MySQL', 'MongoDB', 'Git', 'Docker'
@@ -78,7 +34,7 @@ export class PerfilAlumnoService {
         telefono: '+54 9 221 3199796',
         ubicacion: 'La Plata, Buenos Aires',
         fechaNacimiento: '12 de marzo de 2004',
-        curriculumUrl: '/assets/documents/WACELINKA, Ariana.pdf'
+        cvUrl: '/assets/documents/WACELINKA, Ariana.pdf'
     };
 
     constructor(
@@ -88,11 +44,11 @@ export class PerfilAlumnoService {
         this.perfilSubject.next(this.mockPerfil);
     }
 
-    getPerfil(): Observable<PerfilAlumnoDTO> {
+    getPerfil(): Observable<EstudianteDTO> {
         return of({ ...this.mockPerfil });
     }
 
-    actualizarPerfil(datosActualizados: ActualizarPerfilDTO): Observable<PerfilAlumnoDTO> {
+    actualizarPerfil(datosActualizados: ActualizarEstudianteDTO): Observable<EstudianteDTO> {
         const perfilActualizado = {
             ...this.mockPerfil,
             ...datosActualizados
@@ -114,7 +70,7 @@ export class PerfilAlumnoService {
 
     subirCV(archivo: File): Observable<{ cvUrl: string }> {
         const mockCvUrl = `/assets/documents/${archivo.name}`;
-        this.mockPerfil.curriculumUrl = mockCvUrl;
+        this.mockPerfil.cvUrl = mockCvUrl;
         this.perfilSubject.next(this.mockPerfil);
 
         return of({ cvUrl: mockCvUrl });
@@ -122,18 +78,18 @@ export class PerfilAlumnoService {
 
     descargarCV(): void {
         const perfil = this.perfilSubject.value;
-        if (!perfil?.curriculumUrl) {
+        if (!perfil?.cvUrl) {
             console.error('No hay URL de curriculum disponible');
             return;
         }
 
         const link = document.createElement('a');
-        link.href = perfil.curriculumUrl;
+        link.href = perfil.cvUrl;
         link.download = `CV_${perfil.nombre}_${perfil.apellido}.pdf`;
         link.target = '_blank';
 
-        if (perfil.curriculumUrl.startsWith('http')) {
-            window.open(perfil.curriculumUrl, '_blank');
+        if (perfil.cvUrl.startsWith('http')) {
+            window.open(perfil.cvUrl, '_blank');
         } else {
             document.body.appendChild(link);
             link.click();
@@ -141,14 +97,14 @@ export class PerfilAlumnoService {
         }
     }
 
-    actualizarHabilidades(habilidades: string[]): Observable<PerfilAlumnoDTO> {
+    actualizarHabilidades(habilidades: string[]): Observable<EstudianteDTO> {
         this.mockPerfil.habilidades = [...habilidades];
         this.perfilSubject.next(this.mockPerfil);
 
         return of(this.mockPerfil);
     }
 
-    actualizarIdiomas(idiomas: IdiomaDTO[]): Observable<PerfilAlumnoDTO> {
+    actualizarIdiomas(idiomas: IdiomaDTO[]): Observable<EstudianteDTO> {
         this.mockPerfil.idiomas = [...idiomas];
         this.perfilSubject.next(this.mockPerfil);
 

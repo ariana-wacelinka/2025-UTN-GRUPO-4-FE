@@ -13,7 +13,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { PerfilAlumnoComponent } from './perfil-alumno.component';
-import { PerfilAlumnoService } from '../../services/perfil-alumno.service';
+import { PerfilAlumnoService } from '../../../services/perfil-alumno.service';
 
 describe('PerfilAlumnoComponent - Integration Tests', () => {
     let component: PerfilAlumnoComponent;

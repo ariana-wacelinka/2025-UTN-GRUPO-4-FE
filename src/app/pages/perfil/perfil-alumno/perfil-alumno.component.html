@@ -16,7 +16,6 @@
                         <div class="image-container">
                             <img [src]="imagePreview || perfilAlumno.imagen"
                                 [alt]="perfilAlumno.nombre + ' ' + perfilAlumno.apellido" class="profile-image">
-                            <div class="status-indicator"></div>
 
                             <div *ngIf="isEditing" class="image-hover-overlay">
                                 <input type="file" #imageInput accept="image/*" (change)="onImageSelected($event)"
