@@ -1,6 +1,9 @@
 <div class="register-container">
   <mat-card class="register-card">
     <mat-card-header class="card-header">
+      <div class="switch-register">
+        <p>¿Eres estudiante? <a [routerLink]="['/register']">Registro de Estudiante</a></p>
+      </div>
       <mat-card-title class="title">Registro de Organización</mat-card-title>
       <mat-card-subtitle>Únete como organización a la bolsa de trabajo</mat-card-subtitle>
     </mat-card-header>
@@ -110,7 +113,6 @@
 
     <mat-card-actions>
       <p>¿Ya tienes cuenta? <a [routerLink]="['/login']">Inicia Sesión</a></p>
-      <p>¿Eres estudiante? <a [routerLink]="['/register']">Registro de Estudiante</a></p>
     </mat-card-actions>
   </mat-card>
 </div>
