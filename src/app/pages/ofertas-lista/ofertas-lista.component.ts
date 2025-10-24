@@ -166,8 +166,8 @@ export class OfertasListaComponent implements OnInit {
   constructor(private ofertasService: OfertasService) {}
 
   ngOnInit(): void {
-    this.ofertasService.getOfertas().subscribe((ofertas) => {
-      this.ofertas = ofertas;
+    this.ofertasService.getOfertas().subscribe((page) => {
+      this.ofertas = page.content;
     });
   }
 }

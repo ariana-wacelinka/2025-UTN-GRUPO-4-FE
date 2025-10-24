@@ -42,3 +42,13 @@ export interface CrearOfertaDTO {
   pagoAprox?: string;
   atributos: string[];
 }
+
+export interface PagedResponseDTO<T> {
+  content: T[];
+  currentPage: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isFirst: boolean;
+  isLast: boolean;
+}
