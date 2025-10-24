@@ -22,6 +22,7 @@ export interface RegisterCredentials {
   location: string;
   description: string | null;
   username: string;
+  linkedinUrl?: string;
 }
 
 export interface LoginResponse {

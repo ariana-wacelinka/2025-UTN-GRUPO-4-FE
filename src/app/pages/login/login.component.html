@@ -60,7 +60,11 @@
     </form>
 
     <div class="login-footer">
-      <p>¿No tienes cuenta? <a [routerLink]="['/register']">Regístrate</a></p>
+      <p>¿No tienes cuenta?</p>
+      <div class="register-options">
+        <a [routerLink]="['/register']" class="register-link">Registro Estudiante</a>
+        <a [routerLink]="['/register-organization']" class="register-link">Registro Organización</a>
+      </div>
     </div>
   </div>
 </div>
