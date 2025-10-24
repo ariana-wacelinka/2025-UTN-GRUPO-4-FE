@@ -1,149 +1,104 @@
 <div class="register-container">
-  <div class="register-card">
-    <div class="register-header">
-      <h1>Crear Cuenta</h1>
-      <p>Únete a la bolsa de trabajo de la FRLP</p>
-    </div>
+  <mat-card class="register-card">
+    <mat-card-header class="card-header">
+      <mat-card-title>Crear Cuenta</mat-card-title>
+      <mat-card-subtitle>Únete a la bolsa de trabajo de la FRLP</mat-card-subtitle>
+    </mat-card-header>
 
-    <form class="register-form" (ngSubmit)="onRegister()">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="firstName">Nombre</label>
-          <input
-            type="text"
-            id="firstName"
-            name="firstName"
-            [(ngModel)]="credentials.firstName"
-            placeholder="Tu nombre"
-            required
-            [disabled]="loading"
-          />
+    <mat-card-content>
+      <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="register-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="firstName" placeholder="Tu nombre">
+            @if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
+              <mat-error>{{ getErrorMessage('firstName') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido</mat-label>
+            <input matInput formControlName="lastName" placeholder="Tu apellido">
+            @if (registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched) {
+              <mat-error>{{ getErrorMessage('lastName') }}</mat-error>
+            }
+          </mat-form-field>
         </div>
 
-        <div class="form-group">
-          <label for="lastName">Apellido</label>
-          <input
-            type="text"
-            id="lastName"
-            name="lastName"
-            [(ngModel)]="credentials.lastName"
-            placeholder="Tu apellido"
-            required
-            [disabled]="loading"
-          />
-        </div>
-      </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="tu.email@ejemplo.com">
+          <mat-icon matSuffix>email</mat-icon>
+          @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+            <mat-error>{{ getErrorMessage('email') }}</mat-error>
+          }
+        </mat-form-field>
 
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          [(ngModel)]="credentials.email"
-          placeholder="tu.email@ejemplo.com"
-          required
-          [disabled]="loading"
-          autocomplete="email"
-        />
-      </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Teléfono</mat-label>
+          <input matInput type="tel" formControlName="phone" placeholder="Tu número de teléfono">
+          <mat-icon matSuffix>phone</mat-icon>
+          @if (registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched) {
+            <mat-error>{{ getErrorMessage('phone') }}</mat-error>
+          }
+        </mat-form-field>
 
-      <div class="form-group">
-        <label for="phone">Teléfono</label>
-        <input
-          type="tel"
-          id="phone"
-          name="phone"
-          [(ngModel)]="credentials.phone"
-          placeholder="Tu número de teléfono"
-          required
-          [disabled]="loading"
-        />
-      </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Ubicación</mat-label>
+          <input matInput formControlName="location" placeholder="Tu ciudad o región">
+          <mat-icon matSuffix>location_on</mat-icon>
+          @if (registerForm.get('location')?.invalid && registerForm.get('location')?.touched) {
+            <mat-error>{{ getErrorMessage('location') }}</mat-error>
+          }
+        </mat-form-field>
 
-      <div class="form-group">
-        <label for="location">Ubicación</label>
-        <input
-          type="text"
-          id="location"
-          name="location"
-          [(ngModel)]="credentials.location"
-          placeholder="Tu ciudad o región"
-          required
-          [disabled]="loading"
-        />
-      </div>
-
-
-
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <div class="password-input-wrapper">
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            id="password"
-            name="password"
-            [(ngModel)]="credentials.password"
-            placeholder="Mínimo 6 caracteres"
-            required
-            [disabled]="loading"
-            autocomplete="new-password"
-          />
-          <button
-            type="button"
-            class="toggle-password"
-            (click)="togglePasswordVisibility()"
-            [disabled]="loading"
-          >
-            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña</mat-label>
+          <input matInput [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Mínimo 6 caracteres">
+          <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-        </div>
-      </div>
+          @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+            <mat-error>{{ getErrorMessage('password') }}</mat-error>
+          }
+        </mat-form-field>
 
-      <div class="form-group">
-        <label for="confirmPassword">Confirmar Contraseña</label>
-        <div class="password-input-wrapper">
-          <input
-            [type]="showConfirmPassword ? 'text' : 'password'"
-            id="confirmPassword"
-            name="confirmPassword"
-            [(ngModel)]="confirmPassword"
-            placeholder="Repite tu contraseña"
-            required
-            [disabled]="loading"
-            autocomplete="new-password"
-          />
-          <button
-            type="button"
-            class="toggle-password"
-            (click)="toggleConfirmPasswordVisibility()"
-            [disabled]="loading"
-          >
-            {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
+        <mat-form-field appearance="outline">
+          <mat-label>Confirmar Contraseña</mat-label>
+          <input matInput [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Repite tu contraseña">
+          <button mat-icon-button matSuffix type="button" (click)="toggleConfirmPasswordVisibility()">
+            <mat-icon>{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-        </div>
-      </div>
+          @if (registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched) {
+            <mat-error>{{ getErrorMessage('confirmPassword') }}</mat-error>
+          }
+        </mat-form-field>
 
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
+        @if (errorMessage) {
+          <div class="error-message">
+            {{ errorMessage }}
+          </div>
+        }
 
-      <div class="success-message" *ngIf="successMessage">
-        {{ successMessage }}
-      </div>
+        @if (successMessage) {
+          <div class="success-message">
+            {{ successMessage }}
+          </div>
+        }
 
-      <button
-        type="submit"
-        class="register-button"
-        [disabled]="loading"
-      >
-        <span *ngIf="!loading">Registrarse</span>
-        <span *ngIf="loading">Registrando...</span>
-      </button>
-    </form>
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading || registerForm.invalid" class="register-button">
+          @if (loading) {
+            <mat-spinner diameter="20"></mat-spinner>
+            Registrando...
+          } @else {
+            Registrarse
+          }
+        </button>
+      </form>
+    </mat-card-content>
 
-    <div class="register-footer">
+    <mat-card-actions>
       <p>¿Ya tienes cuenta? <a [routerLink]="['/login']">Inicia Sesión</a></p>
-    </div>
-  </div>
+    </mat-card-actions>
+  </mat-card>
 </div>

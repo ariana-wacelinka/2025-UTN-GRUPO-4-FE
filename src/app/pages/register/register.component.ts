@@ -1,46 +1,59 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService, RegisterCredentials, UserRole } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
-  credentials: RegisterCredentials = {
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    role: UserRole.STUDENT,
-    phone: '',
-    location: '',
-    description: null,
-    username: ''
-  };
-
-  confirmPassword = '';
-
+  registerForm: FormGroup;
   loading = false;
   errorMessage = '';
   successMessage = '';
   showPassword = false;
   showConfirmPassword = false;
 
-
-
   constructor(
+    private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    this.registerForm = this.fb.group({
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required]],
+      location: ['', [Validators.required]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+  }
 
   onRegister(): void {
-    if (!this.validateForm()) {
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
       return;
     }
 
@@ -48,7 +61,20 @@ export class RegisterComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.authService.register(this.credentials).subscribe({
+    const formValue = this.registerForm.value;
+    const credentials: RegisterCredentials = {
+      email: formValue.email,
+      password: formValue.password,
+      firstName: formValue.firstName,
+      lastName: formValue.lastName,
+      role: UserRole.STUDENT,
+      phone: formValue.phone,
+      location: formValue.location,
+      description: null,
+      username: formValue.email
+    };
+
+    this.authService.register(credentials).subscribe({
       next: (response) => {
         this.loading = false;
         if (response.success) {
@@ -68,65 +94,54 @@ export class RegisterComponent {
     });
   }
 
-  private validateForm(): boolean {
-    if (!this.credentials.email) {
-      this.errorMessage = 'El email es requerido';
-      return false;
+  private passwordMatchValidator(form: FormGroup) {
+    const password = form.get('password');
+    const confirmPassword = form.get('confirmPassword');
+
+    if (password && confirmPassword && password.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
     }
 
-    if (!this.isValidEmail(this.credentials.email)) {
-      this.errorMessage = 'El email no es válido';
-      return false;
+    if (confirmPassword?.hasError('passwordMismatch')) {
+      delete confirmPassword.errors!['passwordMismatch'];
+      if (Object.keys(confirmPassword.errors!).length === 0) {
+        confirmPassword.setErrors(null);
+      }
     }
 
-    if (!this.credentials.password) {
-      this.errorMessage = 'La contraseña es requerida';
-      return false;
-    }
-
-    if (this.credentials.password.length < 6) {
-      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres';
-      return false;
-    }
-
-    if (!this.confirmPassword) {
-      this.errorMessage = 'Debes confirmar la contraseña';
-      return false;
-    }
-
-    if (this.credentials.password !== this.confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden';
-      return false;
-    }
-
-    if (!this.credentials.firstName || this.credentials.firstName.trim().length < 2) {
-      this.errorMessage = 'El nombre debe tener al menos 2 caracteres';
-      return false;
-    }
-
-    if (!this.credentials.lastName || this.credentials.lastName.trim().length < 2) {
-      this.errorMessage = 'El apellido debe tener al menos 2 caracteres';
-      return false;
-    }
-
-    if (!this.credentials.phone) {
-      this.errorMessage = 'El teléfono es requerido';
-      return false;
-    }
-
-    if (!this.credentials.location) {
-      this.errorMessage = 'La ubicación es requerida';
-      return false;
-    }
-
-
-
-    return true;
+    return null;
   }
 
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  getErrorMessage(fieldName: string): string {
+    const field = this.registerForm.get(fieldName);
+    if (field?.hasError('required')) {
+      return `${this.getFieldLabel(fieldName)} es requerido`;
+    }
+    if (field?.hasError('email')) {
+      return 'Email no válido';
+    }
+    if (field?.hasError('minlength')) {
+      const minLength = field.errors?.['minlength'].requiredLength;
+      return `Mínimo ${minLength} caracteres`;
+    }
+    if (field?.hasError('passwordMismatch')) {
+      return 'Las contraseñas no coinciden';
+    }
+    return '';
+  }
+
+  private getFieldLabel(fieldName: string): string {
+    const labels: { [key: string]: string } = {
+      firstName: 'Nombre',
+      lastName: 'Apellido',
+      email: 'Email',
+      phone: 'Teléfono',
+      location: 'Ubicación',
+      password: 'Contraseña',
+      confirmPassword: 'Confirmar contraseña'
+    };
+    return labels[fieldName] || fieldName;
   }
 
   togglePasswordVisibility(): void {
