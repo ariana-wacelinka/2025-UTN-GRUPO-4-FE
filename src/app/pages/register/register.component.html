@@ -63,7 +63,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" class="last-input">
           <mat-label>Confirmar Contraseña</mat-label>
           <input matInput [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Repite tu contraseña">
           <button mat-icon-button matSuffix type="button" (click)="toggleConfirmPasswordVisibility()">
