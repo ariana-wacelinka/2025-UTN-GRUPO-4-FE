@@ -1,7 +1,7 @@
 <div class="register-container">
   <mat-card class="register-card">
     <mat-card-header class="card-header">
-      <mat-card-title>Registro de Organización</mat-card-title>
+      <mat-card-title class="title">Registro de Organización</mat-card-title>
       <mat-card-subtitle>Únete como organización a la bolsa de trabajo</mat-card-subtitle>
     </mat-card-header>
 
@@ -74,7 +74,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" class="last-input">
           <mat-label>Confirmar Contraseña</mat-label>
           <input matInput [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Repite tu contraseña">
           <button mat-icon-button matSuffix type="button" (click)="toggleConfirmPasswordVisibility()">
