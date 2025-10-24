@@ -41,7 +41,6 @@ export class RegisterOrganizationComponent {
     private router: Router
   ) {
     this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required]],
@@ -65,7 +64,7 @@ export class RegisterOrganizationComponent {
 
     const formValue = this.registerForm.value;
     const credentials: RegisterCredentials = {
-      username: formValue.username,
+      username: formValue.email,
       email: formValue.email,
       password: formValue.password,
       firstName: formValue.firstName,
@@ -139,7 +138,6 @@ export class RegisterOrganizationComponent {
 
   private getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
-      username: 'Nombre de usuario',
       firstName: 'Nombre de la organización',
       email: 'Email',
       phone: 'Teléfono',
