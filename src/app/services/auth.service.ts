@@ -8,8 +8,8 @@ export interface LoginCredentials {
 }
 
 export enum UserRole {
-  STUDENT = 'STUDENT',
-  ORGANIZATION = 'ORGANIZATION'
+  STUDENT = 'Student',
+  ORGANIZATION = 'Organization'
 }
 
 export interface RegisterCredentials {
