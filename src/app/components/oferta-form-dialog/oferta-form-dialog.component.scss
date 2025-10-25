@@ -1,0 +1,336 @@
+/* Oferta Form Dialog Styles */
+.oferta-form-dialog {
+    width: 100%;
+}
+
+/* Dialog Header */
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 15px;
+    border-bottom: 1px solid var(--glass-border);
+
+    h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+
+        .title-icon {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+        }
+    }
+
+    .close-button {
+        color: var(--text-secondary);
+
+        &:hover {
+            background: var(--chip-bg);
+            color: var(--text-primary);
+        }
+    }
+}
+
+/* Dialog Content */
+.dialog-content {
+    padding: 32px 24px !important;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.oferta-form {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* Form Sections */
+.form-section {
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 20px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--primary-color);
+    }
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    .form-field {
+        flex: 1;
+
+        &.full-width {
+            width: 100%;
+        }
+    }
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Skills Section */
+.skills-section {
+    margin-top: 16px;
+
+    .skills-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+
+    .skills-input {
+        width: 100%;
+
+        ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+            display: none; // Hide default hint area
+        }
+    }
+
+    .skill-chip {
+        background: var(--primary-color) !important;
+        color: var(--white) !important;
+        font-weight: 500 !important;
+
+        button {
+            color: var(--white) !important;
+        }
+    }
+
+    .skills-hint {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: var(--muted-bg);
+        border-radius: var(--border-radius-small);
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+
+        .hint-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            color: var(--primary-color);
+        }
+    }
+}
+
+/* Form Validation */
+.form-validation {
+    margin-top: 24px;
+
+    .validation-card {
+        background: rgba(244, 67, 54, 0.05);
+        border: 1px solid rgba(244, 67, 54, 0.2);
+        border-radius: var(--border-radius);
+        padding: 16px;
+
+        .validation-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--error-color);
+
+            .warning-icon {
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        .validation-list {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--error-color);
+
+            li {
+                margin-bottom: 4px;
+                font-size: 0.9rem;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+}
+
+/* Dialog Actions */
+.dialog-actions {
+    padding: 16px 24px !important;
+    border-top: 1px solid var(--glass-border);
+    background: var(--muted-bg);
+
+    .actions-content {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        width: 100%;
+
+        .cancel-button {
+            color: var(--text-secondary) !important;
+            font-weight: 500 !important;
+            text-transform: none !important;
+            border-radius: var(--border-radius-small) !important;
+
+            &:hover {
+                background: var(--chip-bg) !important;
+                color: var(--text-primary) !important;
+            }
+        }
+
+        .submit-button {
+            border-radius: var(--border-radius-small) !important;
+            font-weight: 600 !important;
+            text-transform: none !important;
+            padding: 12px 24px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+
+            &:disabled {
+                background: var(--chip-bg) !important;
+                color: var(--text-muted) !important;
+            }
+
+            .loading-icon {
+                animation: spin 1s linear infinite;
+            }
+        }
+    }
+}
+
+/* Material Form Field Customizations */
+::ng-deep .oferta-form-dialog {
+    .mat-mdc-form-field {
+        .mat-mdc-form-field-subscript-wrapper {
+            margin-top: 4px;
+        }
+
+        .mat-mdc-form-field-hint-wrapper {
+            .mat-mdc-form-field-hint {
+                color: var(--text-muted);
+                font-size: 0.75rem;
+            }
+        }
+
+        .mat-mdc-form-field-error-wrapper {
+            .mat-mdc-form-field-error {
+                color: var(--error-color);
+                font-size: 0.75rem;
+            }
+        }
+    }
+
+    .mat-mdc-select-panel {
+        border-radius: var(--border-radius) !important;
+    }
+
+    .mat-datepicker-popup {
+        .mat-calendar {
+            border-radius: var(--border-radius) !important;
+        }
+    }
+}
+
+/* Animations */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .oferta-form-dialog {
+        max-width: 95vw;
+        margin: 16px;
+    }
+
+    .dialog-header {
+        padding: 0 16px;
+
+        h2 {
+            font-size: 1.3rem;
+
+            .title-icon {
+                font-size: 1.5rem;
+            }
+        }
+    }
+
+    .dialog-content {
+        padding: 24px 16px !important;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .dialog-actions {
+        padding: 12px 16px !important;
+
+        .actions-content {
+            flex-direction: column-reverse;
+            gap: 8px;
+
+            .cancel-button,
+            .submit-button {
+                width: 100%;
+                justify-content: center !important;
+            }
+        }
+    }
+
+    .skills-section {
+        .skills-hint {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+        }
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .validation-card {
+        background: var(--white);
+        border: 2px solid var(--error-color);
+    }
+
+    .skills-hint {
+        background: var(--white);
+        border: 1px solid var(--text-muted);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .loading-icon {
+        animation: none;
+    }
+
+    * {
+        transition: none !important;
+    }
+}

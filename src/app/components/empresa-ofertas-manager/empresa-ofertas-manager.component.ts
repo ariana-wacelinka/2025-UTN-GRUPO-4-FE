@@ -20,6 +20,10 @@ import { EmpresasService } from '../../services/empresas.service';
 import { OfertasLaboralesService } from '../../services/ofertas-laborales.service';
 import { OfertaLaboralDTO, ModalidadTrabajo } from '../../models/oferta-laboral.dto';
 
+// Importar el componente de formulario
+import { OfertaFormDialogComponent, OfertaFormDialogData } from '../oferta-form-dialog/oferta-form-dialog.component';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
+
 @Component({
     selector: 'app-empresa-ofertas-manager',
     standalone: true,
@@ -285,8 +289,22 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
 
     // Métodos de acción
     crearNuevaOferta() {
-        this.snackBar.open('Funcionalidad de crear oferta en desarrollo', 'Cerrar', { duration: 3000 });
-        // TODO: Abrir dialog para crear nueva oferta
+        const dialogRef = this.dialog.open(OfertaFormDialogComponent, {
+            width: '800px',
+            maxWidth: '95vw',
+            disableClose: true,
+            data: {
+                isEditing: false
+            } as OfertaFormDialogData
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                // Refrescar la lista de ofertas
+                this.cargarOfertas();
+                this.snackBar.open('Oferta creada exitosamente', 'Cerrar', { duration: 3000 });
+            }
+        });
     }
 
     verDetalle(oferta: OfertaListaDTO) {
@@ -294,8 +312,41 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
     }
 
     editarOferta(oferta: OfertaListaDTO) {
-        this.snackBar.open('Funcionalidad de editar oferta en desarrollo', 'Cerrar', { duration: 3000 });
-        // TODO: Abrir dialog para editar oferta
+        // Convertir OfertaListaDTO a OfertaLaboralDTO para el formulario
+        const ofertaParaEditar: OfertaLaboralDTO = {
+            id: oferta.id,
+            title: oferta.titulo,
+            description: oferta.descripcion,
+            requirements: oferta.requisitos,
+            modality: oferta.modalidad as ModalidadTrabajo,
+            location: oferta.locacion,
+            estimatedPayment: this.extractSalaryNumber(oferta.pagoAprox),
+            applyList: [],
+            bidder: {
+                id: oferta.empresa.id,
+                name: oferta.empresa.nombre,
+                industry: 'Tecnología', // Mock
+                imageUrl: undefined
+            }
+        };
+
+        const dialogRef = this.dialog.open(OfertaFormDialogComponent, {
+            width: '800px',
+            maxWidth: '95vw',
+            disableClose: true,
+            data: {
+                isEditing: true,
+                oferta: ofertaParaEditar
+            } as OfertaFormDialogData
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                // Refrescar la lista de ofertas
+                this.cargarOfertas();
+                this.snackBar.open('Oferta actualizada exitosamente', 'Cerrar', { duration: 3000 });
+            }
+        });
     }
 
     verAplicantes(oferta: OfertaListaDTO) {
@@ -303,7 +354,51 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
     }
 
     desactivarOferta(oferta: OfertaListaDTO) {
-        // TODO: Implementar confirmación y desactivación
-        this.snackBar.open('Funcionalidad de desactivar oferta en desarrollo', 'Cerrar', { duration: 3000 });
+        const dialogData: ConfirmationDialogData = {
+            title: 'Desactivar Oferta',
+            message: `¿Estás seguro de que quieres desactivar la oferta <strong>"${oferta.titulo}"</strong>?<br><br>
+                     Esta acción hará que la oferta no sea visible para nuevos aplicantes, pero conservará toda la información y aplicaciones existentes.`,
+            confirmText: 'Desactivar',
+            cancelText: 'Cancelar',
+            type: 'warning'
+        };
+
+        const confirmDialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            width: '500px',
+            maxWidth: '95vw',
+            data: dialogData
+        });
+
+        confirmDialogRef.afterClosed().subscribe(confirmed => {
+            if (confirmed) {
+                this.isLoading.set(true);
+
+                // Por ahora solo mostrar mensaje, en el futuro usar la API
+                setTimeout(() => {
+                    this.isLoading.set(false);
+                    this.snackBar.open('Oferta desactivada exitosamente', 'Cerrar', { duration: 3000 });
+                    // Aquí se refrescaría la lista cuando esté conectado a la API
+                }, 1000);
+
+                // TODO: Implementar con API real
+                // this.ofertasLaboralesService.desactivarOferta(oferta.id).subscribe({
+                //   next: () => {
+                //     this.cargarOfertas();
+                //     this.snackBar.open('Oferta desactivada exitosamente', 'Cerrar', { duration: 3000 });
+                //   },
+                //   error: (error) => {
+                //     console.error('Error al desactivar oferta:', error);
+                //     this.snackBar.open('Error al desactivar la oferta', 'Cerrar', { duration: 3000 });
+                //   }
+                // });
+            }
+        });
+    }
+
+    // Método auxiliar para extraer número del salario
+    private extractSalaryNumber(salarioTexto: string): number {
+        // Extraer el primer número del string como "USD 2000-3000" -> 2000
+        const matches = salarioTexto.match(/\d+/);
+        return matches ? parseInt(matches[0]) : 0;
     }
 }
