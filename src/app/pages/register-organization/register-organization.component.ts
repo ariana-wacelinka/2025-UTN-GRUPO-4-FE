@@ -46,7 +46,7 @@ export class RegisterOrganizationComponent {
       phone: ['', [Validators.required]],
       location: ['', [Validators.required]],
       description: ['', [Validators.required, Validators.minLength(10)]],
-      linkedinUrl: ['', [Validators.required, Validators.pattern(/^https:\/\/[a-z]{2,3}\.linkedin\.com\/.*$/)]],
+      linkedinUrl: ['', [Validators.required, Validators.pattern(/[a-z]{2,3}\.linkedin\.com\/.*$/)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
@@ -68,7 +68,7 @@ export class RegisterOrganizationComponent {
       email: formValue.email,
       password: formValue.password,
       firstName: formValue.firstName,
-      lastName: '',
+      lastName: null,
       role: UserRole.ORGANIZATION,
       phone: formValue.phone,
       location: formValue.location,
