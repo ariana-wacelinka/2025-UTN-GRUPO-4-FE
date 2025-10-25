@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { PerfilAlumnoService, PerfilAlumnoDTO, ActualizarPerfilDTO, IdiomaDTO } from './perfil-alumno.service';
+import { PerfilAlumnoService, PerfilAlumnoDTO, ActualizarPerfilDTO, IdiomaDTO, MateriasState, DEFAULT_MATERIAS_STATE } from './perfil-alumno.service';
 import { API_URL } from '../app.config';
 
 describe('PerfilAlumnoService', () => {
@@ -28,6 +28,15 @@ describe('PerfilAlumnoService', () => {
         fechaNacimiento: '01/01/2000',
         curriculumUrl: '/assets/test-cv.pdf'
     };
+
+        const mockMateriasState: MateriasState = {
+                materias: [
+                        { codigo: '1234', nombre: 'Práctica Profesional', nota: 9, estado: 'Aprobada', fechaAprobacion: '2024-03-10' },
+                        { codigo: '5678', nombre: 'Gestión de Proyectos', nota: 8, estado: 'Aprobada', fechaAprobacion: '2024-07-01' }
+                ],
+                promedioGeneral: 8.5,
+                totalMaterias: 2
+        };
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -280,6 +289,46 @@ describe('PerfilAlumnoService', () => {
                     done();
                 });
             });
+        });
+    });
+
+    describe('gestión de materias', () => {
+        it('should expose default materias state', (done) => {
+            service.obtenerMateriasState().subscribe(state => {
+                expect(state.totalMaterias).toBe(DEFAULT_MATERIAS_STATE.totalMaterias);
+                expect(state.promedioGeneral).toBe(DEFAULT_MATERIAS_STATE.promedioGeneral);
+                done();
+            });
+        });
+
+        it('should load materias from backend and update state', (done) => {
+            service.cargarMateriasDesdeBackend().subscribe(state => {
+                expect(state.materias.length).toBe(mockMateriasState.materias.length);
+                expect(state.promedioGeneral).toBe(mockMateriasState.promedioGeneral);
+                done();
+            });
+
+            const req = httpMock.expectOne(`${mockApiUrl}/students/profile/subjects`);
+            expect(req.request.method).toBe('GET');
+            req.flush(mockMateriasState);
+        });
+
+        it('should upload materias excel and refresh state', (done) => {
+            const mockFile = new File(['contenido'], 'materias.xls', { type: 'application/vnd.ms-excel' });
+
+            service.subirMateriasExcel(mockFile).subscribe(state => {
+                expect(state.totalMaterias).toBe(mockMateriasState.totalMaterias);
+                expect(state.promedioGeneral).toBe(mockMateriasState.promedioGeneral);
+                done();
+            });
+
+            const req = httpMock.expectOne(`${mockApiUrl}/students/profile/subjects/upload`);
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body instanceof FormData).toBeTrue();
+
+            const formData = req.request.body as FormData;
+            expect(formData.has('file')).toBeTrue();
+            req.flush(mockMateriasState);
         });
     });
 });
