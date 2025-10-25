@@ -6,7 +6,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { OfertaListaDTO, EstadoAplicacion } from '../../models/oferta.dto';
-import { OfertasService } from '../../services/ofertas.service';
+import { offersService } from '../../services/ofertas.service';
 import { UsuarioService, Usuario } from '../../services/usuario.service';
 import { AuthService } from '../../services/auth.service';
 import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-dialog.component';
@@ -513,7 +513,7 @@ export class OfertaDetalleComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private ofertasService: OfertasService,
+    private ofertasService: offersService,
     private usuarioService: UsuarioService,
     private authService: AuthService,
     private dialog: MatDialog

@@ -47,8 +47,6 @@ export class offersService {
     return this.http.post<void>(`${this.apiUrl}/offers/aplicar`, aplicacion);
   }
 
-
-
   getAplicantesPorOferta(ofertaId: number): Observable<AplicanteListaDTO> {
     return this.http.get<AplicanteListaDTO>(`${this.apiUrl}/aplicantes/oferta/${ofertaId}`);
   }

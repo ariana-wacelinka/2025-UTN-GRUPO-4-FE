@@ -13,8 +13,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { CrearOfertaDTO, Modalidad } from '../../models/oferta.dto';
-import { OfertasService } from '../../services/ofertas.service';
+import { offersService } from '../../services/ofertas.service';
 import { AtributosService } from '../../services/atributos.service';
+import { UsuarioService } from '../../services/usuario.service';
 
 @Component({
   selector: 'app-publicar-oferta',
@@ -195,6 +196,7 @@ import { AtributosService } from '../../services/atributos.service';
 })
 export class PublicarOfertaComponent implements OnInit {
   oferta: CrearOfertaDTO = {
+    bidderId: 0,
     titulo: '',
     descripcion: '',
     requisitos: '',
@@ -209,15 +211,16 @@ export class PublicarOfertaComponent implements OnInit {
   Modalidad = Modalidad;
 
   constructor(
-    private ofertasService: OfertasService,
+    private ofertasService: offersService,
     private atributosService: AtributosService,
+    private usuarioService: UsuarioService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    // Si la lista de atributos esta vacia, sacarle la clase "atributos-chips" al mat-chip-set, para que no ocupe espacio innecesario
-    // pero si tiene atributos, agregarle la clase para que tenga margen inferior. Se hace dinamicamente
-
+    this.usuarioService.getCurrentUser().subscribe(user => {
+      this.oferta.bidderId = user.id;
+    });
   }
 
   buscarAtributos(event: any): void {
@@ -281,8 +284,13 @@ export class PublicarOfertaComponent implements OnInit {
       this.oferta.locacion &&
       this.oferta.atributos.length > 0
     ) {
-      this.ofertasService.crearOferta(this.oferta);
-      this.router.navigate(['/ofertas']);
+      const ofertaParaEnviar = {
+        ...this.oferta,
+        modalidad: this.oferta.modalidad as string
+      };
+      this.ofertasService.crearOferta(ofertaParaEnviar).subscribe(() => {
+        this.router.navigate(['/ofertas']);
+      });
     }
   }
 

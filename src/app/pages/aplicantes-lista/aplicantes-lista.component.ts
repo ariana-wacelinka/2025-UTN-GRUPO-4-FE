@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { OfertasService } from '../../services/ofertas.service';
+import { offersService } from '../../services/ofertas.service';
 import { AplicanteDTO, AplicanteListaDTO } from '../../models/aplicante.dto';
 import { AuthService } from '../../services/auth.service';
 
@@ -21,7 +21,7 @@ export class AplicantesListaComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private ofertasService: OfertasService,
+    private ofertasService: offersService,
     private authService: AuthService
   ) {}
 
@@ -82,9 +82,9 @@ export class AplicantesListaComponent implements OnInit {
 
   formatearFecha(fecha: string): string {
     const date = new Date(fecha);
-    return date.toLocaleDateString('es-AR', { 
-      year: 'numeric', 
-      month: 'long', 
+    return date.toLocaleDateString('es-AR', {
+      year: 'numeric',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'

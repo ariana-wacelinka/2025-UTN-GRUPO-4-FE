@@ -34,10 +34,11 @@ export interface OfertaListaDTO {
 }
 
 export interface CrearOfertaDTO {
+  bidderId: number;
   titulo: string;
   descripcion: string;
   requisitos: string;
-  modalidad: Modalidad;
+  modalidad: string;
   locacion: string;
   pagoAprox?: string;
   atributos: string[];
