@@ -60,6 +60,13 @@ export class AuthService {
     @Inject(API_URL) private apiUrl: string
   ) {}
 
+  extractSubFromIdToken(idToken: string): void {
+    const decoded = this.decodeJWT(idToken);
+    if (decoded && decoded.sub) {
+      this.idKeycloakUser = decoded.sub;
+    }
+  }
+
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     console.log('=== LOGIN CREDENTIALS ENVIADAS ===');
     return this.http.post<any>(`${this.apiUrl}/auth/login`, credentials).pipe(
@@ -67,6 +74,11 @@ export class AuthService {
         console.log('=== LOGIN RESPONSE COMPLETO ===');
         console.log(JSON.stringify(response, null, 2));
 
+        if (response.id_token) {
+          this.extractSubFromIdToken(response.id_token);
+          this.saveIdTokenToCookie(response.id_token);
+          this.loggedInSubject.next(true);
+        }
 
         return {
           success: true,
@@ -84,36 +96,13 @@ export class AuthService {
   }
 
   register(credentials: RegisterCredentials): Observable<RegisterResponse> {
-    const registerData = {
-      ...credentials,
-      username: credentials.email,
-      role: UserRole.STUDENT,
-      description: null
-    };
+    const registerData = credentials
 
     return this.http.post<any>(`${this.apiUrl}/auth/register`, registerData).pipe(
       map((response) => {
-        // Guardar en localStorage para cumplir CA3 (solo Sprint 1)
-        const existingUsers = this.getRegisteredUsers();
-        const newUser = {
-          id: response.id || Math.floor(Math.random() * 1000),
-          email: registerData.email,
-          firstName: registerData.firstName,
-          lastName: registerData.lastName,
-          phone: registerData.phone,
-          location: registerData.location,
-          description: registerData.description,
-          username: registerData.username,
-          role: registerData.role,
-          passwordHash: btoa(registerData.password),
-          fechaRegistro: new Date().toISOString()
-        };
-        existingUsers.push(newUser);
-        localStorage.setItem('registered_users.txt', JSON.stringify(existingUsers, null, 2));
-
         return {
           success: true,
-          message: response.message || 'Registro exitoso. Ya puedes iniciar sesión.'
+          message: 'Registro exitoso.'
         };
       }),
       catchError((error) => {
