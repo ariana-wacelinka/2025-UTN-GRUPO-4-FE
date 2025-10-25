@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import { delay, map, tap } from 'rxjs/operators';
+import { delay, map, tap, catchError } from 'rxjs/operators';
+import { API_URL } from '../app.config';
 
 export interface LoginCredentials {
   email: string;
@@ -51,20 +53,22 @@ export class AuthService {
   private loggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
   public loggedIn$ = this.loggedInSubject.asObservable();
 
-  constructor() {}
+  constructor(
+    private http: HttpClient,
+    @Inject(API_URL) private apiUrl: string
+  ) {}
 
-  // TODO Sprint 2: Reemplazar con llamada HTTP al backend /api/auth/login
   login(credentials: LoginCredentials): Observable<LoginResponse> {
-    return of(credentials).pipe(
-      delay(500),
-      map((creds) => {
-        this.saveToTxt(creds);
+    return this.http.post<any>(`${this.apiUrl}/auth/login`, credentials).pipe(
+      map((response) => {
+        // Guardar para cumplir CA3 (solo Sprint 1)
+        this.saveToTxt(credentials);
 
         const user = {
-          id: Math.floor(Math.random() * 1000),
-          email: creds.email,
-          nombre: this.extractNameFromEmail(creds.email),
-          tipo: creds.email.includes('empresa') ? 'empresa' as const : 'alumno' as const
+          id: response.id || response.userId,
+          email: response.email || credentials.email,
+          nombre: response.nombre || response.name || this.extractNameFromEmail(credentials.email),
+          tipo: response.tipo || response.role === 'ORGANIZATION' ? 'empresa' as const : 'alumno' as const
         };
 
         this.saveUserToCookie(user);
@@ -75,13 +79,18 @@ export class AuthService {
           message: 'Login exitoso',
           user
         };
+      }),
+      catchError((error) => {
+        console.error('Login error:', error);
+        return of({
+          success: false,
+          message: error.error?.message || 'Error al iniciar sesión'
+        });
       })
     );
   }
 
-  // TODO Sprint 2: Reemplazar con llamada HTTP al backend /api/auth/register
   register(credentials: RegisterCredentials): Observable<RegisterResponse> {
-    // Set username to email, role to STUDENT, and description to null automatically
     const registerData = {
       ...credentials,
       username: credentials.email,
@@ -89,40 +98,37 @@ export class AuthService {
       description: null
     };
 
-    return of(registerData).pipe(
-      delay(500),
-      map((creds) => {
-        // Verificar si el email ya existe
+    return this.http.post<any>(`${this.apiUrl}/auth/register`, registerData).pipe(
+      map((response) => {
+        // Guardar en localStorage para cumplir CA3 (solo Sprint 1)
         const existingUsers = this.getRegisteredUsers();
-        if (existingUsers.find(u => u.email === creds.email)) {
-          return {
-            success: false,
-            message: 'El email ya está registrado'
-          };
-        }
-
-        // Guardar nuevo usuario en localStorage
         const newUser = {
-          id: Math.floor(Math.random() * 1000),
-          email: creds.email,
-          firstName: creds.firstName,
-          lastName: creds.lastName,
-          phone: creds.phone,
-          location: creds.location,
-          description: creds.description,
-          username: creds.username,
-          role: creds.role,
-          passwordHash: btoa(creds.password),
+          id: response.id || Math.floor(Math.random() * 1000),
+          email: registerData.email,
+          firstName: registerData.firstName,
+          lastName: registerData.lastName,
+          phone: registerData.phone,
+          location: registerData.location,
+          description: registerData.description,
+          username: registerData.username,
+          role: registerData.role,
+          passwordHash: btoa(registerData.password),
           fechaRegistro: new Date().toISOString()
         };
-
         existingUsers.push(newUser);
         localStorage.setItem('registered_users.txt', JSON.stringify(existingUsers, null, 2));
 
         return {
           success: true,
-          message: 'Registro exitoso. Ya puedes iniciar sesión.'
+          message: response.message || 'Registro exitoso. Ya puedes iniciar sesión.'
         };
+      }),
+      catchError((error) => {
+        console.error('Register error:', error);
+        return of({
+          success: false,
+          message: error.error?.message || 'Error en el registro'
+        });
       })
     );
   }
