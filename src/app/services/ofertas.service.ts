@@ -6,7 +6,7 @@ import { AplicanteDTO, AplicanteListaDTO } from '../models/aplicante.dto';
 import { API_URL } from '../app.config';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class offersService {
   private offers: OfertaListaDTO[] = [];
@@ -36,40 +36,48 @@ export class offersService {
       });
     }
 
-    return this.http.get<PagedResponseDTO<OfertaListaDTO>>(`${this.apiUrl}/offers`, { params: httpParams }).pipe(
-      tap(result => console.log(result))
-    );
+    return this.http
+      .get<PagedResponseDTO<OfertaListaDTO>>(`${this.apiUrl}/offers`, {
+        params: httpParams,
+      })
+      .pipe(tap((result) => console.log(result)));
   }
 
   getOfertaById(id: number): Observable<OfertaListaDTO> {
-    return this.http.get<OfertaListaDTO>(`${this.apiUrl}/offers/${id}`).pipe(
-      tap(result => console.log(result))
-    );
+    return this.http
+      .get<OfertaListaDTO>(`${this.apiUrl}/offers/${id}`)
+      .pipe(tap((result) => console.log(result)));
   }
 
   aplicarAOferta(aplicacion: AplicacionDTO): Observable<any> {
     console.log('Aplicando a oferta:', aplicacion);
-    return this.http.post(`${this.apiUrl}/applies`, aplicacion);
+    console.log('URL completa:', `${this.apiUrl}/applies`);
+    return this.http.post(`${this.apiUrl}/applies`, aplicacion).pipe(
+      tap({
+        next: (response) => console.log('✅ Respuesta exitosa:', response),
+        error: (error) => console.error('❌ Error en petición:', error),
+      })
+    );
   }
 
   getAplicantesPorOferta(ofertaId: number): Observable<AplicanteListaDTO> {
-    return this.http.get<AplicanteListaDTO>(`${this.apiUrl}/applies?offerId=${ofertaId}`);
+    return this.http.get<AplicanteListaDTO>(
+      `${this.apiUrl}/applies?offerId=${ofertaId}`
+    );
   }
 
   crearOferta(oferta: CrearOfertaDTO): Observable<any> {
     return this.http.post(`${this.apiUrl}/offers`, oferta);
   }
 
-
-
   descargarCV(aplicante: AplicanteDTO): void {
     if (aplicante.cvUrl) {
       const a = document.createElement('a');
       a.href = aplicante.cvUrl;
-      a.download = aplicante.cvFileName || `CV_${aplicante.nombre.replace(/\s/g, '_')}.pdf`;
+      a.download =
+        aplicante.cvFileName ||
+        `CV_${aplicante.nombre.replace(/\s/g, '_')}.pdf`;
       a.click();
     }
   }
-
-
 }

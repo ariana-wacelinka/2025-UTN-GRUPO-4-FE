@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { OfertaListaDTO, EstadoAplicacion } from '../../models/oferta.dto';
 import { offersService } from '../../services/ofertas.service';
-import { UsuarioService, Usuario } from '../../services/usuario.service';
+import { KeycloakUser } from '../../models/keycloak-user.model';
 import { AuthService } from '../../services/auth.service';
 import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-dialog.component';
 
@@ -508,13 +508,12 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
 })
 export class OfertaDetalleComponent implements OnInit {
   oferta?: OfertaListaDTO;
-  usuario?: Usuario;
+  keycloakUser?: KeycloakUser;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private ofertasService: offersService,
-    private usuarioService: UsuarioService,
     private authService: AuthService,
     private dialog: MatDialog
   ) {}
@@ -525,8 +524,9 @@ export class OfertaDetalleComponent implements OnInit {
       this.oferta = oferta;
     });
 
-    this.usuarioService.getCurrentUser().subscribe((usuario) => {
-      this.usuario = usuario;
+    // Esperar a que el usuario esté cargado y luego obtenerlo
+    this.authService.waitForUserLoad().subscribe(() => {
+      this.keycloakUser = this.authService.keycloakUser || undefined;
     });
   }
 
@@ -535,7 +535,7 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   abrirDialogoAplicar(): void {
-    if (!this.oferta || !this.usuario) return;
+    if (!this.oferta || !this.keycloakUser) return;
 
     const dialogRef = this.dialog.open(AplicarDialogComponent, {
       width: '500px',
@@ -546,14 +546,22 @@ export class OfertaDetalleComponent implements OnInit {
       console.log('El diálogo se cerró');
       console.log('Carta de presentación:', cartaPresentacion);
       console.log('Oferta ID:', this.oferta?.id);
-      console.log('Usuario ID:', this.usuario?.id);
+      console.log('Usuario ID:', this.keycloakUser?.id);
         console.log('Enviando aplicación...');
         this.ofertasService.aplicarAOferta({
           offerId: this.oferta!.id,
-          studentId: this.usuario!.id,
+          studentId: this.keycloakUser!.id,
           customCoverLetter: cartaPresentacion,
+        }).subscribe({
+          next: (response) => {
+            console.log('✅ Aplicación enviada exitosamente:', response);
+            this.oferta!.estado = EstadoAplicacion.APLICADO;
+          },
+          error: (error) => {
+            console.error('❌ Error al aplicar a la oferta:', error);
+            // Aquí puedes agregar manejo de errores, como mostrar un mensaje al usuario
+          }
         });
-        this.oferta!.estado = EstadoAplicacion.APLICADO;
     });
   }
 
