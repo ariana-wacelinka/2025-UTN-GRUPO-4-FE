@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { EmpresasService } from '../../../services/empresas.service';
@@ -29,6 +30,7 @@ import { InfoCardComponent, InfoCardData } from '../../../components/info-card/i
         MatInputModule,
         MatSelectModule,
         MatSnackBarModule,
+        MatTabsModule,
         FormsModule,
         ReactiveFormsModule,
         ProfileHeaderComponent,

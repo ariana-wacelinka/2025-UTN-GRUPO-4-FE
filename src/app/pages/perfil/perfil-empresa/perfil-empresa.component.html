@@ -16,130 +16,183 @@
         (cancelEdit)="onCancelEdit()" (imageSelected)="onImageSelected($event)">
       </app-profile-header>
 
-      <!-- Formulario de edición -->
-      <div *ngIf="isEditing()" class="edit-form-container">
-        <mat-card class="modern-card edit-form">
-          <mat-card-header>
-            <mat-card-title class="section-title">
-              <mat-icon class="section-icon">edit</mat-icon>
-              Editar Información de la Empresa
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <form [formGroup]="editForm" class="edit-form-container">
-              <!-- Información Básica -->
-              <div class="form-section">
-                <h3 class="form-section-title">Información Básica</h3>
+      <!-- Material Tabs para organizar el contenido -->
+      <mat-tab-group class="profile-tabs" animationDuration="300ms">
 
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Nombre de la Empresa</mat-label>
-                    <input matInput formControlName="name" required>
-                    <mat-error *ngIf="f['name'].invalid && f['name'].touched">
-                      El nombre es requerido
-                    </mat-error>
-                  </mat-form-field>
+        <!-- Pestaña: Perfil de la Empresa -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">business</mat-icon>
+            <span class="tab-label">Perfil</span>
+          </ng-template>
 
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Industria</mat-label>
-                    <mat-select formControlName="industry" required>
-                      <mat-option *ngFor="let sector of sectoresDisponibles" [value]="sector">
-                        {{ sector }}
-                      </mat-option>
-                    </mat-select>
-                    <mat-error *ngIf="f['industry'].invalid && f['industry'].touched">
-                      La industria es requerida
-                    </mat-error>
-                  </mat-form-field>
-                </div>
+          <!-- Formulario de edición -->
+          <div *ngIf="isEditing()" class="edit-form-container">
+            <mat-card class="modern-card edit-form">
+              <mat-card-header>
+                <mat-card-title class="section-title">
+                  <mat-icon class="section-icon">edit</mat-icon>
+                  Editar Información de la Empresa
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <form [formGroup]="editForm" class="edit-form-container">
+                  <!-- Información Básica -->
+                  <div class="form-section">
+                    <h3 class="form-section-title">Información Básica</h3>
 
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Tamaño</mat-label>
-                    <mat-select formControlName="size" required>
-                      <mat-option *ngFor="let tamanio of tamaniosDisponibles" [value]="tamanio.value">
-                        {{ tamanio.label }}
-                      </mat-option>
-                    </mat-select>
-                    <mat-error *ngIf="f['size'].invalid && f['size'].touched">
-                      El tamaño es requerido
-                    </mat-error>
-                  </mat-form-field>
+                    <div class="form-row">
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Nombre de la Empresa</mat-label>
+                        <input matInput formControlName="name" required>
+                        <mat-error *ngIf="f['name'].invalid && f['name'].touched">
+                          El nombre es requerido
+                        </mat-error>
+                      </mat-form-field>
 
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Ubicación</mat-label>
-                    <input matInput formControlName="location">
-                  </mat-form-field>
-                </div>
-              </div>
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Industria</mat-label>
+                        <mat-select formControlName="industry" required>
+                          <mat-option *ngFor="let sector of sectoresDisponibles" [value]="sector">
+                            {{ sector }}
+                          </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="f['industry'].invalid && f['industry'].touched">
+                          La industria es requerida
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
 
-              <!-- Descripción -->
-              <div class="form-section">
-                <h3 class="form-section-title">Descripción</h3>
-                <mat-form-field appearance="outline" class="form-field full-width">
-                  <mat-label>Descripción</mat-label>
-                  <textarea matInput formControlName="description" rows="4" maxlength="500"></textarea>
-                  <mat-hint>{{f['description'].value?.length || 0}}/500</mat-hint>
-                </mat-form-field>
-              </div>
+                    <div class="form-row">
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Tamaño</mat-label>
+                        <mat-select formControlName="size" required>
+                          <mat-option *ngFor="let tamanio of tamaniosDisponibles" [value]="tamanio.value">
+                            {{ tamanio.label }}
+                          </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="f['size'].invalid && f['size'].touched">
+                          El tamaño es requerido
+                        </mat-error>
+                      </mat-form-field>
 
-              <!-- Información de Contacto -->
-              <div class="form-section">
-                <h3 class="form-section-title">Información de Contacto</h3>
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Ubicación</mat-label>
+                        <input matInput formControlName="location">
+                      </mat-form-field>
+                    </div>
+                  </div>
 
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Email</mat-label>
-                    <input matInput formControlName="email" type="email">
-                    <mat-error *ngIf="f['email'].invalid && f['email'].touched">
-                      Ingrese un email válido
-                    </mat-error>
-                  </mat-form-field>
+                  <!-- Descripción -->
+                  <div class="form-section">
+                    <h3 class="form-section-title">Descripción</h3>
+                    <mat-form-field appearance="outline" class="form-field full-width">
+                      <mat-label>Descripción</mat-label>
+                      <textarea matInput formControlName="description" rows="4" maxlength="500"></textarea>
+                      <mat-hint>{{f['description'].value?.length || 0}}/500</mat-hint>
+                    </mat-form-field>
+                  </div>
 
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Teléfono</mat-label>
-                    <input matInput formControlName="phone">
-                  </mat-form-field>
-                </div>
+                  <!-- Información de Contacto -->
+                  <div class="form-section">
+                    <h3 class="form-section-title">Información de Contacto</h3>
 
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Sitio Web</mat-label>
-                    <input matInput formControlName="webSiteUrl">
-                  </mat-form-field>
+                    <div class="form-row">
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Email</mat-label>
+                        <input matInput formControlName="email" type="email">
+                        <mat-error *ngIf="f['email'].invalid && f['email'].touched">
+                          Ingrese un email válido
+                        </mat-error>
+                      </mat-form-field>
 
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>LinkedIn</mat-label>
-                    <input matInput formControlName="linkedinUrl">
-                  </mat-form-field>
-                </div>
-              </div>
-            </form>
-          </mat-card-content>
-        </mat-card>
-      </div>
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Teléfono</mat-label>
+                        <input matInput formControlName="phone">
+                      </mat-form-field>
+                    </div>
 
-      <!-- Vista normal (no edición) usando componentes compartidos -->
-      <div *ngIf="!isEditing()" class="profile-content">
+                    <div class="form-row">
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Sitio Web</mat-label>
+                        <input matInput formControlName="webSiteUrl">
+                      </mat-form-field>
 
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>LinkedIn</mat-label>
+                        <input matInput formControlName="linkedinUrl">
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </form>
+              </mat-card-content>
+            </mat-card>
+          </div>
 
-        <!-- Descripción -->
-        <mat-card class="modern-card about-card" *ngIf="empresa()?.description">
-          <mat-card-header>
-            <mat-card-title class="section-title">
-              <mat-icon class="section-icon">info</mat-icon>
-              Acerca de la Empresa
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <p class="about-text">{{empresa()?.description}}</p>
-          </mat-card-content>
-        </mat-card>
+          <!-- Vista normal (no edición) usando componentes compartidos -->
+          <div *ngIf="!isEditing()" class="profile-content">
+            <!-- Descripción -->
+            <mat-card class="modern-card about-card" *ngIf="empresa()?.description">
+              <mat-card-header>
+                <mat-card-title class="section-title">
+                  <mat-icon class="section-icon">info</mat-icon>
+                  Acerca de la Empresa
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="about-text">{{empresa()?.description}}</p>
+              </mat-card-content>
+            </mat-card>
 
-        <!-- Información de Contacto usando info-card compartido -->
-        <app-info-card *ngIf="contactInfo()" [data]="contactInfo()!">
-        </app-info-card>
-      </div>
+            <!-- Información de Contacto usando info-card compartido -->
+            <app-info-card *ngIf="contactInfo()" [data]="contactInfo()!">
+            </app-info-card>
+          </div>
+
+        </mat-tab>
+
+        <!-- Pestaña: Mis Publicaciones -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">work</mat-icon>
+            <span class="tab-label">Mis Publicaciones</span>
+          </ng-template>
+
+          <!-- Contenido de ofertas laborales -->
+          <div class="ofertas-container">
+            <div class="ofertas-header">
+              <h2 class="section-title">
+                <mat-icon class="section-icon">work</mat-icon>
+                Ofertas Laborales Activas
+              </h2>
+              <p class="section-subtitle">
+                Gestiona tus publicaciones de trabajo y revisa los aplicantes
+              </p>
+            </div>
+
+            <!-- Placeholder para la lista de ofertas -->
+            <div class="ofertas-placeholder">
+              <mat-card class="modern-card placeholder-card">
+                <mat-card-content>
+                  <div class="placeholder-content">
+                    <mat-icon class="placeholder-icon">work_outline</mat-icon>
+                    <h3>Próximamente: Lista de Ofertas</h3>
+                    <p>Aquí podrás ver y gestionar todas tus ofertas laborales activas.</p>
+                    <p><strong>Funcionalidades que se implementarán:</strong></p>
+                    <ul>
+                      <li>Ver listado de ofertas activas</li>
+                      <li>Acceder al detalle de cada oferta</li>
+                      <li>Revisar aplicantes</li>
+                      <li>Dar de baja ofertas</li>
+                    </ul>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+
+        </mat-tab>
+      </mat-tab-group>
     </div>
   </div>
 </div>

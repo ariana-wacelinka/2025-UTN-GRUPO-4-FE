@@ -424,6 +424,139 @@
     }
 }
 
+.profile-tabs {
+    margin-top: 32px;
+    background: transparent;
+
+    ::ng-deep .mat-mdc-tab-group {
+        background: transparent;
+    }
+
+    ::ng-deep .mat-mdc-tab-header {
+        background: var(--glass-white);
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        border: 1px solid var(--glass-border);
+        border-bottom: none;
+        backdrop-filter: blur(10px);
+        margin-bottom: 0;
+    }
+
+    ::ng-deep .mat-mdc-tab-body-wrapper {
+        background: var(--glass-white);
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        border: 1px solid var(--glass-border);
+        border-top: none;
+        backdrop-filter: blur(10px);
+        min-height: 400px;
+    }
+
+    ::ng-deep .mat-mdc-tab {
+        &.mdc-tab--active {
+            .mdc-tab__text-label {
+                color: var(--primary-color);
+                font-weight: 600;
+            }
+
+            .tab-icon {
+                color: var(--primary-color);
+            }
+        }
+    }
+
+    ::ng-deep .mat-mdc-tab-body-content {
+        padding: 32px;
+        overflow-x: hidden;
+    }
+
+    .tab-label {
+        margin-left: 8px;
+        font-weight: 500;
+    }
+
+    .tab-icon {
+        font-size: 20px;
+        transition: color 0.3s ease;
+    }
+}
+
+.ofertas-container {
+    .ofertas-header {
+        text-align: center;
+        margin-bottom: 32px;
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 0 0 12px 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+
+            .section-icon {
+                color: var(--primary-color);
+                font-size: 2.2rem;
+            }
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    }
+
+    .ofertas-placeholder {
+        .placeholder-card {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+
+            .placeholder-content {
+                padding: 32px 24px;
+
+                .placeholder-icon {
+                    font-size: 4rem;
+                    color: var(--primary-color);
+                    margin-bottom: 16px;
+                    opacity: 0.7;
+                }
+
+                h3 {
+                    color: var(--text-primary);
+                    font-size: 1.5rem;
+                    font-weight: 600;
+                    margin: 0 0 16px 0;
+                }
+
+                p {
+                    color: var(--text-secondary);
+                    margin: 0 0 16px 0;
+                    line-height: 1.6;
+
+                    &:last-of-type {
+                        margin-bottom: 20px;
+                    }
+                }
+
+                ul {
+                    text-align: left;
+                    max-width: 400px;
+                    margin: 0 auto;
+                    color: var(--text-secondary);
+
+                    li {
+                        margin-bottom: 8px;
+                        line-height: 1.5;
+                    }
+                }
+            }
+        }
+    }
+}
+
 @media (max-width: 768px) {
     .container-modern {
         padding: 0 0.5rem;
@@ -443,5 +576,48 @@
 
     .team-container {
         justify-content: center;
+    }
+
+    .profile-tabs {
+        ::ng-deep .mat-mdc-tab-body-content {
+            padding: 16px;
+        }
+
+        .tab-label {}
+    }
+
+    .ofertas-container {
+        .ofertas-header {
+            .section-title {
+                font-size: 1.5rem;
+
+                .section-icon {
+                    font-size: 1.7rem;
+                }
+            }
+
+            .section-subtitle {
+                font-size: 1rem;
+                padding: 0 16px;
+            }
+        }
+
+        .ofertas-placeholder {
+            .placeholder-card {
+                margin: 0;
+
+                .placeholder-content {
+                    padding: 24px 16px;
+
+                    .placeholder-icon {
+                        font-size: 3rem;
+                    }
+
+                    h3 {
+                        font-size: 1.3rem;
+                    }
+                }
+            }
+        }
     }
 }
