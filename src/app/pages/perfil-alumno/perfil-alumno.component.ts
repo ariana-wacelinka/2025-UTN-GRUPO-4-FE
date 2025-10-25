@@ -12,7 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { PerfilAlumnoService, PerfilAlumnoDTO, ActualizarPerfilDTO, IdiomaDTO } from '../../services/perfil-alumno.service';
+import { PerfilAlumnoService, PerfilAlumnoDTO, ActualizarPerfilDTO, IdiomaDTO, MateriaDTO, MateriasState } from '../../services/perfil-alumno.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -44,6 +44,14 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   selectedImageFile: File | null = null;
   selectedCVFile: File | null = null;
   imagePreview: string | null = null;
+  materiasAlumno: MateriaDTO[] = [];
+  promedioMaterias = 0;
+  totalMaterias = 0;
+  isMateriasLoading = false;
+  isMateriasUploading = false;
+  materiasError: string | null = null;
+  selectedMateriasFileName: string | null = null;
+  private readonly MAX_MATERIAS_FILE_SIZE = 5 * 1024 * 1024;
 
   nivelesIdioma = ['Básico', 'Intermedio', 'Avanzado', 'Nativo'];
   habilidadesDisponibles = [
@@ -88,7 +96,9 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.suscribirseAMaterias();
     this.cargarPerfil();
+    this.obtenerMateriasDesdeBackend();
   }
 
   ngOnDestroy() {
@@ -124,6 +134,34 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
           });
       }
     });
+  }
+
+  private suscribirseAMaterias() {
+    this.perfilService.obtenerMateriasState()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((state: MateriasState) => {
+        this.materiasAlumno = state.materias;
+        this.promedioMaterias = state.promedioGeneral;
+        this.totalMaterias = state.totalMaterias;
+      });
+  }
+
+  private obtenerMateriasDesdeBackend() {
+    this.isMateriasLoading = true;
+
+    this.perfilService.cargarMateriasDesdeBackend()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isMateriasLoading = false;
+          this.materiasError = null;
+        },
+        error: (error) => {
+          console.error('Error al cargar materias:', error);
+          this.isMateriasLoading = false;
+          this.materiasError = 'No pudimos cargar tus materias. Intenta nuevamente más tarde.';
+        }
+      });
   }
 
   /**
@@ -473,5 +511,74 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         duration: 3000
       });
     }
+  }
+
+  onMateriasFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length ? input.files[0] : null;
+
+    if (!file) {
+      return;
+    }
+
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    if (extension !== 'xls') {
+      this.selectedMateriasFileName = null;
+      this.snackBar.open('El archivo debe estar en formato .xls (Alumnos Web).', 'Cerrar', {
+        duration: 4000
+      });
+      input.value = '';
+      return;
+    }
+
+    if (file.size > this.MAX_MATERIAS_FILE_SIZE) {
+      this.selectedMateriasFileName = null;
+      this.snackBar.open('El archivo supera el tamaño máximo permitido (5 MB).', 'Cerrar', {
+        duration: 4000
+      });
+      input.value = '';
+      return;
+    }
+
+    this.selectedMateriasFileName = file.name;
+    this.materiasError = null;
+    this.subirMateriasExcel(file);
+    input.value = '';
+  }
+
+  private subirMateriasExcel(archivo: File) {
+    if (this.isMateriasUploading) {
+      return;
+    }
+
+    this.isMateriasUploading = true;
+
+    this.perfilService.subirMateriasExcel(archivo)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isMateriasUploading = false;
+          this.snackBar.open('Materias actualizadas correctamente.', 'Cerrar', {
+            duration: 3000
+          });
+          this.selectedMateriasFileName = null;
+          this.materiasError = null;
+        },
+        error: (error) => {
+          console.error('Error al subir materias:', error);
+          this.snackBar.open('No pudimos procesar el archivo. Intenta nuevamente.', 'Cerrar', {
+            duration: 4000
+          });
+          this.isMateriasUploading = false;
+          this.selectedMateriasFileName = null;
+        },
+        complete: () => {
+          this.isMateriasUploading = false;
+        }
+      });
+  }
+
+  trackByMateria(index: number, materia: MateriaDTO) {
+    return materia.codigo || materia.nombre;
   }
 }
