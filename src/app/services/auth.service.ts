@@ -5,7 +5,7 @@ import { delay, map, tap, catchError } from 'rxjs/operators';
 import { API_URL } from '../app.config';
 
 export interface LoginCredentials {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -61,32 +61,12 @@ export class AuthService {
   ) {}
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {
+    console.log('=== LOGIN CREDENTIALS ENVIADAS ===');
     return this.http.post<any>(`${this.apiUrl}/auth/login`, credentials).pipe(
       map((response) => {
         console.log('=== LOGIN RESPONSE COMPLETO ===');
         console.log(JSON.stringify(response, null, 2));
 
-        // Decodificar JWT tokens
-        if (response.access_token) {
-          console.log('=== ACCESS TOKEN PAYLOAD ===');
-          const accessTokenPayload = this.decodeJWT(response.access_token);
-          console.log(JSON.stringify(accessTokenPayload, null, 2));
-        }
-
-        if (response.id_token) {
-          console.log('=== ID TOKEN PAYLOAD ===');
-          const idTokenPayload = this.decodeJWT(response.id_token);
-          console.log(JSON.stringify(idTokenPayload, null, 2));
-
-          // Extraer sub del ID token y guardarlo en idKeycloakUser
-          if (idTokenPayload && idTokenPayload.sub) {
-            this.idKeycloakUser = idTokenPayload.sub;
-          }
-        }
-
-        // Guardar solo el id_token en cookie
-        this.saveIdTokenToCookie(response.id_token);
-        this.loggedInSubject.next(true);
 
         return {
           success: true,
@@ -156,7 +136,7 @@ export class AuthService {
   private saveToTxt(credentials: LoginCredentials): void {
     const timestamp = new Date().toISOString();
     const loginData = {
-      email: credentials.email,
+      email: credentials.username,
       password: credentials.password,
       timestamp
     };

@@ -25,7 +25,7 @@ describe('AuthService', () => {
   describe('Login', () => {
     it('should login successfully with valid credentials', (done) => {
       const credentials: LoginCredentials = {
-        email: 'test@example.com',
+        username: 'test@example.com',
         password: 'password123'
       };
 
@@ -33,21 +33,21 @@ describe('AuthService', () => {
         expect(response.success).toBe(true);
         expect(response.message).toBe('Login exitoso');
         expect(response.user).toBeDefined();
-        expect(response.user?.email).toBe(credentials.email);
+        expect(response.user?.email).toBe(credentials.username);
         done();
       });
     });
 
     it('should save login to txt (localStorage)', (done) => {
       const credentials: LoginCredentials = {
-        email: 'test@example.com',
+        username: 'test@example.com',
         password: 'password123'
       };
 
       service.login(credentials).subscribe(() => {
         const history = service.getLoginHistory();
         expect(history.length).toBe(1);
-        expect(history[0].email).toBe(credentials.email);
+        expect(history[0].email).toBe(credentials.username);
         expect(history[0].password).toBe(credentials.password);
         expect(history[0].timestamp).toBeDefined();
         done();
@@ -56,21 +56,21 @@ describe('AuthService', () => {
 
     it('should save user to cookie', (done) => {
       const credentials: LoginCredentials = {
-        email: 'test@example.com',
+        username: 'test@example.com',
         password: 'password123'
       };
 
       service.login(credentials).subscribe(() => {
         const user = service.getCurrentUserFromCookie();
         expect(user).toBeDefined();
-        expect(user.email).toBe(credentials.email);
+        expect(user.email).toBe(credentials.username);
         done();
       });
     });
 
     it('should detect empresa type from email', (done) => {
       const credentials: LoginCredentials = {
-        email: 'empresa@test.com',
+        username: 'empresa@test.com',
         password: 'password123'
       };
 
@@ -83,7 +83,7 @@ describe('AuthService', () => {
 
     it('should detect alumno type from email', (done) => {
       const credentials: LoginCredentials = {
-        email: 'alumno@test.com',
+        username: 'alumno@test.com',
         password: 'password123'
       };
 
@@ -96,7 +96,7 @@ describe('AuthService', () => {
 
     it('should update loggedIn$ observable on login', (done) => {
       const credentials: LoginCredentials = {
-        email: 'test@example.com',
+        username: 'test@example.com',
         password: 'password123'
       };
 
@@ -173,7 +173,7 @@ describe('AuthService', () => {
   describe('Logout', () => {
     it('should clear cookie on logout', (done) => {
       const credentials: LoginCredentials = {
-        email: 'test@example.com',
+        username: 'test@example.com',
         password: 'password123'
       };
 
@@ -187,7 +187,7 @@ describe('AuthService', () => {
 
     it('should update loggedIn$ observable on logout', (done) => {
       const credentials: LoginCredentials = {
-        email: 'test@example.com',
+        username: 'test@example.com',
         password: 'password123'
       };
 
@@ -210,7 +210,7 @@ describe('AuthService', () => {
   describe('Session Management', () => {
     it('should return true when user is logged in', (done) => {
       const credentials: LoginCredentials = {
-        email: 'test@example.com',
+        username: 'test@example.com',
         password: 'password123'
       };
 
@@ -226,14 +226,14 @@ describe('AuthService', () => {
 
     it('should retrieve current user from cookie', (done) => {
       const credentials: LoginCredentials = {
-        email: 'test@example.com',
+        username: 'test@example.com',
         password: 'password123'
       };
 
       service.login(credentials).subscribe(() => {
         const user = service.getCurrentUserFromCookie();
         expect(user).not.toBeNull();
-        expect(user.email).toBe(credentials.email);
+        expect(user.email).toBe(credentials.username);
         done();
       });
     });
@@ -247,12 +247,12 @@ describe('AuthService', () => {
 
     it('should accumulate multiple logins in history', (done) => {
       const credentials1: LoginCredentials = {
-        email: 'test1@example.com',
+        username: 'test1@example.com',
         password: 'password123'
       };
 
       const credentials2: LoginCredentials = {
-        email: 'test2@example.com',
+        username: 'test2@example.com',
         password: 'password456'
       };
 
@@ -260,8 +260,8 @@ describe('AuthService', () => {
         service.login(credentials2).subscribe(() => {
           const history = service.getLoginHistory();
           expect(history.length).toBe(2);
-          expect(history[0].email).toBe(credentials1.email);
-          expect(history[1].email).toBe(credentials2.email);
+          expect(history[0].email).toBe(credentials1.username);
+          expect(history[1].email).toBe(credentials2.username);
           done();
         });
       });

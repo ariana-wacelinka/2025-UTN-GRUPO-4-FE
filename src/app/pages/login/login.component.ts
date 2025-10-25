@@ -39,15 +39,15 @@ import { AuthService, LoginCredentials } from '../../services/auth.service';
                 <input
                   matInput
                   type="email"
-                  formControlName="email"
+                  formControlName="username"
                   placeholder="tu.email@ejemplo.com"
                 />
                 <mat-icon matSuffix>email</mat-icon>
-                @if (loginForm.get('email')?.hasError('required') &&
-                loginForm.get('email')?.touched) {
+                @if (loginForm.get('username')?.hasError('required') &&
+                loginForm.get('username')?.touched) {
                 <mat-error>El email es requerido</mat-error>
-                } @if (loginForm.get('email')?.hasError('email') &&
-                loginForm.get('email')?.touched) {
+                } @if (loginForm.get('username')?.hasError('email') &&
+                loginForm.get('username')?.touched) {
                 <mat-error>Email no válido</mat-error>
                 }
               </mat-form-field>
@@ -287,7 +287,7 @@ export class LoginComponent {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
