@@ -8,15 +8,15 @@ import { API_URL } from '../app.config';
 @Injectable({
   providedIn: 'root'
 })
-export class OfertasService {
-  private ofertas: OfertaListaDTO[] = [];
+export class offersService {
+  private offers: OfertaListaDTO[] = [];
 
   constructor(
     private http: HttpClient,
     @Inject(API_URL) private apiUrl: string
   ) {}
 
-  getOfertas(params?: {
+  getoffers(params?: {
     titulo?: string;
     empresaId?: number;
     tipoContrato?: string;
@@ -27,7 +27,7 @@ export class OfertasService {
     size?: number;
   }): Observable<PagedResponseDTO<OfertaListaDTO>> {
     let httpParams = new HttpParams();
-    
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -35,16 +35,16 @@ export class OfertasService {
         }
       });
     }
-    
-    return this.http.get<PagedResponseDTO<OfertaListaDTO>>(`${this.apiUrl}/ofertas`, { params: httpParams });
+
+    return this.http.get<PagedResponseDTO<OfertaListaDTO>>(`${this.apiUrl}/offers`, { params: httpParams });
   }
 
   getOfertaById(id: number): Observable<OfertaListaDTO> {
-    return this.http.get<OfertaListaDTO>(`${this.apiUrl}/ofertas/${id}`);
+    return this.http.get<OfertaListaDTO>(`${this.apiUrl}/offers/${id}`);
   }
 
   aplicarAOferta(aplicacion: AplicacionDTO): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/ofertas/aplicar`, aplicacion);
+    return this.http.post<void>(`${this.apiUrl}/offers/aplicar`, aplicacion);
   }
 
 
@@ -54,7 +54,7 @@ export class OfertasService {
   }
 
   crearOferta(oferta: CrearOfertaDTO): Observable<any> {
-    return this.http.post(`${this.apiUrl}/ofertas`, oferta);
+    return this.http.post(`${this.apiUrl}/offers`, oferta);
   }
 
 
