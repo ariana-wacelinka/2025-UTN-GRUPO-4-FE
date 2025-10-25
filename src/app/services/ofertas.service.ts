@@ -17,14 +17,14 @@ export class offersService {
   ) {}
 
   getoffers(params?: {
-    titulo?: string;
-    empresaId?: number;
+    title?: string;
+    description?: string;
+    requirements?: number;
     tipoContrato?: string;
-    locacion?: string;
-    status?: string;
-    usuarioId?: number;
-    page?: number;
-    size?: number;
+    modality?: string;
+    location?: string;
+    estimatedPayment?: number;
+    bidderId?: number;
   }): Observable<PagedResponseDTO<OfertaListaDTO>> {
     let httpParams = new HttpParams();
 
@@ -94,14 +94,23 @@ export class offersService {
    * @returns Observable<boolean> true si ya aplicó, false si no
    */
   alumnoYaAplico(offerId: number, studentId: number): Observable<boolean> {
-    return this.http.get<AplicantesPagedResponse>(
-      `${this.apiUrl}/applies?offerId=${offerId}&studentId=${studentId}`
-    ).pipe(
-      map((response: AplicantesPagedResponse) => {
-        // Verificar si hay aplicaciones y si alguna coincide con el student ID
-        return response.content.some(aplicante => aplicante.student.id === studentId);
-      }),
-      tap((yaAplico) => console.log(`🔍 Usuario ${studentId} ya aplicó a oferta ${offerId}:`, yaAplico))
-    );
+    return this.http
+      .get<AplicantesPagedResponse>(
+        `${this.apiUrl}/applies?offerId=${offerId}&studentId=${studentId}`
+      )
+      .pipe(
+        map((response: AplicantesPagedResponse) => {
+          // Verificar si hay aplicaciones y si alguna coincide con el student ID
+          return response.content.some(
+            (aplicante) => aplicante.student.id === studentId
+          );
+        }),
+        tap((yaAplico) =>
+          console.log(
+            `🔍 Usuario ${studentId} ya aplicó a oferta ${offerId}:`,
+            yaAplico
+          )
+        )
+      );
   }
 }

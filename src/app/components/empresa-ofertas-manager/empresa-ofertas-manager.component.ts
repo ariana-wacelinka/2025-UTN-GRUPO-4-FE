@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, OnDestroy } from '@angular/core';
+import { Component, OnInit, signal, computed, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,6 +23,7 @@ import { OfertaLaboralDTO, ModalidadTrabajo } from '../../models/oferta-laboral.
 // Importar el componente de formulario
 import { OfertaFormDialogComponent, OfertaFormDialogData } from '../oferta-form-dialog/oferta-form-dialog.component';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-empresa-ofertas-manager',
@@ -205,6 +206,7 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirma
 })
 export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  authService = inject(AuthService);
 
   // Signals
   ofertas = signal<OfertaListaDTO[]>([]);
@@ -221,9 +223,23 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
   );
 
   totalAplicantes = computed(() => {
-    // Por ahora retornamos un número mock
-    // En el futuro se calculará basado en datos reales
-    return this.ofertas().length * 3; // Mock: promedio 3 aplicantes por oferta
+    // Sumar todas las aplicaciones de todas las ofertas
+    return this.ofertas().reduce((total, oferta) => {
+      return total + (oferta.applyList?.length || 0);
+    }, 0);
+  });
+
+  // Computed property para obtener todas las aplicaciones de forma reactiva
+  todasLasAplicaciones = computed(() => {
+    return this.ofertas().flatMap(oferta => oferta.applyList || []);
+  });
+
+  // Computed property para aplicaciones agrupadas por oferta
+  aplicacionesPorOferta = computed(() => {
+    return this.ofertas().map(oferta => ({
+      oferta: oferta,
+      aplicaciones: oferta.applyList || []
+    })).filter(item => item.aplicaciones.length > 0);
   });
 
   constructor(
@@ -249,7 +265,7 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
 
     // Por ahora usamos el servicio mock existente
     // TODO: Implementar con API real cuando esté disponible
-    this.ofertasService.getoffers()
+    this.ofertasService.getoffers({bidderId: this.authService.keycloakUser?.id})
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: PagedResponseDTO<OfertaListaDTO>) => {
@@ -278,8 +294,72 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
   }
 
   getNumeroAplicantes(ofertaId: number): number {
-    // Mock: retornar número random entre 1-5
-    return Math.floor(Math.random() * 5) + 1;
+    // Buscar la oferta específica y retornar el número de aplicaciones
+    const oferta = this.ofertas().find(o => o.id === ofertaId);
+    return oferta?.applyList?.length || 0;
+  }
+
+  /**
+   * Obtiene todas las aplicaciones de todas las ofertas
+   * @returns Array con todas las aplicaciones combinadas
+   */
+  getAllAplyLists(): any[] {
+    return this.ofertas().flatMap(oferta => oferta.applyList || []);
+  }
+
+  /**
+   * Obtiene todas las aplicaciones agrupadas por oferta
+   * @returns Array de objetos con información de la oferta y sus aplicaciones
+   */
+  getAplyListsByOffer(): Array<{oferta: OfertaListaDTO, aplicaciones: any[]}> {
+    return this.ofertas().map(oferta => ({
+      oferta: oferta,
+      aplicaciones: oferta.applyList || []
+    })).filter(item => item.aplicaciones.length > 0);
+  }
+
+  /**
+   * Carga aplicaciones detalladas para todas las ofertas desde el servidor
+   * Este método puede ser útil si necesitas información más detallada de los aplicantes
+   */
+  async cargarTodasLasAplicacionesDetalladas(): Promise<any[]> {
+    const todasLasAplicaciones: any[] = [];
+
+    for (const oferta of this.ofertas()) {
+      try {
+        const aplicacionesDetalladas = await this.ofertasService
+          .getAplicantesPorOferta(oferta.id)
+          .toPromise();
+
+        if (aplicacionesDetalladas?.content) {
+          todasLasAplicaciones.push(...aplicacionesDetalladas.content.map(app => ({
+            ...app,
+            ofertaId: oferta.id,
+            ofertaTitulo: oferta.title
+          })));
+        }
+      } catch (error) {
+        console.error(`Error al cargar aplicaciones para oferta ${oferta.id}:`, error);
+      }
+    }
+
+    return todasLasAplicaciones;
+  }
+
+  /**
+   * Método de utilidad para imprimir todas las aplicaciones en consola
+   * Útil para debugging o exportación
+   */
+  mostrarTodasLasAplicaciones(): void {
+    const aplicaciones = this.getAllAplyLists();
+    console.log('📋 Todas las aplicaciones:', aplicaciones);
+    console.log('📊 Total de aplicaciones:', aplicaciones.length);
+
+    const aplicacionesPorOferta = this.getAplyListsByOffer();
+    console.log('📁 Aplicaciones agrupadas por oferta:', aplicacionesPorOferta);
+
+    // También mostrar el computed property
+    console.log('🔄 Aplicaciones reactivas:', this.todasLasAplicaciones());
   }
 
   // Métodos de acción
