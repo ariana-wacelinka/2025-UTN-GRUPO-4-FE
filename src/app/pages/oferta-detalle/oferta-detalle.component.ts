@@ -10,6 +10,7 @@ import { offersService } from '../../services/ofertas.service';
 import { KeycloakUser } from '../../models/keycloak-user.model';
 import { AuthService } from '../../services/auth.service';
 import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-dialog.component';
+import { tap } from 'rxjs';
 
 @Component({
   selector: 'app-oferta-detalle',
@@ -90,7 +91,7 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
           <mat-card class="modern-card action-card">
             <mat-card-content>
               <div class="action-buttons">
-                @if (isEmpresa()) {
+                @if (isMyOffer()) {
                 <button
                   mat-raised-button
                   class="view-applicants-button"
@@ -520,13 +521,17 @@ export class OfertaDetalleComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+
+    // Cargar la oferta
     this.ofertasService.getOfertaById(id).subscribe((oferta) => {
       this.oferta = oferta;
+      this.verificarEstadoAplicacion(); // Verificar estado después de cargar la oferta
     });
 
     // Esperar a que el usuario esté cargado y luego obtenerlo
     this.authService.waitForUserLoad().subscribe(() => {
       this.keycloakUser = this.authService.keycloakUser || undefined;
+      this.verificarEstadoAplicacion(); // Verificar estado después de cargar el usuario
     });
   }
 
@@ -555,7 +560,10 @@ export class OfertaDetalleComponent implements OnInit {
         }).subscribe({
           next: (response) => {
             console.log('✅ Aplicación enviada exitosamente:', response);
-            this.oferta!.estado = EstadoAplicacion.APLICADO;
+            // Actualizar el estado inmediatamente después de aplicar
+            if (this.oferta) {
+              this.oferta.estado = EstadoAplicacion.APLICADO;
+            }
           },
           error: (error) => {
             console.error('❌ Error al aplicar a la oferta:', error);
@@ -571,7 +579,35 @@ export class OfertaDetalleComponent implements OnInit {
     }
   }
 
-  isEmpresa(): boolean {
-    return this.authService.isEmpresa();
+  isMyOffer(): boolean {
+    return this.oferta?.bidder.id === this.keycloakUser?.id;
+  }
+
+  /**
+   * Verifica si el usuario ya aplicó a esta oferta y actualiza el estado
+   */
+  private verificarEstadoAplicacion(): void {
+    // Solo verificar si tenemos tanto la oferta como el usuario
+    if (!this.oferta || !this.keycloakUser) {
+      return;
+    }
+
+    // No verificar si es nuestra propia oferta
+    if (this.isMyOffer()) {
+      return;
+    }
+
+    this.ofertasService.alumnoYaAplico(this.oferta.id, this.keycloakUser.id).subscribe({
+      next: (yaAplico) => {
+        if (yaAplico && this.oferta) {
+          this.oferta.estado = EstadoAplicacion.APLICADO;
+        } else if (this.oferta) {
+          this.oferta.estado = EstadoAplicacion.NO_APLICADO;
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error al verificar estado de aplicación:', error);
+      }
+    });
   }
 }

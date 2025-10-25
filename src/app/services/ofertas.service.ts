@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of, delay, tap } from 'rxjs';
+import { Observable, of, delay, tap, map } from 'rxjs';
 import { OfertaListaDTO, EstadoAplicacion, AplicacionDTO, CrearOfertaDTO, PagedResponseDTO } from '../models/oferta.dto';
 import { AplicanteDTO, AplicantesPagedResponse, StudentDTO } from '../models/aplicante.dto';
 import { API_URL } from '../app.config';
@@ -60,7 +60,9 @@ export class offersService {
     );
   }
 
-  getAplicantesPorOferta(ofertaId: number): Observable<AplicantesPagedResponse> {
+  getAplicantesPorOferta(
+    ofertaId: number
+  ): Observable<AplicantesPagedResponse> {
     return this.http.get<AplicantesPagedResponse>(
       `${this.apiUrl}/applies?offerId=${ofertaId}`
     );
@@ -77,8 +79,29 @@ export class offersService {
       a.href = student.cvUrl;
       a.download =
         student.cvFileName ||
-        `CV_${student.name.replace(/\s/g, '_')}_${student.surname.replace(/\s/g, '_')}.pdf`;
+        `CV_${student.name.replace(/\s/g, '_')}_${student.surname.replace(
+          /\s/g,
+          '_'
+        )}.pdf`;
       a.click();
     }
+  }
+
+  /**
+   * Verifica si un estudiante ya aplicó a una oferta específica
+   * @param offerId ID de la oferta
+   * @param studentId ID del estudiante
+   * @returns Observable<boolean> true si ya aplicó, false si no
+   */
+  alumnoYaAplico(offerId: number, studentId: number): Observable<boolean> {
+    return this.http.get<AplicantesPagedResponse>(
+      `${this.apiUrl}/applies?offerId=${offerId}&studentId=${studentId}`
+    ).pipe(
+      map((response: AplicantesPagedResponse) => {
+        // Verificar si hay aplicaciones y si alguna coincide con el student ID
+        return response.content.some(aplicante => aplicante.student.id === studentId);
+      }),
+      tap((yaAplico) => console.log(`🔍 Usuario ${studentId} ya aplicó a oferta ${offerId}:`, yaAplico))
+    );
   }
 }
