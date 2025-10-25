@@ -53,6 +53,8 @@ export class AuthService {
   private loggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
   public loggedIn$ = this.loggedInSubject.asObservable();
 
+  public idKeycloakUser: string | null = null;
+
   constructor(
     private http: HttpClient,
     @Inject(API_URL) private apiUrl: string
@@ -61,23 +63,34 @@ export class AuthService {
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http.post<any>(`${this.apiUrl}/auth/login`, credentials).pipe(
       map((response) => {
-        // Guardar para cumplir CA3 (solo Sprint 1)
-        this.saveToTxt(credentials);
+        console.log('=== LOGIN RESPONSE COMPLETO ===');
+        console.log(JSON.stringify(response, null, 2));
 
-        const user = {
-          id: response.id || response.userId,
-          email: response.email || credentials.email,
-          nombre: response.nombre || response.name || this.extractNameFromEmail(credentials.email),
-          tipo: response.tipo || response.role === 'ORGANIZATION' ? 'empresa' as const : 'alumno' as const
-        };
+        // Decodificar JWT tokens
+        if (response.access_token) {
+          console.log('=== ACCESS TOKEN PAYLOAD ===');
+          const accessTokenPayload = this.decodeJWT(response.access_token);
+          console.log(JSON.stringify(accessTokenPayload, null, 2));
+        }
 
-        this.saveUserToCookie(user);
+        if (response.id_token) {
+          console.log('=== ID TOKEN PAYLOAD ===');
+          const idTokenPayload = this.decodeJWT(response.id_token);
+          console.log(JSON.stringify(idTokenPayload, null, 2));
+
+          // Extraer sub del ID token y guardarlo en idKeycloakUser
+          if (idTokenPayload && idTokenPayload.sub) {
+            this.idKeycloakUser = idTokenPayload.sub;
+          }
+        }
+
+        // Guardar solo el id_token en cookie
+        this.saveIdTokenToCookie(response.id_token);
         this.loggedInSubject.next(true);
 
         return {
           success: true,
-          message: 'Login exitoso',
-          user
+          message: 'Login exitoso'
         };
       }),
       catchError((error) => {
@@ -158,23 +171,22 @@ export class AuthService {
     return history ? JSON.parse(history) : [];
   }
 
-  private saveUserToCookie(user: any): void {
+  private saveIdTokenToCookie(idToken: string): void {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + this.COOKIE_EXPIRY_DAYS);
 
-    const cookieValue = JSON.stringify(user);
-    const cookieString = `${this.COOKIE_NAME}=${encodeURIComponent(cookieValue)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+    const cookieString = `${this.COOKIE_NAME}=${encodeURIComponent(idToken)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
     document.cookie = cookieString;
   }
 
-  getCurrentUserFromCookie(): any | null {
+  getIdTokenFromCookie(): string | null {
     const cookies = document.cookie.split(';');
     const sessionCookie = cookies.find(c => c.trim().startsWith(`${this.COOKIE_NAME}=`));
 
     if (sessionCookie) {
       const cookieValue = sessionCookie.split('=')[1];
       try {
-        return JSON.parse(decodeURIComponent(cookieValue));
+        return decodeURIComponent(cookieValue);
       } catch (e) {
         return null;
       }
@@ -183,11 +195,12 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return this.getCurrentUserFromCookie() !== null;
+    return this.getIdTokenFromCookie() !== null;
   }
 
   logout(): void {
     document.cookie = `${this.COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    this.idKeycloakUser = null;
     this.loggedInSubject.next(false);
   }
 
@@ -198,13 +211,27 @@ export class AuthService {
     ).join(' ');
   }
 
+  private decodeJWT(token: string): any {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        throw new Error('Invalid JWT format');
+      }
+
+      const payload = parts[1];
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch (error) {
+      console.error('Error decoding JWT:', error);
+      return null;
+    }
+  }
+
   isEmpresa(): boolean {
-    const user = this.getCurrentUserFromCookie();
-    return user && user.tipo === 'empresa';
+    return false;
   }
 
   isAlumno(): boolean {
-    const user = this.getCurrentUserFromCookie();
-    return user && user.tipo === 'alumno';
+    return true;
   }
 }
