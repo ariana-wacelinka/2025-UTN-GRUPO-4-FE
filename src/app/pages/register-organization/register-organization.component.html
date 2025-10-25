@@ -2,56 +2,67 @@
   <mat-card class="register-card">
     <mat-card-header class="card-header">
       <div class="switch-register">
-        <p>¿Eres una organización? <a [routerLink]="['/register-organization']">Registro de Organización</a></p>
+        <p>¿Eres estudiante? <a [routerLink]="['/register']">Registro de Estudiante</a></p>
       </div>
-      <mat-card-title class="title">Crear Cuenta</mat-card-title>
-      <mat-card-subtitle class="subtitle">Únete a la bolsa de trabajo de la FRLP</mat-card-subtitle>
+      <mat-card-title class="title">Registro de Organización</mat-card-title>
+      <mat-card-subtitle>Únete como organización a la bolsa de trabajo</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
       <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="register-form">
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Nombre</mat-label>
-            <input matInput formControlName="firstName" placeholder="Tu nombre">
-            @if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
-              <mat-error>{{ getErrorMessage('firstName') }}</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Apellido</mat-label>
-            <input matInput formControlName="lastName" placeholder="Tu apellido">
-            @if (registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched) {
-              <mat-error>{{ getErrorMessage('lastName') }}</mat-error>
-            }
-          </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre de la organización</mat-label>
+          <input matInput formControlName="firstName" placeholder="Nombre de tu organización">
+          <mat-icon matSuffix>business</mat-icon>
+          @if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
+            <mat-error>{{ getErrorMessage('firstName') }}</mat-error>
+          }
+        </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" placeholder="tu.email@ejemplo.com">
+          <input matInput type="email" formControlName="email" placeholder="contacto@organizacion.com">
           <mat-icon matSuffix>email</mat-icon>
           @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
             <mat-error>{{ getErrorMessage('email') }}</mat-error>
           }
         </mat-form-field>
 
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
+            <input matInput type="tel" formControlName="phone" placeholder="Teléfono de contacto">
+            <mat-icon matSuffix>phone</mat-icon>
+            @if (registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched) {
+              <mat-error>{{ getErrorMessage('phone') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Ubicación</mat-label>
+            <input matInput formControlName="location" placeholder="Ciudad o región">
+            <mat-icon matSuffix>location_on</mat-icon>
+            @if (registerForm.get('location')?.invalid && registerForm.get('location')?.touched) {
+              <mat-error>{{ getErrorMessage('location') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
         <mat-form-field appearance="outline">
-          <mat-label>Teléfono</mat-label>
-          <input matInput type="tel" formControlName="phone" placeholder="Tu número de teléfono">
-          <mat-icon matSuffix>phone</mat-icon>
-          @if (registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched) {
-            <mat-error>{{ getErrorMessage('phone') }}</mat-error>
+          <mat-label>Descripción</mat-label>
+          <textarea matInput formControlName="description" placeholder="Describe tu organización" rows="3"></textarea>
+          <mat-icon matSuffix>description</mat-icon>
+          @if (registerForm.get('description')?.invalid && registerForm.get('description')?.touched) {
+            <mat-error>{{ getErrorMessage('description') }}</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Ubicación</mat-label>
-          <input matInput formControlName="location" placeholder="Tu ciudad o región">
-          <mat-icon matSuffix>location_on</mat-icon>
-          @if (registerForm.get('location')?.invalid && registerForm.get('location')?.touched) {
-            <mat-error>{{ getErrorMessage('location') }}</mat-error>
+          <mat-label>LinkedIn URL</mat-label>
+          <input matInput formControlName="linkedinUrl" placeholder="https://linkedin.com/company/tu-empresa">
+          <mat-icon matSuffix>link</mat-icon>
+          @if (registerForm.get('linkedinUrl')?.invalid && registerForm.get('linkedinUrl')?.touched) {
+            <mat-error>{{ getErrorMessage('linkedinUrl') }}</mat-error>
           }
         </mat-form-field>
 
@@ -94,7 +105,7 @@
             <mat-spinner diameter="20"></mat-spinner>
             Registrando...
           } @else {
-            Registrarse
+            Registrar Organización
           }
         </button>
       </form>

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OfertaCardComponent } from '../../components/oferta-card/oferta-card.component';
 import { OfertaListaDTO } from '../../models/oferta.dto';
-import { OfertasService } from '../../services/ofertas.service';
+import { offersService } from '../../services/ofertas.service';
 
 @Component({
   selector: 'app-ofertas-lista',
@@ -163,11 +163,11 @@ import { OfertasService } from '../../services/ofertas.service';
 export class OfertasListaComponent implements OnInit {
   ofertas: OfertaListaDTO[] = [];
 
-  constructor(private ofertasService: OfertasService) {}
+  constructor(private ofertasService: offersService) {}
 
   ngOnInit(): void {
-    this.ofertasService.getOfertas().subscribe((ofertas) => {
-      this.ofertas = ofertas;
+    this.ofertasService.getoffers().subscribe((page) => {
+      this.ofertas = page.content;
     });
   }
 }

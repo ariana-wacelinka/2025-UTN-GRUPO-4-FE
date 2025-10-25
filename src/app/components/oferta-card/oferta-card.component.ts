@@ -14,14 +14,14 @@ import { OfertaListaDTO } from '../../models/oferta.dto';
     <mat-card class="oferta-card modern-card" (click)="verDetalle()">
       <div class="card-header">
         <div class="title-section">
-          <h3 class="job-title">{{ oferta.titulo }}</h3>
+          <h3 class="job-title">{{ oferta.title }}</h3>
           <div class="location">
             <mat-icon class="location-icon">location_on</mat-icon>
-            <span>{{ oferta.locacion }}</span>
+            <span>{{ oferta.location }}</span>
           </div>
         </div>
         <div class="salary-badge">
-          {{ oferta.pagoAprox }}
+          {{ oferta.estimatedPayment }}
         </div>
       </div>
 
@@ -29,7 +29,7 @@ import { OfertaListaDTO } from '../../models/oferta.dto';
         <div class="job-details">
           <div class="detail-item">
             <mat-icon class="detail-icon">work</mat-icon>
-            <span>{{ oferta.modalidad }}</span>
+            <span>{{ oferta.modality }}</span>
           </div>
         </div>
 
@@ -37,8 +37,8 @@ import { OfertaListaDTO } from '../../models/oferta.dto';
           @for (atributo of atributosLimitados; track atributo) {
             <mat-chip class="tech-chip" selected>{{ atributo }}</mat-chip>
           }
-          @if (oferta.atributos.length > 5) {
-            <span class="more-tech">+{{ oferta.atributos.length - 5 }} más</span>
+          @if ((oferta.attributes?.length || 0) > 5) {
+            <span class="more-tech">+{{ (oferta.attributes?.length || 0) - 5 }} más</span>
           }
         </div>
       </mat-card-content>
@@ -231,7 +231,7 @@ export class OfertaCardComponent {
   constructor(private router: Router) {}
 
   get atributosLimitados(): string[] {
-    return this.oferta.atributos.slice(0, 5);
+    return this.oferta.attributes?.slice(0, 5) || [];
   }
 
   verDetalle(): void {

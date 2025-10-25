@@ -11,7 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService, RegisterCredentials, UserRole } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-register-organization',
   standalone: true,
   imports: [
     CommonModule,
@@ -24,10 +24,10 @@ import { AuthService, RegisterCredentials, UserRole } from '../../services/auth.
     MatIconModule,
     MatProgressSpinnerModule
   ],
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+  templateUrl: './register-organization.component.html',
+  styleUrls: ['./register-organization.component.scss']
 })
-export class RegisterComponent {
+export class RegisterOrganizationComponent {
   registerForm: FormGroup;
   loading = false;
   errorMessage = '';
@@ -42,10 +42,11 @@ export class RegisterComponent {
   ) {
     this.registerForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
-      lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required]],
       location: ['', [Validators.required]],
+      description: ['', [Validators.required, Validators.minLength(10)]],
+      linkedinUrl: ['', [Validators.required, Validators.pattern(/[a-z]{2,3}\.linkedin\.com\/.*$/)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
@@ -63,15 +64,16 @@ export class RegisterComponent {
 
     const formValue = this.registerForm.value;
     const credentials: RegisterCredentials = {
+      username: formValue.email,
       email: formValue.email,
       password: formValue.password,
       firstName: formValue.firstName,
-      lastName: formValue.lastName,
-      role: UserRole.STUDENT,
+      lastName: null,
+      role: UserRole.ORGANIZATION,
       phone: formValue.phone,
       location: formValue.location,
-      description: null,
-      username: formValue.email
+      description: formValue.description,
+      linkedinUrl: formValue.linkedinUrl
     };
 
     this.authService.register(credentials).subscribe({
@@ -83,7 +85,7 @@ export class RegisterComponent {
             this.router.navigate(['/login']);
           }, 2000);
         } else {
-          this.errorMessage = response.message || 'Error al registrar usuario';
+          this.errorMessage = response.message || 'Error al registrar organización';
         }
       },
       error: (error) => {
@@ -125,6 +127,9 @@ export class RegisterComponent {
       const minLength = field.errors?.['minlength'].requiredLength;
       return `Mínimo ${minLength} caracteres`;
     }
+    if (field?.hasError('pattern')) {
+      return 'URL de LinkedIn no válida';
+    }
     if (field?.hasError('passwordMismatch')) {
       return 'Las contraseñas no coinciden';
     }
@@ -133,11 +138,12 @@ export class RegisterComponent {
 
   private getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
-      firstName: 'Nombre',
-      lastName: 'Apellido',
+      firstName: 'Nombre de la organización',
       email: 'Email',
       phone: 'Teléfono',
       location: 'Ubicación',
+      description: 'Descripción',
+      linkedinUrl: 'LinkedIn URL',
       password: 'Contraseña',
       confirmPassword: 'Confirmar contraseña'
     };

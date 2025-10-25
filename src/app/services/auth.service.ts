@@ -1,19 +1,31 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import { delay, map, tap } from 'rxjs/operators';
+import { delay, map, tap, catchError, switchMap, filter, take } from 'rxjs/operators';
+import { API_URL } from '../app.config';
+import { KeycloakUser } from '../models/keycloak-user.model';
 
 export interface LoginCredentials {
-  email: string;
+  username: string;
   password: string;
+}
+
+export enum UserRole {
+  STUDENT = 'Student',
+  ORGANIZATION = 'Organization'
 }
 
 export interface RegisterCredentials {
   email: string;
   password: string;
-  confirmPassword: string;
-  nombre: string;
-  apellido: string;
-  carrera: string;
+  firstName: string;
+  lastName: string|null;
+  role: UserRole;
+  phone: string;
+  location: string;
+  description: string | null;
+  username: string;
+  linkedinUrl?: string;
 }
 
 export interface LoginResponse {
@@ -38,71 +50,116 @@ export interface RegisterResponse {
 export class AuthService {
   private readonly COOKIE_NAME = 'userSession';
   private readonly COOKIE_EXPIRY_DAYS = 7;
-  
+
   private loggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
   public loggedIn$ = this.loggedInSubject.asObservable();
 
-  constructor() {}
+  public idKeycloakUser: string | null = null;
+  public keycloakUser: KeycloakUser | null = null;
+  private userLoadedSubject = new BehaviorSubject<boolean>(false);
+  public userLoaded$ = this.userLoadedSubject.asObservable();
 
-  // TODO Sprint 2: Reemplazar con llamada HTTP al backend /api/auth/login
+  constructor(
+    private http: HttpClient,
+    @Inject(API_URL) private apiUrl: string
+  ) {
+    setTimeout(() => this.initializeUser(), 0);
+  }
+
+  private initializeUser(): void {
+    const idToken = this.getIdTokenFromCookie();
+    if (idToken) {
+      this.extractSubFromIdToken(idToken);
+      this.loggedInSubject.next(true);
+      this.fetchKeycloakUser().subscribe();
+    } else {
+      this.userLoadedSubject.next(true);
+    }
+  }
+
+  extractSubFromIdToken(idToken: string): void {
+    const decoded = this.decodeJWT(idToken);
+    if (decoded && decoded.sub) {
+      this.idKeycloakUser = decoded.sub;
+    }
+  }
+
   login(credentials: LoginCredentials): Observable<LoginResponse> {
-    return of(credentials).pipe(
-      delay(500),
-      map((creds) => {
-        this.saveToTxt(creds);
+    console.log('=== LOGIN CREDENTIALS ENVIADAS ===');
+    return this.http.post<any>(`${this.apiUrl}/auth/login`, credentials).pipe(
+      switchMap((response) => {
+        console.log('=== LOGIN RESPONSE COMPLETO ===');
+        console.log(JSON.stringify(response, null, 2));
 
-        const user = {
-          id: Math.floor(Math.random() * 1000),
-          email: creds.email,
-          nombre: this.extractNameFromEmail(creds.email),
-          tipo: creds.email.includes('empresa') ? 'empresa' as const : 'alumno' as const
-        };
+        if (response.id_token) {
+          this.extractSubFromIdToken(response.id_token);
+          this.saveIdTokenToCookie(response.id_token);
+          this.loggedInSubject.next(true);
 
-        this.saveUserToCookie(user);
-        this.loggedInSubject.next(true);
+          return this.fetchKeycloakUser().pipe(
+            map(() => ({
+              success: true,
+              message: 'Login exitoso'
+            }))
+          );
+        }
 
-        return {
+        return of({
           success: true,
-          message: 'Login exitoso',
-          user
-        };
+          message: 'Login exitoso'
+        });
+      }),
+      catchError((error) => {
+        console.error('Login error:', error);
+        return of({
+          success: false,
+          message: error.error?.message || 'Error al iniciar sesión'
+        });
       })
     );
   }
 
-  // TODO Sprint 2: Reemplazar con llamada HTTP al backend /api/auth/register
+  private fetchKeycloakUser(): Observable<KeycloakUser> {
+    if (!this.idKeycloakUser) {
+      this.userLoadedSubject.next(true);
+      return of();
+    }
+
+    console.log('=== FETCHING KEYCLOAK USER ===');
+    return this.http
+      .get<KeycloakUser>(`${this.apiUrl}/users/keycloak/${this.idKeycloakUser}`)
+      .pipe(
+        tap((user) => {
+          console.log('=== KEYCLOAK USER FETCHED ===');
+          this.keycloakUser = user;
+          this.userLoadedSubject.next(true);
+          console.log('=== KEYCLOAK USER ===');
+          console.log(JSON.stringify(user, null, 2));
+        }),
+        catchError((error) => {
+          console.error('Error fetching keycloak user:', error);
+          this.userLoadedSubject.next(true);
+          return of();
+        })
+      );
+  }
+
   register(credentials: RegisterCredentials): Observable<RegisterResponse> {
-    return of(credentials).pipe(
-      delay(500),
-      map((creds) => {
-        // Verificar si el email ya existe
-        const existingUsers = this.getRegisteredUsers();
-        if (existingUsers.find(u => u.email === creds.email)) {
-          return {
-            success: false,
-            message: 'El email ya está registrado'
-          };
-        }
+    const registerData = credentials
 
-        // Guardar nuevo usuario en localStorage
-        const newUser = {
-          id: Math.floor(Math.random() * 1000),
-          email: creds.email,
-          nombre: creds.nombre,
-          apellido: creds.apellido,
-          carrera: creds.carrera,
-          passwordHash: btoa(creds.password),
-          tipo: 'alumno' as const,
-          fechaRegistro: new Date().toISOString()
-        };
-
-        existingUsers.push(newUser);
-        localStorage.setItem('registered_users.txt', JSON.stringify(existingUsers, null, 2));
-
+    return this.http.post<any>(`${this.apiUrl}/auth/register`, registerData).pipe(
+      map((response) => {
         return {
           success: true,
-          message: 'Registro exitoso. Ya puedes iniciar sesión.'
+          message: 'Registro exitoso.'
         };
+      }),
+      catchError((error) => {
+        console.error('Register error:', error);
+        return of({
+          success: false,
+          message: error.error?.message || 'Error en el registro'
+        });
       })
     );
   }
@@ -117,7 +174,7 @@ export class AuthService {
   private saveToTxt(credentials: LoginCredentials): void {
     const timestamp = new Date().toISOString();
     const loginData = {
-      email: credentials.email,
+      email: credentials.username,
       password: credentials.password,
       timestamp
     };
@@ -132,23 +189,22 @@ export class AuthService {
     return history ? JSON.parse(history) : [];
   }
 
-  private saveUserToCookie(user: any): void {
+  private saveIdTokenToCookie(idToken: string): void {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + this.COOKIE_EXPIRY_DAYS);
-    
-    const cookieValue = JSON.stringify(user);
-    const cookieString = `${this.COOKIE_NAME}=${encodeURIComponent(cookieValue)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+
+    const cookieString = `${this.COOKIE_NAME}=${encodeURIComponent(idToken)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
     document.cookie = cookieString;
   }
 
-  getCurrentUserFromCookie(): any | null {
+  getIdTokenFromCookie(): string | null {
     const cookies = document.cookie.split(';');
     const sessionCookie = cookies.find(c => c.trim().startsWith(`${this.COOKIE_NAME}=`));
-    
+
     if (sessionCookie) {
       const cookieValue = sessionCookie.split('=')[1];
       try {
-        return JSON.parse(decodeURIComponent(cookieValue));
+        return decodeURIComponent(cookieValue);
       } catch (e) {
         return null;
       }
@@ -157,28 +213,51 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return this.getCurrentUserFromCookie() !== null;
+    return this.getIdTokenFromCookie() !== null;
   }
 
   logout(): void {
     document.cookie = `${this.COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    this.idKeycloakUser = null;
+    this.keycloakUser = null;
     this.loggedInSubject.next(false);
   }
 
   private extractNameFromEmail(email: string): string {
     const name = email.split('@')[0];
-    return name.split('.').map(part => 
+    return name.split('.').map(part =>
       part.charAt(0).toUpperCase() + part.slice(1)
     ).join(' ');
   }
 
+  private decodeJWT(token: string): any {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        throw new Error('Invalid JWT format');
+      }
+
+      const payload = parts[1];
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch (error) {
+      console.error('Error decoding JWT:', error);
+      return null;
+    }
+  }
+
   isEmpresa(): boolean {
-    const user = this.getCurrentUserFromCookie();
-    return user && user.tipo === 'empresa';
+    return this.keycloakUser?.role === UserRole.ORGANIZATION;
   }
 
   isAlumno(): boolean {
-    const user = this.getCurrentUserFromCookie();
-    return user && user.tipo === 'alumno';
+    return this.keycloakUser?.role === UserRole.STUDENT;
+  }
+
+  waitForUserLoad(): Observable<boolean> {
+    return this.userLoaded$.pipe(
+      filter(loaded => loaded),
+      take(1)
+    );
   }
 }

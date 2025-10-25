@@ -4,7 +4,7 @@
     <button class="btn-volver" (click)="volverAOfertas()">
       ← Volver a ofertas
     </button>
-    <h1 *ngIf="aplicantesData">Aplicantes para "{{ aplicantesData.ofertaTitulo }}"</h1>
+    <h1 *ngIf="aplicantesData">Aplicantes para la Oferta #{{ ofertaId }}</h1>
   </div>
 
   <!-- Loading State -->
@@ -27,56 +27,84 @@
     <!-- Stats -->
     <div class="stats-card">
       <div class="stat">
-        <span class="stat-number">{{ aplicantesData.totalAplicantes }}</span>
+        <span class="stat-number">{{ aplicantesData.totalElements }}</span>
         <span class="stat-label">Aplicantes totales</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">{{ aplicantesData.numberOfElements }}</span>
+        <span class="stat-label">En esta página</span>
       </div>
     </div>
 
     <!-- CA1: Listado de aplicantes -->
-    <div class="aplicantes-lista" *ngIf="aplicantesData.aplicantes.length > 0">
-      <div class="aplicante-card" *ngFor="let aplicante of aplicantesData.aplicantes">
+    <div class="aplicantes-lista" *ngIf="aplicantes.length > 0">
+      <div class="aplicante-card" *ngFor="let aplicante of aplicantes">
         <div class="aplicante-header">
           <!-- CA3: Nombre como link al perfil -->
           <h3 class="aplicante-nombre" (click)="verPerfil(aplicante)">
-            {{ aplicante.nombre }}
+            {{ aplicante.student.name }} {{ aplicante.student.surname }}
           </h3>
-          <span class="fecha-aplicacion">
-            Aplicó el {{ formatearFecha(aplicante.fechaAplicacion) }}
+          <span class="estudiante-info">
+            {{ aplicante.student.role }}
           </span>
         </div>
 
         <div class="aplicante-info">
           <div class="info-item">
             <span class="info-label">📧 Email:</span>
-            <span class="info-value">{{ aplicante.email }}</span>
+            <span class="info-value">{{ aplicante.student.email }}</span>
           </div>
-          <div class="info-item" *ngIf="aplicante.carrera">
+          <div class="info-item" *ngIf="aplicante.student.phone">
+            <span class="info-label">📞 Teléfono:</span>
+            <span class="info-value">{{ aplicante.student.phone }}</span>
+          </div>
+          <div class="info-item" *ngIf="aplicante.student.location">
+            <span class="info-label">� Ubicación:</span>
+            <span class="info-value">{{ aplicante.student.location }}</span>
+          </div>
+          <div class="info-item" *ngIf="aplicante.student.career">
             <span class="info-label">🎓 Carrera:</span>
-            <span class="info-value">{{ aplicante.carrera }}</span>
+            <span class="info-value">{{ aplicante.student.career }}</span>
           </div>
-          <div class="info-item" *ngIf="aplicante.anioIngreso">
-            <span class="info-label">📅 Año de Ingreso:</span>
-            <span class="info-value">{{ aplicante.anioIngreso }}</span>
+          <div class="info-item" *ngIf="aplicante.student.currentYearLevel">
+            <span class="info-label">� Año Académico:</span>
+            <span class="info-value">{{ aplicante.student.currentYearLevel }}°</span>
+          </div>
+          <div class="info-item" *ngIf="aplicante.student.institution">
+            <span class="info-label">🏫 Institución:</span>
+            <span class="info-value">{{ aplicante.student.institution }}</span>
           </div>
         </div>
 
-        <div class="aplicante-carta" *ngIf="aplicante.cartaPresentacion">
+        <div class="aplicante-carta" *ngIf="aplicante.customCoverLetter">
           <h4>Carta de Presentación:</h4>
-          <p>{{ aplicante.cartaPresentacion }}</p>
+          <p>{{ aplicante.customCoverLetter }}</p>
+        </div>
+
+        <div class="links-section" *ngIf="aplicante.student.linkedinUrl || aplicante.student.githubUrl">
+          <div class="info-item" *ngIf="aplicante.student.linkedinUrl">
+            <span class="info-label">💼 LinkedIn:</span>
+            <a [href]="aplicante.student.linkedinUrl" target="_blank" class="link">Ver perfil</a>
+          </div>
+          <div class="info-item" *ngIf="aplicante.student.githubUrl">
+            <span class="info-label">💻 GitHub:</span>
+            <a [href]="aplicante.student.githubUrl" target="_blank" class="link">Ver repositorios</a>
+          </div>
         </div>
 
         <div class="aplicante-acciones">
           <!-- CA2: Botón para descargar CV -->
-          <button 
-            class="btn-descargar-cv" 
+          <button
+            class="btn-descargar-cv"
             (click)="descargarCV(aplicante, $event)"
-            title="Descargar CV de {{ aplicante.nombre }}"
+            [disabled]="!aplicante.student.cvUrl"
+            title="Descargar CV de {{ aplicante.student.name }} {{ aplicante.student.surname }}"
           >
-            📄 Descargar CV
+            📄 {{ aplicante.student.cvUrl ? 'Descargar CV' : 'CV no disponible' }}
           </button>
-          
-          <button 
-            class="btn-ver-perfil" 
+
+          <button
+            class="btn-ver-perfil"
             (click)="verPerfil(aplicante)"
             title="Ver perfil completo"
           >
@@ -86,8 +114,16 @@
       </div>
     </div>
 
+    <!-- Pagination -->
+    <div class="pagination-info" *ngIf="aplicantes.length > 0">
+      <p>
+        Página {{ aplicantesData.number + 1 }} de {{ aplicantesData.totalPages }}
+        ({{ aplicantesData.totalElements }} aplicantes en total)
+      </p>
+    </div>
+
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="aplicantesData.aplicantes.length === 0">
+    <div class="empty-state" *ngIf="aplicantes.length === 0">
       <div class="empty-icon">📭</div>
       <h2>No hay aplicantes todavía</h2>
       <p>Aún no se han recibido aplicaciones para esta oferta.</p>

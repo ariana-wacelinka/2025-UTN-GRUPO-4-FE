@@ -6,10 +6,11 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { OfertaListaDTO, EstadoAplicacion } from '../../models/oferta.dto';
-import { OfertasService } from '../../services/ofertas.service';
-import { UsuarioService, Usuario } from '../../services/usuario.service';
+import { offersService } from '../../services/ofertas.service';
+import { KeycloakUser } from '../../models/keycloak-user.model';
 import { AuthService } from '../../services/auth.service';
 import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-dialog.component';
+import { tap } from 'rxjs';
 
 @Component({
   selector: 'app-oferta-detalle',
@@ -24,19 +25,19 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
             <mat-icon>arrow_back</mat-icon>
           </button>
           <div class="header-info">
-            <h1 class="job-title">{{ oferta.titulo }}</h1>
-            <div class="company-name">{{ oferta.empresa.nombre }}</div>
+            <h1 class="job-title">{{ oferta.title }}</h1>
+            <div class="company-name">{{ oferta.bidder.name }} {{ oferta.bidder.surname }}</div>
             <div class="job-meta">
               <div class="meta-item">
                 <mat-icon>location_on</mat-icon>
-                <span>{{ oferta.locacion }}</span>
+                <span>{{ oferta.location }}</span>
               </div>
               <div class="meta-item">
                 <mat-icon>work</mat-icon>
-                <span>{{ oferta.modalidad }}</span>
+                <span>{{ oferta.modality }}</span>
               </div>
               <div class="salary-highlight">
-                {{ oferta.pagoAprox }}
+                {{ oferta.estimatedPayment }}
               </div>
             </div>
           </div>
@@ -53,7 +54,7 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <p class="description-text">{{ oferta.descripcion }}</p>
+              <p class="description-text">{{ oferta.description }}</p>
             </mat-card-content>
           </mat-card>
 
@@ -65,7 +66,7 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <p class="requirements-text">{{ oferta.requisitos }}</p>
+              <p class="requirements-text">{{ oferta.requirements }}</p>
             </mat-card-content>
           </mat-card>
 
@@ -78,7 +79,7 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
             </mat-card-header>
             <mat-card-content>
               <div class="tech-grid">
-                @for (atributo of oferta.atributos; track atributo) {
+                @for (atributo of oferta.attributes || []; track atributo) {
                 <mat-chip class="tech-chip" selected>{{ atributo }}</mat-chip>
                 }
               </div>
@@ -90,7 +91,7 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
           <mat-card class="modern-card action-card">
             <mat-card-content>
               <div class="action-buttons">
-                @if (isEmpresa()) {
+                @if (isMyOffer()) {
                 <button
                   mat-raised-button
                   class="view-applicants-button"
@@ -101,7 +102,22 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
                   Ver Aplicantes
                 </button>
                 } @else {
-                  @if (oferta.estado === 'APLICADO') {
+                  @if (loadingApplicationStatus) {
+                  <!-- Botón de carga mientras verifica el estado o aplica -->
+                  <button mat-raised-button class="loading-button" disabled>
+                    @if (isApplying) {
+                      <ng-container>
+                        <mat-icon>send</mat-icon>
+                        Enviando aplicación...
+                      </ng-container>
+                    } @else {
+                      <ng-container>
+                        <mat-icon>hourglass_empty</mat-icon>
+                        Verificando...
+                      </ng-container>
+                    }
+                  </button>
+                  } @else if (oferta.estado === 'APLICADO') {
                   <button mat-raised-button class="applied-button" disabled>
                     <mat-icon>check</mat-icon>
                     Ya Aplicado
@@ -111,6 +127,7 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
                     mat-raised-button
                     class="apply-button"
                     color="primary"
+                    [disabled]="!dataLoaded"
                     (click)="abrirDialogoAplicar()"
                   >
                     <mat-icon>send</mat-icon>
@@ -140,21 +157,21 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
                   <mat-icon>schedule</mat-icon>
                   <div>
                     <strong>Modalidad</strong>
-                    <span>{{ oferta.modalidad }}</span>
+                    <span>{{ oferta.modality }}</span>
                   </div>
                 </div>
                 <div class="info-item">
                   <mat-icon>payments</mat-icon>
                   <div>
                     <strong>Salario</strong>
-                    <span>{{ oferta.pagoAprox }}</span>
+                    <span>{{ oferta.estimatedPayment }}</span>
                   </div>
                 </div>
                 <div class="info-item">
                   <mat-icon>location_on</mat-icon>
                   <div>
                     <strong>Ubicación</strong>
-                    <span>{{ oferta.locacion }}</span>
+                    <span>{{ oferta.location }}</span>
                   </div>
                 </div>
               </div>
@@ -389,6 +406,25 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
         padding: 16px !important;
       }
 
+      .loading-button {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%) !important;
+        color: #718096 !important;
+        font-weight: 500 !important;
+        text-transform: none !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        cursor: not-allowed !important;
+      }
+
+      .loading-button mat-icon {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
       .view-applicants-button {
         background: var(--primary-gradient) !important;
         color: var(--white) !important;
@@ -508,25 +544,32 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
 })
 export class OfertaDetalleComponent implements OnInit {
   oferta?: OfertaListaDTO;
-  usuario?: Usuario;
+  keycloakUser?: KeycloakUser;
+  loadingApplicationStatus = true; // Estado de carga para verificar si ya aplicó
+  dataLoaded = false; // Para controlar si los datos necesarios ya están cargados
+  isApplying = false; // Para mostrar cuando se está enviando la aplicación
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private ofertasService: OfertasService,
-    private usuarioService: UsuarioService,
+    private ofertasService: offersService,
     private authService: AuthService,
     private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+
+    // Cargar la oferta
     this.ofertasService.getOfertaById(id).subscribe((oferta) => {
       this.oferta = oferta;
+      this.checkIfDataLoaded(); // Verificar si ya tenemos todos los datos
     });
 
-    this.usuarioService.getCurrentUser().subscribe((usuario) => {
-      this.usuario = usuario;
+    // Esperar a que el usuario esté cargado y luego obtenerlo
+    this.authService.waitForUserLoad().subscribe(() => {
+      this.keycloakUser = this.authService.keycloakUser || undefined;
+      this.checkIfDataLoaded(); // Verificar si ya tenemos todos los datos
     });
   }
 
@@ -535,22 +578,44 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   abrirDialogoAplicar(): void {
-    if (!this.oferta || !this.usuario) return;
+    if (!this.oferta || !this.keycloakUser) return;
 
     const dialogRef = this.dialog.open(AplicarDialogComponent, {
       width: '500px',
-      data: { ofertaTitulo: this.oferta.titulo },
+      data: { ofertaTitulo: this.oferta.title },
     });
 
     dialogRef.afterClosed().subscribe((cartaPresentacion) => {
-      if (cartaPresentacion !== undefined && this.oferta && this.usuario) {
+      console.log('El diálogo se cerró');
+      console.log('Carta de presentación:', cartaPresentacion);
+      console.log('Oferta ID:', this.oferta?.id);
+      console.log('Usuario ID:', this.keycloakUser?.id);
+        console.log('Enviando aplicación...');
+        // Mostrar estado de carga mientras se aplica
+        this.isApplying = true;
+        this.loadingApplicationStatus = true;
+
         this.ofertasService.aplicarAOferta({
-          ofertaId: this.oferta.id,
-          usuarioId: this.usuario.id,
-          cartaPresentacion,
+          offerId: this.oferta!.id,
+          studentId: this.keycloakUser!.id,
+          customCoverLetter: cartaPresentacion,
+        }).subscribe({
+          next: (response) => {
+            console.log('✅ Aplicación enviada exitosamente:', response);
+            // Actualizar el estado inmediatamente después de aplicar
+            if (this.oferta) {
+              this.oferta.estado = EstadoAplicacion.APLICADO;
+            }
+            this.isApplying = false;
+            this.loadingApplicationStatus = false;
+          },
+          error: (error) => {
+            console.error('❌ Error al aplicar a la oferta:', error);
+            this.isApplying = false;
+            this.loadingApplicationStatus = false;
+            // Aquí puedes agregar manejo de errores, como mostrar un mensaje al usuario
+          }
         });
-        this.oferta.estado = EstadoAplicacion.APLICADO;
-      }
     });
   }
 
@@ -560,7 +625,52 @@ export class OfertaDetalleComponent implements OnInit {
     }
   }
 
-  isEmpresa(): boolean {
-    return this.authService.isEmpresa();
+  isMyOffer(): boolean {
+    return this.oferta?.bidder.id === this.keycloakUser?.id;
+  }
+
+  /**
+   * Verifica si todos los datos necesarios están cargados y procede con la verificación
+   */
+  private checkIfDataLoaded(): void {
+    if (this.oferta && this.keycloakUser && !this.dataLoaded) {
+      this.dataLoaded = true;
+      this.verificarEstadoAplicacion();
+    }
+  }
+
+  /**
+   * Verifica si el usuario ya aplicó a esta oferta y actualiza el estado
+   */
+  private verificarEstadoAplicacion(): void {
+    // No verificar si es nuestra propia oferta
+    if (this.isMyOffer()) {
+      this.loadingApplicationStatus = false;
+      return;
+    }
+
+    // Asegurarse de que tenemos los datos necesarios
+    if (!this.oferta || !this.keycloakUser) {
+      return;
+    }
+
+    this.ofertasService.alumnoYaAplico(this.oferta.id, this.keycloakUser.id).subscribe({
+      next: (yaAplico) => {
+        if (yaAplico && this.oferta) {
+          this.oferta.estado = EstadoAplicacion.APLICADO;
+        } else if (this.oferta) {
+          this.oferta.estado = EstadoAplicacion.NO_APLICADO;
+        }
+        this.loadingApplicationStatus = false;
+      },
+      error: (error) => {
+        console.error('❌ Error al verificar estado de aplicación:', error);
+        this.loadingApplicationStatus = false;
+        // En caso de error, asumir que no ha aplicado
+        if (this.oferta) {
+          this.oferta.estado = EstadoAplicacion.NO_APLICADO;
+        }
+      }
+    });
   }
 }

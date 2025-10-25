@@ -3,26 +3,64 @@ export enum EstadoAplicacion {
   NO_APLICADO = 'NO_APLICADO'
 }
 
-export interface Empresa {
+export enum Modalidad {
+  REMOTO = 'remoto',
+  HIBRIDO = 'hibrido',
+  PRESENCIAL = 'presencial'
+}
+
+export interface Bidder {
   id: number;
-  nombre: string;
+  description: string | null;
+  phone: string;
+  email: string;
+  location: string;
+  name: string;
+  surname: string;
+  imageUrl: string | null;
+  linkedinUrl: string | null;
+  role: string;
 }
 
 export interface AplicacionDTO {
-  ofertaId: number;
-  usuarioId: number;
-  cartaPresentacion?: string;
+  offerId: number;
+  studentId: number;
+  customCoverLetter?: string;
 }
 
 export interface OfertaListaDTO {
   id: number;
+  title: string;
+  description: string;
+  requirements: string;
+  modality: string;
+  location: string;
+  estimatedPayment: string;
+  applyList: any[];
+  bidder: Bidder;
+  estado?: EstadoAplicacion;
+  attributes?: string[];
+}
+
+export interface CrearOfertaDTO {
+  bidderId: number;
   titulo: string;
   descripcion: string;
   requisitos: string;
-  modalidad: string; // "remoto" | "híbrido" | "presencial"
+  modalidad: string;
   locacion: string;
-  pagoAprox: string; // ejemplo: "USD 1500-2000"
-  atributos: string[]; // ejemplo: ["Java", "Spring Boot", "Docker"]
-  estado: EstadoAplicacion;
-  empresa: Empresa;
+  pagoAprox?: string;
+  atributos: string[];
+}
+
+export interface PagedResponseDTO<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  last: boolean;
+  size: number;
+  number: number;
+  numberOfElements: number;
+  first: boolean;
+  empty: boolean;
 }

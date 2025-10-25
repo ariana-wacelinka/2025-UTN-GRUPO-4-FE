@@ -22,6 +22,9 @@ import { MatIcon, MatIconModule } from '@angular/material/icon';
           <button class="nav-button" (click)="verOfertas()">
             <span>Ofertas</span>
           </button>
+          <button class="nav-button" (click)="publicarOferta()">
+            <span>Publicar Oferta</span>
+          </button>
 
           <ng-container *ngIf="!isLoggedIn">
             <button class="login-button" (click)="irLogin()">
@@ -239,6 +242,10 @@ export class NavbarComponent implements OnInit {
 
   irLogin(): void {
     this.router.navigate(['/login']);
+  }
+
+  publicarOferta(): void {
+    this.router.navigate(['/publicar-oferta']);
   }
 
   cerrarSesion(): void {
