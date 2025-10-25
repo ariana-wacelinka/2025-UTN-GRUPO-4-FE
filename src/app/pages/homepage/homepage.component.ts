@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { EmpresaDTO } from '../../models/empresa.dto';
+import { CompanySize } from '../../models/usuario.dto';
 import { EmpresasService } from '../../services/empresas.service';
 import { Router } from '@angular/router';
 
@@ -57,11 +58,13 @@ import { Router } from '@angular/router';
         <div class="empresas-grid">
           @for (empresa of empresas; track empresa.id) {
           <div class="empresa-card">
-            <div class="empresa-logo">{{ empresa.logo }}</div>
+            <div class="empresa-logo">
+              <img [src]="empresa.imageUrl" [alt]="empresa.name" class="empresa-img" />
+            </div>
             <div class="empresa-info">
-              <h3 class="empresa-nombre">{{ empresa.nombre }}</h3>
-              <p class="empresa-sector">{{ empresa.sector }}</p>
-              <span class="empresa-tamanio">{{ empresa.tamanio }}</span>
+              <h3 class="empresa-nombre">{{ empresa.name }}</h3>
+              <p class="empresa-sector">{{ empresa.industry }}</p>
+              <span class="empresa-tamanio">{{ getSizeLabel(empresa.size) }}</span>
             </div>
           </div>
           }
@@ -295,9 +298,18 @@ import { Router } from '@angular/router';
     }
 
     .empresa-logo {
-      font-size: 3rem;
       margin-bottom: 16px;
       display: block;
+      height: 60px;
+      width: 60px;
+      margin: 0 auto 16px;
+    }
+
+    .empresa-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
     }
 
     .empresa-nombre {
@@ -404,7 +416,7 @@ import { Router } from '@angular/router';
 export class HomepageComponent implements OnInit {
   empresas: EmpresaDTO[] = [];
 
-  constructor(private empresasService: EmpresasService, private router: Router) {}
+  constructor(private empresasService: EmpresasService, private router: Router) { }
 
   ngOnInit(): void {
     this.empresasService.getEmpresas().subscribe((empresas) => {
@@ -414,5 +426,16 @@ export class HomepageComponent implements OnInit {
 
   verTodasOfertas(): void {
     this.router.navigate(['/ofertas']);
+  }
+
+  getSizeLabel(size: CompanySize): string {
+    const sizeLabels = {
+      [CompanySize.FROM_1_TO_10]: '1-10 empleados',
+      [CompanySize.FROM_11_TO_50]: '11-50 empleados',
+      [CompanySize.FROM_51_TO_200]: '51-200 empleados',
+      [CompanySize.FROM_201_TO_500]: '201-500 empleados',
+      [CompanySize.MORE_THAN_500]: '500+ empleados'
+    };
+    return sizeLabels[size] || 'Tamaño no especificado';
   }
 }

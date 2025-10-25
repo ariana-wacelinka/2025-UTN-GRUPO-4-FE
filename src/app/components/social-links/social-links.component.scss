@@ -1,0 +1,76 @@
+.links-card {
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+
+        .section-icon {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+    }
+}
+
+.social-links {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.social-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    text-align: left;
+    justify-content: flex-start;
+    transition: var(--transition);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-white);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    mat-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    &.linkedin-btn {
+        background: linear-gradient(135deg, #0077b5, #00a0dc);
+        color: white;
+        border-color: #0077b5;
+
+        &:hover {
+            background: linear-gradient(135deg, #005885, #0077b5);
+        }
+    }
+
+    &.github-btn {
+        background: linear-gradient(135deg, #333, #555);
+        color: white;
+        border-color: #333;
+
+        &:hover {
+            background: linear-gradient(135deg, #222, #333);
+        }
+    }
+
+    &.cv-btn {
+        background: linear-gradient(135deg, #e53e3e, #fc8181);
+        color: white;
+        border-color: #e53e3e;
+
+        &:hover {
+            background: linear-gradient(135deg, #c53030, #e53e3e);
+        }
+    }
+}

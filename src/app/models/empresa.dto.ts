@@ -1,18 +1,11 @@
+import { UsuarioDTO, CompanySize } from './usuario.dto';
 import { EstudianteDTO } from './aplicante.dto';
-export interface EmpresaDTO {
-  id: number;
-  nombre: string;
-  logo: string;
-  descripcion: string;
-  sector: string;
-  tamanio: string;
-  sitioWeb?: string;
-  fechaFundacion?: string;
-  ubicacion?: string;
-  telefono?: string;
-  email?: string;
-  empleados?: EstudianteDTO[];
-  redesSociales?: RedesSocialesDTO;
+
+// DTO de empresa actualizado según el backend
+export interface EmpresaDTO extends UsuarioDTO {
+  webSiteUrl: string;
+  industry: string;
+  size: CompanySize;
 }
 
 export interface RedesSocialesDTO {
@@ -22,15 +15,16 @@ export interface RedesSocialesDTO {
   instagram?: string;
 }
 
+// DTO para actualizar empresa
 export interface ActualizarEmpresaDTO {
-  nombre?: string;
-  descripcion?: string;
-  sector?: string;
-  tamanio?: string;
-  fechaFundacion?: string;
-  ubicacion?: string;
-  telefono?: string;
+  description?: string;
+  phone?: string;
   email?: string;
-  sitioWeb?: string;
-  redesSociales?: RedesSocialesDTO;
+  location?: string;
+  name?: string;
+  imageUrl?: string;
+  linkedinUrl?: string;
+  webSiteUrl?: string;
+  industry?: string;
+  size?: CompanySize;
 }

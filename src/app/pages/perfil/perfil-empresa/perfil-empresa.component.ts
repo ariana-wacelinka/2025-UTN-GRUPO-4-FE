@@ -10,7 +10,12 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { EmpresasService } from '../../../services/empresas.service';
-import { EmpresaDTO, ActualizarEmpresaDTO } from '../../../models/empresa.dto';
+import { EmpresaDTO } from '../../../models/empresa.dto';
+import { CompanySize } from '../../../models/usuario.dto';
+
+// Importar componentes compartidos
+import { ProfileHeaderComponent, ProfileHeaderData, SocialLink } from '../../../components/profile-header/profile-header.component';
+import { InfoCardComponent, InfoCardData } from '../../../components/info-card/info-card.component';
 
 @Component({
     selector: 'app-perfil-empresa',
@@ -25,7 +30,9 @@ import { EmpresaDTO, ActualizarEmpresaDTO } from '../../../models/empresa.dto';
         MatSelectModule,
         MatSnackBarModule,
         FormsModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        ProfileHeaderComponent,
+        InfoCardComponent
     ],
     templateUrl: './perfil-empresa.component.html',
     styleUrls: ['./perfil-empresa.component.scss']
@@ -43,41 +50,46 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
     // Form
     editForm!: FormGroup;
 
-    // Sectores disponibles
+    // Sectores disponibles (actualizado para industrias)
     sectoresDisponibles = [
         'Tecnología', 'Finanzas', 'Salud', 'Educación',
-        'E-commerce', 'Consultoría', 'Marketing', 'Otro'
+        'E-commerce', 'Consultoría', 'Marketing', 'Manufactura',
+        'Servicios', 'Retail', 'Otro'
     ];
 
-    // Tamaños disponibles
+    // Tamaños disponibles (usando enum del backend)
     tamaniosDisponibles = [
-        'Startup', 'Pequeña', 'Mediana', 'Grande'
+        { value: CompanySize.FROM_1_TO_10, label: '1-10 empleados' },
+        { value: 'FROM_11_TO_50', label: '11-50 empleados' },
+        { value: 'FROM_51_TO_200', label: '51-200 empleados' },
+        { value: 'FROM_201_TO_500', label: '201-500 empleados' },
+        { value: 'MORE_THAN_500', label: 'Más de 500 empleados' }
     ];
 
-    // Computed properties
-    headerData = computed(() => {
+    // Computed properties para componentes compartidos
+    profileHeaderData = computed((): ProfileHeaderData | null => {
         const emp = this.empresa();
         if (!emp) return null;
 
         return {
-            titulo: emp.nombre,
-            subtitulo: emp.sector,
-            descripcion: emp.descripcion,
-            imagen: emp.logo
+            name: emp.name,
+            subtitle: emp.industry,
+            description: emp.description,
+            imageUrl: emp.imageUrl,
+            showDownloadCV: false
         };
     });
 
-    contactInfo = computed(() => {
+    contactInfo = computed((): InfoCardData | null => {
         const emp = this.empresa();
         if (!emp) return null;
 
         const items = [];
         if (emp.email) items.push({ icon: 'email', label: 'Email', value: emp.email });
-        if (emp.telefono) items.push({ icon: 'phone', label: 'Teléfono', value: emp.telefono });
-        if (emp.ubicacion) items.push({ icon: 'location_on', label: 'Ubicación', value: emp.ubicacion });
-        if (emp.sitioWeb) items.push({ icon: 'language', label: 'Sitio Web', value: emp.sitioWeb });
-        if (emp.fechaFundacion) items.push({ icon: 'event', label: 'Fundación', value: emp.fechaFundacion });
-        if (emp.tamanio) items.push({ icon: 'business', label: 'Tamaño', value: emp.tamanio });
+        if (emp.phone) items.push({ icon: 'phone', label: 'Teléfono', value: emp.phone });
+        if (emp.location) items.push({ icon: 'location_on', label: 'Ubicación', value: emp.location });
+        if (emp.webSiteUrl) items.push({ icon: 'language', label: 'Sitio Web', value: emp.webSiteUrl });
+        if (emp.size) items.push({ icon: 'business', label: 'Tamaño', value: this.getSizeLabel(emp.size) });
 
         return {
             title: 'Información de Contacto',
@@ -86,23 +98,23 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
         };
     });
 
-    socialLinksCompact = computed(() => {
+    socialLinksCompact = computed((): SocialLink[] => {
         const emp = this.empresa();
-        if (!emp?.redesSociales) return [];
+        if (!emp) return [];
 
-        const links = [];
-        if (emp.redesSociales.linkedin) {
+        const links: SocialLink[] = [];
+        if (emp.linkedinUrl) {
             links.push({
                 icon: 'business',
                 label: 'LinkedIn',
-                url: emp.redesSociales.linkedin
+                url: emp.linkedinUrl
             });
         }
-        if (emp.sitioWeb) {
+        if (emp.webSiteUrl) {
             links.push({
                 icon: 'language',
                 label: 'Sitio Web',
-                url: emp.sitioWeb
+                url: emp.webSiteUrl
             });
         }
 
@@ -119,21 +131,15 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
 
     private initializeForm() {
         this.editForm = this.formBuilder.group({
-            nombre: ['', [Validators.required, Validators.minLength(2)]],
-            descripcion: ['', [Validators.required, Validators.maxLength(500)]],
-            sector: ['', [Validators.required]],
-            tamanio: ['', [Validators.required]],
-            fechaFundacion: [''],
-            ubicacion: [''],
-            telefono: [''],
+            name: ['', [Validators.required, Validators.minLength(2)]],
+            description: ['', [Validators.required, Validators.maxLength(500)]],
+            industry: ['', [Validators.required]],
+            size: ['', [Validators.required]],
+            location: [''],
+            phone: [''],
             email: ['', [Validators.email]],
-            sitioWeb: [''],
-            redesSociales: this.formBuilder.group({
-                linkedin: [''],
-                facebook: [''],
-                twitter: [''],
-                instagram: ['']
-            })
+            webSiteUrl: [''],
+            linkedinUrl: ['']
         });
     }
 
@@ -167,61 +173,54 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
         return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=ffffff&size=150`;
     }
 
-    // Eventos de archivos
-    onLogoSelectedInternal(event: Event) {
-        const input = event.target as HTMLInputElement;
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            this.selectedLogoFile.set(file);
-
-            // Crear preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.imagePreview.set(e.target?.result as string);
-            };
-            reader.readAsDataURL(file);
-
-            this.snackBar.open('Logo seleccionado', 'Cerrar', { duration: 2000 });
-        }
+    getSizeLabel(size: string): string {
+        const sizeOption = this.tamaniosDisponibles.find(t => t.value === size);
+        return sizeOption?.label || size;
     }
 
-    // Edición del perfil
-    editarPerfil() {
+    // Métodos de eventos de componentes compartidos
+    onEditProfile() {
         const empresaActual = this.empresa();
         if (!empresaActual) return;
 
         this.isEditing.set(true);
 
         this.editForm.patchValue({
-            nombre: empresaActual.nombre,
-            descripcion: empresaActual.descripcion,
-            sector: empresaActual.sector,
-            tamanio: empresaActual.tamanio,
-            fechaFundacion: empresaActual.fechaFundacion,
-            ubicacion: empresaActual.ubicacion,
-            telefono: empresaActual.telefono,
+            name: empresaActual.name,
+            description: empresaActual.description,
+            industry: empresaActual.industry,
+            size: empresaActual.size,
+            location: empresaActual.location,
+            phone: empresaActual.phone,
             email: empresaActual.email,
-            sitioWeb: empresaActual.sitioWeb,
-            redesSociales: {
-                linkedin: empresaActual.redesSociales?.linkedin || '',
-                facebook: empresaActual.redesSociales?.facebook || '',
-                twitter: empresaActual.redesSociales?.twitter || '',
-                instagram: empresaActual.redesSociales?.instagram || ''
-            }
+            webSiteUrl: empresaActual.webSiteUrl,
+            linkedinUrl: empresaActual.linkedinUrl
         });
     }
 
-    cancelarEdicion() {
+    onCancelEdit() {
         this.isEditing.set(false);
         this.selectedLogoFile.set(null);
         this.imagePreview.set(null);
     }
 
-    guardarCambios() {
+    onImageSelected(file: File) {
+        this.selectedLogoFile.set(file);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.imagePreview.set(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+
+        this.snackBar.open('Logo seleccionado', 'Cerrar', { duration: 2000 });
+    }
+
+    onSaveChanges() {
         if (this.editForm.valid) {
             this.isLoading.set(true);
 
-            const datosActualizados: ActualizarEmpresaDTO = this.editForm.value;
+            const datosActualizados: Partial<EmpresaDTO> = this.editForm.value;
 
             this.empresasService.actualizarPerfil(datosActualizados)
                 .pipe(takeUntil(this.destroy$))
@@ -259,5 +258,25 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
     // Getters para formularios
     get f() {
         return this.editForm.controls;
+    }
+
+    // Métodos de compatibilidad con el template existente
+    editarPerfil() {
+        this.onEditProfile();
+    }
+
+    cancelarEdicion() {
+        this.onCancelEdit();
+    }
+
+    guardarCambios() {
+        this.onSaveChanges();
+    }
+
+    onLogoSelectedInternal(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            this.onImageSelected(input.files[0]);
+        }
     }
 }

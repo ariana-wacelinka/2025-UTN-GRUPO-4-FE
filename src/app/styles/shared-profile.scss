@@ -1,0 +1,248 @@
+/* Variables CSS compartidas para perfiles */
+:root {
+    /* Colores principales */
+    --primary-color: #6366f1;
+    --primary-light: #818cf8;
+    --primary-dark: #4f46e5;
+
+    /* Colores de texto */
+    --text-primary: #1f2937;
+    --text-secondary: #374151;
+    --text-muted: #6b7280;
+
+    /* Colores de fondo */
+    --background-page: #f8fafc;
+    --glass-white: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(99, 102, 241, 0.1);
+    --muted-bg: #f1f5f9;
+
+    /* Colores para chips/tags */
+    --chip-bg: #e2e8f0;
+    --chip-text: #475569;
+    --chip-border: #cbd5e1;
+
+    /* Colores utilitarios */
+    --white: #ffffff;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --warning-color: #f59e0b;
+
+    /* Sombras */
+    --shadow-small: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    /* Bordes */
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+
+    /* Transiciones */
+    --transition: all 0.2s ease-in-out;
+    --transition-fast: all 0.15s ease-in-out;
+}
+
+/* Clases utilitarias compartidas */
+.perfil-container {
+    min-height: 100vh;
+    background: var(--background-page);
+    padding: 24px 0;
+}
+
+.container-modern {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading styles */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--muted-bg);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+    }
+
+    p {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin: 0;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Card styles */
+.modern-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-small);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-white);
+    transition: var(--transition);
+
+    &:hover {
+        box-shadow: var(--shadow-medium);
+        transform: translateY(-2px);
+    }
+}
+
+/* Button styles */
+.modern-button {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: var(--transition);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+}
+
+/* Form styles */
+.edit-form-container {
+    margin-bottom: 32px;
+}
+
+.edit-form-grid {
+    display: grid;
+    gap: 24px;
+}
+
+.form-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 24px 0 16px 0;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 8px;
+
+    &:first-child {
+        margin-top: 0;
+    }
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-field {
+    width: 100%;
+
+    &.full-width {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Grid layouts */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+
+    /* Card "Sobre mí" con tamaño fijo basado en contenido */
+    .about-card {
+        /* La card "Sobre mí" tendrá un tamaño mínimo y máximo definido */
+        grid-column: span 1;
+        min-width: 300px;
+        max-width: 450px;
+        /* Justificar contenido para centrar la card si es necesario */
+        justify-self: start;
+    }
+
+    /* Para pantallas más grandes, usar un layout específico */
+    @media (min-width: 1200px) {
+        /* En pantallas grandes, usar un layout más específico */
+        grid-template-columns: 1fr 450px 1fr;
+        /* Las otras cards se distribuyen, "Sobre mí" tiene 450px fijo */
+
+        .about-card {
+            /* En pantallas grandes, la card "Sobre mí" va en la columna del medio */
+            grid-column: 2;
+            justify-self: stretch;
+            max-width: none;
+        }
+
+        /* Las otras cards se distribuyen en las columnas 1 y 3 */
+        .modern-card:not(.about-card) {
+            grid-column: auto;
+        }
+    }
+
+    @media (min-width: 900px) and (max-width: 1199px) {
+        /* En pantallas medianas, permitir que "Sobre mí" tenga su tamaño natural */
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+
+        .about-card {
+            /* En tablets, mantener el tamaño basado en contenido */
+            width: fit-content;
+            min-width: 320px;
+            max-width: 500px;
+            justify-self: center;
+        }
+    }
+}
+
+.profile-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .container-modern {
+        padding: 0 16px;
+    }
+
+    .profile-grid,
+    .profile-content {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

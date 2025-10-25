@@ -2,64 +2,23 @@
     <div class="container-modern animate-fade-in">
 
         <!-- Loading indicator -->
-        <div *ngIf="isLoading" class="loading-container">
+        <div *ngIf="isLoading()" class="loading-container">
             <div class="loading-spinner"></div>
             <p>Cargando perfil...</p>
         </div>
 
         <!-- Contenido del perfil -->
-        <div *ngIf="!isLoading && perfilAlumno">
-            <!-- Header del perfil -->
-            <mat-card class="modern-card profile-header">
-                <div class="header-content">
-                    <div class="profile-image-section">
-                        <div class="image-container">
-                            <img [src]="imagePreview || perfilAlumno.imagen"
-                                [alt]="perfilAlumno.nombre + ' ' + perfilAlumno.apellido" class="profile-image">
+        <div *ngIf="!isLoading() && perfilAlumno()">
 
-                            <div *ngIf="isEditing" class="image-hover-overlay">
-                                <input type="file" #imageInput accept="image/*" (change)="onImageSelected($event)"
-                                    style="display: none">
-                                <div class="image-hover-content" (click)="imageInput.click()">
-                                    <mat-icon>camera_alt</mat-icon>
-                                    <span>Cambiar foto</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="profile-info">
-                        <h1 class="profile-name">{{perfilAlumno.nombre}} {{perfilAlumno.apellido}}</h1>
-                        <p class="profile-title">{{perfilAlumno.carrera}} - {{perfilAlumno.anio}}</p>
-                        <p class="profile-university">{{perfilAlumno.universidad}}</p>
-
-                        <div class="contact-buttons">
-                            <button *ngIf="!isEditing" mat-raised-button color="primary" class="modern-button"
-                                (click)="editarPerfil()">
-                                <mat-icon>edit</mat-icon>
-                                Editar Perfil
-                            </button>
-                            <button *ngIf="isEditing" mat-raised-button color="primary" class="modern-button"
-                                (click)="guardarCambios()">
-                                <mat-icon>save</mat-icon>
-                                Guardar Cambios
-                            </button>
-                            <button *ngIf="isEditing" mat-stroked-button class="modern-button"
-                                (click)="cancelarEdicion()">
-                                <mat-icon>cancel</mat-icon>
-                                Cancelar
-                            </button>
-                            <button *ngIf="!isEditing" mat-stroked-button class="modern-button" (click)="descargarCV()">
-                                <mat-icon>download</mat-icon>
-                                Descargar CV
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </mat-card>
+            <!-- Header del perfil usando componente compartido -->
+            <app-profile-header [data]="profileHeaderData()!" [socialLinks]="socialLinksCompact()"
+                [isEditing]="isEditing" [imagePreview]="imagePreview" (editProfile)="onEditProfile()"
+                (saveChanges)="onSaveChanges()" (cancelEdit)="onCancelEdit()" (downloadCV)="onDownloadCV()"
+                (imageSelected)="onImageSelected($event)">
+            </app-profile-header>
 
             <!-- Formulario de edición -->
-            <div *ngIf="isEditing" class="edit-form-container">
+            <div *ngIf="isEditing()" class="edit-form-container">
                 <mat-card class="modern-card edit-form">
                     <mat-card-header>
                         <mat-card-title class="section-title">
@@ -75,16 +34,16 @@
                             <div class="form-row">
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Nombre</mat-label>
-                                    <input matInput formControlName="nombre" required>
-                                    <mat-error *ngIf="f['nombre'].invalid && f['nombre'].touched">
+                                    <input matInput formControlName="name" required>
+                                    <mat-error *ngIf="f['name'].invalid && f['name'].touched">
                                         El nombre es requerido y debe tener al menos 2 caracteres
                                     </mat-error>
                                 </mat-form-field>
 
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Apellido</mat-label>
-                                    <input matInput formControlName="apellido" required>
-                                    <mat-error *ngIf="f['apellido'].invalid && f['apellido'].touched">
+                                    <input matInput formControlName="surname" required>
+                                    <mat-error *ngIf="f['surname'].invalid && f['surname'].touched">
                                         El apellido es requerido y debe tener al menos 2 caracteres
                                     </mat-error>
                                 </mat-form-field>
@@ -101,8 +60,8 @@
 
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Teléfono</mat-label>
-                                    <input matInput formControlName="telefono" required>
-                                    <mat-error *ngIf="f['telefono'].invalid && f['telefono'].touched">
+                                    <input matInput formControlName="phone" required>
+                                    <mat-error *ngIf="f['phone'].invalid && f['phone'].touched">
                                         El teléfono es requerido
                                     </mat-error>
                                 </mat-form-field>
@@ -111,27 +70,27 @@
                             <div class="form-row">
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Ubicación</mat-label>
-                                    <input matInput formControlName="ubicacion" required>
-                                    <mat-error *ngIf="f['ubicacion'].invalid && f['ubicacion'].touched">
+                                    <input matInput formControlName="location" required>
+                                    <mat-error *ngIf="f['location'].invalid && f['location'].touched">
                                         La ubicación es requerida
                                     </mat-error>
                                 </mat-form-field>
 
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Fecha de Nacimiento</mat-label>
-                                    <input matInput formControlName="fechaNacimiento" required>
-                                    <mat-error *ngIf="f['fechaNacimiento'].invalid && f['fechaNacimiento'].touched">
+                                    <input matInput type="date" formControlName="dateOfBirth" required>
+                                    <mat-error *ngIf="f['dateOfBirth'].invalid && f['dateOfBirth'].touched">
                                         La fecha de nacimiento es requerida
                                     </mat-error>
                                 </mat-form-field>
                             </div>
 
                             <mat-form-field appearance="outline" class="form-field full-width">
-                                <mat-label>Sobre Mí</mat-label>
-                                <textarea matInput formControlName="sobreMi" rows="4" maxlength="1000"></textarea>
-                                <mat-hint>{{f['sobreMi'].value?.length || 0}}/1000</mat-hint>
-                                <mat-error *ngIf="f['sobreMi'].invalid && f['sobreMi'].touched">
-                                    El texto "Sobre mí" no puede exceder 1000 caracteres
+                                <mat-label>Descripción</mat-label>
+                                <textarea matInput formControlName="description" rows="4" maxlength="500"></textarea>
+                                <mat-hint>{{f['description'].value?.length || 0}}/500</mat-hint>
+                                <mat-error *ngIf="f['description'].invalid && f['description'].touched">
+                                    La descripción no puede exceder 500 caracteres
                                 </mat-error>
                             </mat-form-field>
 
@@ -141,22 +100,22 @@
                             <div class="form-row">
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Carrera</mat-label>
-                                    <input matInput formControlName="carrera" required>
-                                    <mat-error *ngIf="f['carrera'].invalid && f['carrera'].touched">
+                                    <input matInput formControlName="career" required>
+                                    <mat-error *ngIf="f['career'].invalid && f['career'].touched">
                                         La carrera es requerida
                                     </mat-error>
                                 </mat-form-field>
 
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Año</mat-label>
-                                    <mat-select formControlName="anio" required>
-                                        <mat-option value="1er año">1er año</mat-option>
-                                        <mat-option value="2do año">2do año</mat-option>
-                                        <mat-option value="3er año">3er año</mat-option>
-                                        <mat-option value="4to año">4to año</mat-option>
-                                        <mat-option value="5to año">5to año</mat-option>
+                                    <mat-select formControlName="currentYearLevel" required>
+                                        <mat-option value="1">1er año</mat-option>
+                                        <mat-option value="2">2do año</mat-option>
+                                        <mat-option value="3">3er año</mat-option>
+                                        <mat-option value="4">4to año</mat-option>
+                                        <mat-option value="5">5to año</mat-option>
                                     </mat-select>
-                                    <mat-error *ngIf="f['anio'].invalid && f['anio'].touched">
+                                    <mat-error *ngIf="f['currentYearLevel'].invalid && f['currentYearLevel'].touched">
                                         El año es requerido
                                     </mat-error>
                                 </mat-form-field>
@@ -164,8 +123,8 @@
 
                             <mat-form-field appearance="outline" class="form-field full-width">
                                 <mat-label>Institución</mat-label>
-                                <input matInput formControlName="universidad" required>
-                                <mat-error *ngIf="f['universidad'].invalid && f['universidad'].touched">
+                                <input matInput formControlName="institution" required>
+                                <mat-error *ngIf="f['institution'].invalid && f['institution'].touched">
                                     La institución es requerida
                                 </mat-error>
                             </mat-form-field>
@@ -173,28 +132,26 @@
                             <!-- Habilidades -->
                             <h3 class="form-section-title">Skills/Habilidades</h3>
                             <div class="skills-edit-section">
-                                <div formArrayName="habilidades" class="skills-array">
-                                    <div *ngFor="let habilidad of habilidades.controls; let i = index"
-                                        class="skill-input-row">
+                                <div formArrayName="skills" class="skills-array">
+                                    <div *ngFor="let skill of skills.controls; let i = index" class="skill-input-row">
                                         <mat-form-field appearance="outline" class="skill-input">
                                             <mat-label>Habilidad {{i + 1}}</mat-label>
                                             <mat-select [formControlName]="i" required>
-                                                <mat-option *ngFor="let skill of habilidadesDisponibles"
-                                                    [value]="skill">
-                                                    {{skill}}
+                                                <mat-option *ngFor="let skillOption of habilidadesDisponibles"
+                                                    [value]="skillOption">
+                                                    {{skillOption}}
                                                 </mat-option>
                                             </mat-select>
-                                            <mat-error *ngIf="habilidad.invalid && habilidad.touched">
+                                            <mat-error *ngIf="skill.invalid && skill.touched">
                                                 Selecciona una habilidad
                                             </mat-error>
                                         </mat-form-field>
-                                        <button type="button" mat-icon-button color="warn"
-                                            (click)="eliminarHabilidad(i)">
+                                        <button type="button" mat-icon-button color="warn" (click)="removeSkill(i)">
                                             <mat-icon>delete</mat-icon>
                                         </button>
                                     </div>
                                 </div>
-                                <button type="button" mat-stroked-button (click)="agregarHabilidad()" class="add-btn">
+                                <button type="button" mat-stroked-button (click)="addSkill()" class="add-btn">
                                     <mat-icon>add</mat-icon>
                                     Agregar Habilidad
                                 </button>
@@ -203,59 +160,38 @@
                             <!-- Idiomas -->
                             <h3 class="form-section-title">Idiomas</h3>
                             <div class="languages-edit-section">
-                                <div formArrayName="idiomas" class="languages-array">
-                                    <div *ngFor="let idioma of idiomas.controls; let i = index" [formGroupName]="i"
+                                <div formArrayName="languages" class="languages-array">
+                                    <div *ngFor="let language of languages.controls; let i = index" [formGroupName]="i"
                                         class="language-input-row">
                                         <mat-form-field appearance="outline" class="language-input">
                                             <mat-label>Idioma</mat-label>
-                                            <input matInput formControlName="idioma" required>
+                                            <input matInput formControlName="name" required>
                                             <mat-error
-                                                *ngIf="idioma.get('idioma')?.invalid && idioma.get('idioma')?.touched">
+                                                *ngIf="language.get('name')?.invalid && language.get('name')?.touched">
                                                 El idioma es requerido
                                             </mat-error>
                                         </mat-form-field>
                                         <mat-form-field appearance="outline" class="level-input">
-                                            <mat-label>Nivel</mat-label>
-                                            <mat-select formControlName="nivel" required>
+                                            <mat-label>Nivel (1-5)</mat-label>
+                                            <mat-select formControlName="level" required>
                                                 <mat-option *ngFor="let nivel of nivelesIdioma" [value]="nivel">
                                                     {{nivel}}
                                                 </mat-option>
                                             </mat-select>
                                             <mat-error
-                                                *ngIf="idioma.get('nivel')?.invalid && idioma.get('nivel')?.touched">
+                                                *ngIf="language.get('level')?.invalid && language.get('level')?.touched">
                                                 El nivel es requerido
                                             </mat-error>
                                         </mat-form-field>
-                                        <button type="button" mat-icon-button color="warn" (click)="eliminarIdioma(i)">
+                                        <button type="button" mat-icon-button color="warn" (click)="removeLanguage(i)">
                                             <mat-icon>delete</mat-icon>
                                         </button>
                                     </div>
                                 </div>
-                                <button type="button" mat-stroked-button (click)="agregarIdioma()" class="add-btn">
+                                <button type="button" mat-stroked-button (click)="addLanguage()" class="add-btn">
                                     <mat-icon>add</mat-icon>
                                     Agregar Idioma
                                 </button>
-                            </div>
-
-                            <!-- Enlaces Profesionales -->
-                            <h3 class="form-section-title">Enlaces Profesionales</h3>
-
-                            <div class="form-row">
-                                <mat-form-field appearance="outline" class="form-field">
-                                    <mat-label>LinkedIn</mat-label>
-                                    <input matInput formControlName="linkedin">
-                                    <mat-error *ngIf="f['linkedin'].invalid && f['linkedin'].touched">
-                                        Ingrese un enlace válido de LinkedIn
-                                    </mat-error>
-                                </mat-form-field>
-
-                                <mat-form-field appearance="outline" class="form-field">
-                                    <mat-label>GitHub</mat-label>
-                                    <input matInput formControlName="github">
-                                    <mat-error *ngIf="f['github'].invalid && f['github'].touched">
-                                        Ingrese un enlace válido de GitHub
-                                    </mat-error>
-                                </mat-form-field>
                             </div>
 
                             <!-- Curriculum -->
@@ -265,10 +201,10 @@
                                     style="display: none">
                                 <button type="button" mat-stroked-button (click)="cvInput.click()" class="upload-btn">
                                     <mat-icon>upload_file</mat-icon>
-                                    {{selectedCVFile ? 'Cambiar CV' : 'Subir CV (PDF)'}}
+                                    {{selectedCVFile() ? 'Cambiar CV' : 'Subir CV (PDF)'}}
                                 </button>
-                                <span *ngIf="selectedCVFile" class="file-selected">
-                                    Archivo seleccionado: {{selectedCVFile.name}}
+                                <span *ngIf="selectedCVFile()" class="file-selected">
+                                    Archivo seleccionado: {{selectedCVFile()!.name}}
                                 </span>
                             </div>
                         </form>
@@ -276,82 +212,12 @@
                 </mat-card>
             </div>
 
-            <!-- Vista normal (no edición) -->
-            <div *ngIf="!isEditing" class="profile-grid">
-                <!-- Información Personal -->
-                <mat-card class="modern-card info-card">
-                    <mat-card-header>
-                        <mat-card-title class="section-title">
-                            <mat-icon class="section-icon">person</mat-icon>
-                            Información Personal
-                        </mat-card-title>
-                    </mat-card-header>
-                    <mat-card-content>
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <mat-icon class="info-icon">email</mat-icon>
-                                <div class="info-content">
-                                    <span class="info-label">Email</span>
-                                    <span class="info-value">{{perfilAlumno.email}}</span>
-                                </div>
-                            </div>
+            <!-- Vista normal (no edición) usando componentes compartidos -->
+            <div *ngIf="!isEditing()" class="profile-grid">
 
-                            <div class="info-item">
-                                <mat-icon class="info-icon">phone</mat-icon>
-                                <div class="info-content">
-                                    <span class="info-label">Teléfono</span>
-                                    <span class="info-value">{{perfilAlumno.telefono}}</span>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <mat-icon class="info-icon">location_on</mat-icon>
-                                <div class="info-content">
-                                    <span class="info-label">Ubicación</span>
-                                    <span class="info-value">{{perfilAlumno.ubicacion}}</span>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <mat-icon class="info-icon">cake</mat-icon>
-                                <div class="info-content">
-                                    <span class="info-label">Fecha de Nacimiento</span>
-                                    <span class="info-value">{{perfilAlumno.fechaNacimiento}}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </mat-card-content>
-                </mat-card>
-
-                <!-- Enlaces Profesionales -->
-                <mat-card class="modern-card links-card">
-                    <mat-card-header>
-                        <mat-card-title class="section-title">
-                            <mat-icon class="section-icon">link</mat-icon>
-                            Enlaces Profesionales
-                        </mat-card-title>
-                    </mat-card-header>
-                    <mat-card-content>
-                        <div class="social-links">
-                            <button mat-raised-button class="social-button linkedin-btn"
-                                (click)="abrirEnlace(perfilAlumno.linkedin)">
-                                <mat-icon>work</mat-icon>
-                                LinkedIn
-                            </button>
-
-                            <button mat-raised-button class="social-button github-btn"
-                                (click)="abrirEnlace(perfilAlumno.github)">
-                                <mat-icon>code</mat-icon>
-                                GitHub
-                            </button>
-
-                            <button mat-raised-button class="social-button cv-btn" (click)="descargarCV()">
-                                <mat-icon>description</mat-icon>
-                                Curriculum Vitae
-                            </button>
-                        </div>
-                    </mat-card-content>
-                </mat-card>
+                <!-- Información Personal usando info-card compartido -->
+                <app-info-card *ngIf="personalInfoData()" [data]="personalInfoData()!">
+                </app-info-card>
 
                 <!-- Sobre Mí -->
                 <mat-card class="modern-card about-card">
@@ -362,28 +228,14 @@
                         </mat-card-title>
                     </mat-card-header>
                     <mat-card-content>
-                        <p class="about-text">{{perfilAlumno.descripcion}}</p>
+                        <p class="about-text">{{perfilAlumno()?.description}}</p>
                     </mat-card-content>
                 </mat-card>
 
-                <!-- Habilidades -->
-                <mat-card class="modern-card skills-card">
-                    <mat-card-header>
-                        <mat-card-title class="section-title">
-                            <mat-icon class="section-icon">psychology</mat-icon>
-                            Habilidades Técnicas
-                        </mat-card-title>
-                    </mat-card-header>
-                    <mat-card-content>
-                        <div class="skills-container">
-                            <mat-chip-set class="skills-chips">
-                                <mat-chip *ngFor="let habilidad of perfilAlumno.habilidades" class="skill-chip">
-                                    {{habilidad}}
-                                </mat-chip>
-                            </mat-chip-set>
-                        </div>
-                    </mat-card-content>
-                </mat-card>
+                <!-- Habilidades usando skills-card compartido -->
+                <app-skills-card *ngIf="perfilAlumno()?.skills" title="Habilidades Técnicas"
+                    [skills]="perfilAlumno()!.skills">
+                </app-skills-card>
 
                 <!-- Idiomas -->
                 <mat-card class="modern-card languages-card">
@@ -395,10 +247,10 @@
                     </mat-card-header>
                     <mat-card-content>
                         <div class="languages-list">
-                            <div *ngFor="let idioma of perfilAlumno.idiomas" class="language-item">
+                            <div *ngFor="let language of perfilAlumno()?.languages" class="language-item">
                                 <div class="language-info">
-                                    <span class="language-name">{{idioma.idioma}}</span>
-                                    <span class="language-level">{{idioma.nivel}}</span>
+                                    <span class="language-name">{{language.name}}</span>
+                                    <span class="language-level">Nivel {{language.level}}/5</span>
                                 </div>
                                 <mat-divider></mat-divider>
                             </div>
@@ -408,3 +260,4 @@
             </div>
         </div>
     </div>
+</div>

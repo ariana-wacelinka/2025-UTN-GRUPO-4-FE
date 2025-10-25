@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { EmpresaDTO, ActualizarEmpresaDTO } from '../models/empresa.dto';
+import { EmpresaDTO } from '../models/empresa.dto';
+import { CompanySize } from '../models/usuario.dto';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -18,57 +19,93 @@ export class EmpresasService {
     return [
       {
         id: 1,
-        nombre: 'TechCorp',
-        logo: '🚀',
-        descripcion: 'Líder en soluciones tecnológicas innovadoras',
-        sector: 'Tecnología',
-        tamanio: 'Grande',
-        sitioWeb: 'https://techcorp.com'
+        name: 'TechCorp',
+        surname: '',
+        imageUrl: 'https://i.pravatar.cc/150?img=1',
+        description: 'Líder en soluciones tecnológicas innovadoras',
+        industry: 'Tecnología',
+        size: CompanySize.FROM_201_TO_500,
+        webSiteUrl: 'https://techcorp.com',
+        email: 'info@techcorp.com',
+        phone: '+54 11 1234-5678',
+        location: 'Buenos Aires, Argentina',
+        linkedinUrl: 'https://linkedin.com/company/techcorp',
+        role: 'empresa'
       },
       {
         id: 2,
-        nombre: 'InnovateLab',
-        logo: '💡',
-        descripcion: 'Startup enfocada en IA y Machine Learning',
-        sector: 'Inteligencia Artificial',
-        tamanio: 'Startup',
-        sitioWeb: 'https://innovatelab.com'
+        name: 'InnovateLab',
+        surname: '',
+        imageUrl: 'https://i.pravatar.cc/150?img=2',
+        description: 'Startup enfocada en IA y Machine Learning',
+        industry: 'Inteligencia Artificial',
+        size: CompanySize.FROM_1_TO_10,
+        webSiteUrl: 'https://innovatelab.com',
+        email: 'contact@innovatelab.com',
+        phone: '+54 11 2345-6789',
+        location: 'Córdoba, Argentina',
+        linkedinUrl: 'https://linkedin.com/company/innovatelab',
+        role: 'empresa'
       },
       {
         id: 3,
-        nombre: 'DataSolutions',
-        logo: '📊',
-        descripcion: 'Especialistas en análisis de datos y Big Data',
-        sector: 'Data Science',
-        tamanio: 'Mediana',
-        sitioWeb: 'https://datasolutions.com'
+        name: 'DataSolutions',
+        surname: '',
+        imageUrl: 'https://i.pravatar.cc/150?img=3',
+        description: 'Especialistas en análisis de datos y Big Data',
+        industry: 'Data Science',
+        size: CompanySize.FROM_51_TO_200,
+        webSiteUrl: 'https://datasolutions.com',
+        email: 'hello@datasolutions.com',
+        phone: '+54 11 3456-7890',
+        location: 'Rosario, Argentina',
+        linkedinUrl: 'https://linkedin.com/company/datasolutions',
+        role: 'empresa'
       },
       {
         id: 4,
-        nombre: 'CloudFirst',
-        logo: '☁️',
-        descripcion: 'Servicios de cloud computing y DevOps',
-        sector: 'Cloud Computing',
-        tamanio: 'Mediana',
-        sitioWeb: 'https://cloudfirst.com'
+        name: 'CloudFirst',
+        surname: '',
+        imageUrl: 'https://i.pravatar.cc/150?img=4',
+        description: 'Servicios de cloud computing y DevOps',
+        industry: 'Cloud Computing',
+        size: CompanySize.FROM_51_TO_200,
+        webSiteUrl: 'https://cloudfirst.com',
+        email: 'info@cloudfirst.com',
+        phone: '+54 11 4567-8901',
+        location: 'La Plata, Argentina',
+        linkedinUrl: 'https://linkedin.com/company/cloudfirst',
+        role: 'empresa'
       },
       {
         id: 5,
-        nombre: 'MobileTech',
-        logo: '📱',
-        descripcion: 'Desarrollo de aplicaciones móviles nativas',
-        sector: 'Desarrollo Móvil',
-        tamanio: 'Pequeña',
-        sitioWeb: 'https://mobiletech.com'
+        name: 'MobileTech',
+        surname: '',
+        imageUrl: 'https://i.pravatar.cc/150?img=5',
+        description: 'Desarrollo de aplicaciones móviles nativas',
+        industry: 'Desarrollo Móvil',
+        size: CompanySize.FROM_11_TO_50,
+        webSiteUrl: 'https://mobiletech.com',
+        email: 'team@mobiletech.com',
+        phone: '+54 11 5678-9012',
+        location: 'Mendoza, Argentina',
+        linkedinUrl: 'https://linkedin.com/company/mobiletech',
+        role: 'empresa'
       },
       {
         id: 6,
-        nombre: 'CyberSecure',
-        logo: '🔒',
-        descripcion: 'Soluciones de ciberseguridad empresarial',
-        sector: 'Ciberseguridad',
-        tamanio: 'Grande',
-        sitioWeb: 'https://cybersecure.com'
+        name: 'CyberSecure',
+        surname: '',
+        imageUrl: 'https://i.pravatar.cc/150?img=6',
+        description: 'Soluciones de ciberseguridad empresarial',
+        industry: 'Ciberseguridad',
+        size: CompanySize.FROM_201_TO_500,
+        webSiteUrl: 'https://cybersecure.com',
+        email: 'security@cybersecure.com',
+        phone: '+54 11 6789-0123',
+        location: 'San Miguel de Tucumán, Argentina',
+        linkedinUrl: 'https://linkedin.com/company/cybersecure',
+        role: 'empresa'
       }
     ];
   }
@@ -82,41 +119,39 @@ export class EmpresasService {
     // Simular datos de la empresa loggeada
     const empresaLoggeada: EmpresaDTO = {
       id: currentUser.id,
-      nombre: currentUser.nombre || 'Mi Empresa',
-      logo: '🏢',
-      descripcion: 'Descripción de mi empresa...',
-      sector: 'Tecnología',
-      tamanio: 'Mediana',
-      sitioWeb: 'https://miempresa.com',
-      fechaFundacion: '2020-01-01',
-      ubicacion: 'Buenos Aires, Argentina',
-      telefono: '+54 11 1234-5678',
+      name: currentUser.nombre || 'Mi Empresa',
+      surname: '',
+      imageUrl: 'https://i.pravatar.cc/150?img=default',
+      description: 'Descripción de mi empresa...',
+      industry: 'Tecnología',
+      size: CompanySize.FROM_51_TO_200,
+      webSiteUrl: 'https://miempresa.com',
       email: currentUser.email,
-      empleados: [],
-      redesSociales: {
-        linkedin: 'https://linkedin.com/company/miempresa'
-      }
+      phone: '+54 11 1234-5678',
+      location: 'Buenos Aires, Argentina',
+      linkedinUrl: 'https://linkedin.com/company/miempresa',
+      role: 'empresa'
     };
 
     return of(empresaLoggeada);
   }
 
-  actualizarPerfil(datos: ActualizarEmpresaDTO): Observable<EmpresaDTO> {
+  actualizarPerfil(datos: Partial<EmpresaDTO>): Observable<EmpresaDTO> {
     // Simular actualización del perfil
     const empresaActualizada: EmpresaDTO = {
-      id: 1,
-      nombre: datos.nombre || 'Mi Empresa',
-      logo: '🏢',
-      descripcion: datos.descripcion || '',
-      sector: datos.sector || '',
-      tamanio: datos.tamanio || '',
-      sitioWeb: datos.sitioWeb,
-      fechaFundacion: datos.fechaFundacion,
-      ubicacion: datos.ubicacion,
-      telefono: datos.telefono,
-      email: datos.email,
-      empleados: [],
-      redesSociales: datos.redesSociales
+      id: datos.id || 1,
+      name: datos.name || 'Mi Empresa',
+      surname: datos.surname || '',
+      imageUrl: datos.imageUrl || 'https://i.pravatar.cc/150?img=default',
+      description: datos.description || '',
+      industry: datos.industry || '',
+      size: datos.size || CompanySize.FROM_1_TO_10,
+      webSiteUrl: datos.webSiteUrl || '',
+      email: datos.email || '',
+      phone: datos.phone || '',
+      location: datos.location || '',
+      linkedinUrl: datos.linkedinUrl || '',
+      role: 'empresa'
     };
 
     return of(empresaActualizada);

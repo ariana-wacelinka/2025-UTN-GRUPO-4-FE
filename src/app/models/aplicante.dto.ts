@@ -1,3 +1,8 @@
+import { UsuarioDTO, IdiomaDTO } from './usuario.dto';
+
+// Exportar IdiomaDTO para uso en otros archivos
+export type { IdiomaDTO } from './usuario.dto';
+
 export interface AplicanteDTO {
   id: number;
   usuarioId: number;
@@ -19,47 +24,40 @@ export interface AplicanteListaDTO {
   totalAplicantes: number;
 }
 
-export interface IdiomaDTO {
-  idioma: string;
-  nivel: string;
-}
-
-export interface EstudianteDTO {
-  id?: number;
-  nombre: string;
-  apellido: string;
-  imagen: string;
-  email: string;
-  linkedin: string;
-  github: string;
-  carrera: string;
-  anio: string;
-  universidad: string;
-  descripcion: string;
-  habilidades: string[];
-  idiomas: IdiomaDTO[];
-  telefono: string;
-  ubicacion: string;
-  fechaNacimiento: string;
+// DTO del estudiante actualizado según el backend
+export interface EstudianteDTO extends UsuarioDTO {
+  githubUrl: string;
+  career: string;
+  currentYearLevel: number;
+  institution: string;
+  skills: string[];
+  incomeDate: string;
+  dateOfBirth: string;
   cvUrl: string;
-  anioIngreso?: number;
-  cvFileName?: string;
-  cartaPresentacion?: string;
+  cvFileName: string;
+  coverLetter: string;
+  languages: IdiomaDTO[];
 }
 
+// DTO para actualizar estudiante
 export interface ActualizarEstudianteDTO {
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
-  ubicacion: string;
-  fechaNacimiento: string;
-  carrera: string;
-  anio: string;
-  universidad: string;
-  descripcion: string;
-  linkedin: string;
-  github: string;
-  habilidades: string[];
-  idiomas: IdiomaDTO[];
+  description?: string;
+  phone?: string;
+  email?: string;
+  location?: string;
+  name?: string;
+  surname?: string;
+  imageUrl?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  career?: string;
+  currentYearLevel?: number;
+  institution?: string;
+  skills?: string[];
+  incomeDate?: string;
+  dateOfBirth?: string;
+  cvUrl?: string;
+  cvFileName?: string;
+  coverLetter?: string;
+  languages?: IdiomaDTO[];
 }

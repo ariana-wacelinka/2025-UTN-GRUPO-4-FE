@@ -1,6 +1,9 @@
 /* Angular Material Theme */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
+/* Estilos compartidos para perfiles */
+@import './app/styles/shared-profile.scss';
+
 /* Modern Global Styles */
 
 :root {
@@ -16,7 +19,7 @@
   --border-radius: 16px;
   --border-radius-lg: 24px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   /* Colores específicos */
   --primary-color: #667eea;
   --primary-dark: #764ba2;
@@ -48,7 +51,8 @@
   --muted-bg: rgba(100, 116, 139, 0.1);
 }
 
-html, body {
+html,
+body {
   height: 100%;
   scroll-behavior: smooth;
 }
@@ -116,6 +120,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

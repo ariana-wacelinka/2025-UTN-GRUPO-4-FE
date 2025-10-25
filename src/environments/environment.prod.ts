@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.production.com/api'
+  apiUrl: 'http://api-unijobs.lafuah.com/api'
 };

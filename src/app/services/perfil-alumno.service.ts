@@ -13,28 +13,32 @@ export class PerfilAlumnoService {
 
     private mockPerfil: EstudianteDTO = {
         id: 1,
-        nombre: 'Ariana',
-        apellido: 'Wacelinka',
-        imagen: 'https://tse2.mm.bing.net/th/id/OIP.5CC9Agv_WNLAAwLXTaSzGAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3',
+        name: 'Ariana',
+        surname: 'Wacelinka',
+        imageUrl: 'https://tse2.mm.bing.net/th/id/OIP.5CC9Agv_WNLAAwLXTaSzGAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3',
         email: 'arianawacelinka@alu.frlp.utn.edu.ar',
-        linkedin: 'https://www.linkedin.com/in/ariana-wacelinka-652a70208/',
-        github: 'https://github.com/ariana-wacelinka/',
-        carrera: 'Ingenieria en sistemas de informacion',
-        anio: '4to año',
-        universidad: 'Universidad Tecnologica Nacional - Facultad Regional La Plata',
-        descripcion: 'Estudiante apasionada por el desarrollo de software con experiencia en proyectos académicos y personales. Me especializo en desarrollo web full-stack y tengo particular interés en UX/UI y tecnologías emergentes.',
-        habilidades: [
+        phone: '+54 9 221 3199796',
+        location: 'La Plata, Buenos Aires',
+        linkedinUrl: 'https://www.linkedin.com/in/ariana-wacelinka-652a70208/',
+        description: 'Estudiante apasionada por el desarrollo de software con experiencia en proyectos académicos y personales. Me especializo en desarrollo web full-stack y tengo particular interés en UX/UI y tecnologías emergentes.',
+        role: 'estudiante',
+        career: 'Ingenieria en sistemas de informacion',
+        currentYearLevel: 4,
+        institution: 'Universidad Tecnologica Nacional - Facultad Regional La Plata',
+        skills: [
             'JavaScript', 'TypeScript', 'Angular', 'React', 'Node.js',
             'Python', 'Java', 'MySQL', 'MongoDB', 'Git', 'Docker'
         ],
-        idiomas: [
-            { idioma: 'Español', nivel: 'Nativo' },
-            { idioma: 'Inglés', nivel: 'Avanzado' },
+        languages: [
+            { id: 1, name: 'Español', level: 5 },
+            { id: 2, name: 'Inglés', level: 4 },
         ],
-        telefono: '+54 9 221 3199796',
-        ubicacion: 'La Plata, Buenos Aires',
-        fechaNacimiento: '12 de marzo de 2004',
-        cvUrl: '/assets/documents/WACELINKA, Ariana.pdf'
+        cvUrl: '/assets/documents/WACELINKA, Ariana.pdf',
+        cvFileName: 'WACELINKA_Ariana.pdf',
+        githubUrl: 'https://github.com/ariana-wacelinka/',
+        incomeDate: '2022-03-01',
+        dateOfBirth: '2002-03-15',
+        coverLetter: 'Estudiante apasionada por el desarrollo full-stack.'
     };
 
     constructor(
@@ -62,7 +66,7 @@ export class PerfilAlumnoService {
 
     subirImagenPerfil(archivo: File): Observable<{ imageUrl: string }> {
         const mockImageUrl = 'https://via.placeholder.com/300x300';
-        this.mockPerfil.imagen = mockImageUrl;
+        this.mockPerfil.imageUrl = mockImageUrl;
         this.perfilSubject.next(this.mockPerfil);
 
         return of({ imageUrl: mockImageUrl });
@@ -85,7 +89,7 @@ export class PerfilAlumnoService {
 
         const link = document.createElement('a');
         link.href = perfil.cvUrl;
-        link.download = `CV_${perfil.nombre}_${perfil.apellido}.pdf`;
+        link.download = `CV_${perfil.name}_${perfil.surname}.pdf`;
         link.target = '_blank';
 
         if (perfil.cvUrl.startsWith('http')) {
@@ -98,14 +102,14 @@ export class PerfilAlumnoService {
     }
 
     actualizarHabilidades(habilidades: string[]): Observable<EstudianteDTO> {
-        this.mockPerfil.habilidades = [...habilidades];
+        this.mockPerfil.skills = [...habilidades];
         this.perfilSubject.next(this.mockPerfil);
 
         return of(this.mockPerfil);
     }
 
     actualizarIdiomas(idiomas: IdiomaDTO[]): Observable<EstudianteDTO> {
-        this.mockPerfil.idiomas = [...idiomas];
+        this.mockPerfil.languages = [...idiomas];
         this.perfilSubject.next(this.mockPerfil);
 
         return of(this.mockPerfil);

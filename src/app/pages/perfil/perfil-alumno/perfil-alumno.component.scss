@@ -52,7 +52,6 @@
             box-shadow: var(--shadow-light);
         }
 
-        // Overlay para hover de edición de imagen
         .image-hover-overlay {
             position: absolute;
             top: 0;
@@ -94,7 +93,6 @@
             }
         }
 
-        // Mostrar overlay en hover del contenedor
         &:hover .image-hover-overlay {
             opacity: 1;
         }
@@ -141,14 +139,72 @@
 
 .profile-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: 1fr 1fr 1fr;
+    /* 3 columnas uniformes */
+    grid-template-rows: auto auto;
+    /* 2 filas automáticas */
     gap: 24px;
+    grid-template-areas:
+        "info-personal sobre-mi sobre-mi"
+        "info-personal skills idiomas";
+
+    /* Card de Información Personal - primer elemento (app-info-card) */
+    >*:nth-child(1) {
+        grid-area: info-personal;
+    }
+
+    /* Card "Sobre mí" - segundo elemento (mat-card con clase about-card) */
+    >*:nth-child(2),
+    .about-card {
+        grid-area: sobre-mi;
+        width: 100% !important;
+        min-width: auto !important;
+        max-width: none !important;
+        height: fit-content !important;
+
+        mat-card-content {
+            padding: 24px !important;
+        }
+
+        .about-text {
+            line-height: 1.6;
+            text-align: justify;
+            hyphens: auto;
+        }
+    }
+
+    /* Card de Skills - tercer elemento (app-skills-card) */
+    >*:nth-child(3) {
+        grid-area: skills;
+    }
+
+    /* Card de Idiomas - cuarto elemento (mat-card con clase languages-card) */
+    >*:nth-child(4),
+    .languages-card {
+        grid-area: idiomas;
+    }
+
+    @media (max-width: 1200px) {
+        /* En tablets, cambiar a layout de 2 columnas */
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "info-personal sobre-mi"
+            "skills idiomas";
+    }
 
     @media (max-width: 768px) {
+        /* En móviles, layout vertical */
         grid-template-columns: 1fr;
+        grid-template-areas:
+            "info-personal"
+            "sobre-mi"
+            "skills"
+            "idiomas";
         gap: 16px;
     }
 }
+
+/* Removed layout específico para pantallas grandes - now using flexbox above */
 
 .modern-card {
     background: var(--glass-white) !important;
@@ -346,12 +402,6 @@
     }
 }
 
-@media (max-width: 1200px) {
-    .profile-grid {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    }
-}
-
 @media (max-width: 768px) {
     .perfil-container {
         padding: 16px 0;
@@ -363,11 +413,6 @@
 
     .profile-title {
         font-size: 1.1rem !important;
-    }
-
-    .profile-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
     }
 
     .social-button {
@@ -399,7 +444,6 @@
     }
 }
 
-// Estilos para loading
 .loading-container {
     display: flex;
     flex-direction: column;
@@ -434,7 +478,6 @@
     }
 }
 
-// Estilos para el formulario de edición
 .edit-form-container {
     margin-bottom: 32px;
 }
@@ -535,7 +578,6 @@
     }
 }
 
-// Animaciones para la transición entre vista y edición
 .edit-form-container,
 .profile-grid {
     animation: fadeInUp 0.4s ease-out;
@@ -553,7 +595,6 @@
     }
 }
 
-// Estilos para botones en modo edición
 .contact-buttons {
     button {
         &.modern-button {
@@ -566,7 +607,6 @@
     }
 }
 
-// Responsive para formulario
 @media (max-width: 768px) {
     .edit-form-container {
         .edit-form-grid {
@@ -578,7 +618,6 @@
     }
 }
 
-// Estilos para validaciones
 .mat-mdc-form-field.mat-form-field-invalid {
     .mat-mdc-form-field-outline-thick {
 
@@ -590,7 +629,6 @@
     }
 }
 
-// Estilos para secciones del formulario
 .form-section-title {
     color: var(--primary-color);
     font-size: 1.3rem;
@@ -605,7 +643,6 @@
     }
 }
 
-// Estilos para habilidades dinámicas
 .skills-edit-section {
     grid-column: 1 / -1;
     margin-bottom: 24px;
@@ -643,7 +680,6 @@
     }
 }
 
-// Estilos para idiomas dinámicos
 .languages-edit-section {
     grid-column: 1 / -1;
     margin-bottom: 24px;
@@ -685,7 +721,6 @@
     }
 }
 
-// Estilos para subida de CV
 .cv-upload-section {
     grid-column: 1 / -1;
     display: flex;
@@ -720,7 +755,6 @@
     }
 }
 
-// Responsive para nuevos elementos
 @media (max-width: 768px) {
 
     .skill-input-row,
