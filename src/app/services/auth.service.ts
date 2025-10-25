@@ -247,11 +247,11 @@ export class AuthService {
   }
 
   isEmpresa(): boolean {
-    return false;
+    return this.keycloakUser?.role === UserRole.ORGANIZATION;
   }
 
   isAlumno(): boolean {
-    return true;
+    return this.keycloakUser?.role === UserRole.STUDENT;
   }
 
   waitForUserLoad(): Observable<boolean> {
