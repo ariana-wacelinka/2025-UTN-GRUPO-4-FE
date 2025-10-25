@@ -111,25 +111,26 @@ export class EmpresasService {
   }
 
   getEmpresaActual(): Observable<EmpresaDTO | null> {
-    const currentUser = this.authService.getCurrentUserFromCookie();
-    if (!currentUser || currentUser.tipo !== 'empresa') {
+    // Check if user is logged in and is a company (organization)
+    if (!this.authService.isLoggedIn() || !this.authService.isEmpresa()) {
       return of(null);
     }
 
     // Simular datos de la empresa loggeada
+    const keycloakUser = this.authService.keycloakUser;
     const empresaLoggeada: EmpresaDTO = {
-      id: currentUser.id,
-      name: currentUser.nombre || 'Mi Empresa',
-      surname: '',
-      imageUrl: 'https://i.pravatar.cc/150?img=default',
-      description: 'Descripción de mi empresa...',
+      id: keycloakUser?.id || 1,
+      name: keycloakUser?.name || 'Mi Empresa',
+      surname: keycloakUser?.surname || '',
+      imageUrl: keycloakUser?.imageUrl || 'https://i.pravatar.cc/150?img=default',
+      description: keycloakUser?.description || 'Descripción de mi empresa...',
       industry: 'Tecnología',
       size: CompanySize.FROM_51_TO_200,
       webSiteUrl: 'https://miempresa.com',
-      email: currentUser.email,
-      phone: '+54 11 1234-5678',
-      location: 'Buenos Aires, Argentina',
-      linkedinUrl: 'https://linkedin.com/company/miempresa',
+      email: keycloakUser?.email || 'empresa@example.com',
+      phone: keycloakUser?.phone || '+54 11 1234-5678',
+      location: keycloakUser?.location || 'Buenos Aires, Argentina',
+      linkedinUrl: keycloakUser?.linkedinUrl || 'https://linkedin.com/company/miempresa',
       role: 'empresa'
     };
 
