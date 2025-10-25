@@ -17,6 +17,7 @@ import { CompanySize } from '../../../models/usuario.dto';
 // Importar componentes compartidos
 import { ProfileHeaderComponent, ProfileHeaderData, SocialLink } from '../../../components/profile-header/profile-header.component';
 import { InfoCardComponent, InfoCardData } from '../../../components/info-card/info-card.component';
+import { EmpresaOfertasManagerComponent } from '../../../components/empresa-ofertas-manager/empresa-ofertas-manager.component';
 
 @Component({
     selector: 'app-perfil-empresa',
@@ -34,7 +35,8 @@ import { InfoCardComponent, InfoCardData } from '../../../components/info-card/i
         FormsModule,
         ReactiveFormsModule,
         ProfileHeaderComponent,
-        InfoCardComponent
+        InfoCardComponent,
+        EmpresaOfertasManagerComponent
     ],
     templateUrl: './perfil-empresa.component.html',
     styleUrls: ['./perfil-empresa.component.scss']

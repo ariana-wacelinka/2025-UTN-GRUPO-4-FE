@@ -583,7 +583,10 @@
             padding: 16px;
         }
 
-        .tab-label {}
+        .tab-label {
+            display: none;
+            /* Hide text on mobile, keep only icons */
+        }
     }
 
     .ofertas-container {
