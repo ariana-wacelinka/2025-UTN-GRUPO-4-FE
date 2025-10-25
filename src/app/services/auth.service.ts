@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import { delay, map, tap, catchError, switchMap } from 'rxjs/operators';
+import { delay, map, tap, catchError, switchMap, filter, take } from 'rxjs/operators';
 import { API_URL } from '../app.config';
 import { KeycloakUser } from '../models/keycloak-user.model';
 
@@ -56,11 +56,26 @@ export class AuthService {
 
   public idKeycloakUser: string | null = null;
   public keycloakUser: KeycloakUser | null = null;
+  private userLoadedSubject = new BehaviorSubject<boolean>(false);
+  public userLoaded$ = this.userLoadedSubject.asObservable();
 
   constructor(
     private http: HttpClient,
     @Inject(API_URL) private apiUrl: string
-  ) {}
+  ) {
+    setTimeout(() => this.initializeUser(), 0);
+  }
+
+  private initializeUser(): void {
+    const idToken = this.getIdTokenFromCookie();
+    if (idToken) {
+      this.extractSubFromIdToken(idToken);
+      this.loggedInSubject.next(true);
+      this.fetchKeycloakUser().subscribe();
+    } else {
+      this.userLoadedSubject.next(true);
+    }
+  }
 
   extractSubFromIdToken(idToken: string): void {
     const decoded = this.decodeJWT(idToken);
@@ -106,6 +121,7 @@ export class AuthService {
 
   private fetchKeycloakUser(): Observable<KeycloakUser> {
     if (!this.idKeycloakUser) {
+      this.userLoadedSubject.next(true);
       return of();
     }
 
@@ -116,11 +132,13 @@ export class AuthService {
         tap((user) => {
           console.log('=== KEYCLOAK USER FETCHED ===');
           this.keycloakUser = user;
+          this.userLoadedSubject.next(true);
           console.log('=== KEYCLOAK USER ===');
           console.log(JSON.stringify(user, null, 2));
         }),
         catchError((error) => {
           console.error('Error fetching keycloak user:', error);
+          this.userLoadedSubject.next(true);
           return of();
         })
       );
@@ -234,5 +252,12 @@ export class AuthService {
 
   isAlumno(): boolean {
     return true;
+  }
+
+  waitForUserLoad(): Observable<boolean> {
+    return this.userLoaded$.pipe(
+      filter(loaded => loaded),
+      take(1)
+    );
   }
 }
