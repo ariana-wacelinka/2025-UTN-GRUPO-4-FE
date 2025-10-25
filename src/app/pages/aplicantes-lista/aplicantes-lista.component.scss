@@ -112,6 +112,9 @@
   padding: 24px;
   margin-bottom: 32px;
   color: white;
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
 
   .stat {
     display: flex;
@@ -172,10 +175,14 @@
       }
     }
 
-    .fecha-aplicacion {
+    .estudiante-info {
       font-size: 14px;
       color: #718096;
       white-space: nowrap;
+      background: #e6fffa;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500;
     }
   }
 
@@ -230,6 +237,38 @@
     }
   }
 
+  .links-section {
+    background: #fffaf0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #fed7aa;
+
+    .info-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .link {
+        color: #2b6cb0;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: #2c5aa0;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
   .aplicante-acciones {
     display: flex;
     gap: 12px;
@@ -257,10 +296,16 @@
       color: white;
       box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
 
-      &:hover {
+      &:hover:not(:disabled) {
         background: #38a169;
         box-shadow: 0 4px 8px rgba(72, 187, 120, 0.4);
         transform: translateY(-2px);
+      }
+
+      &:disabled {
+        background: #a0aec0;
+        cursor: not-allowed;
+        box-shadow: none;
       }
     }
 
@@ -275,6 +320,23 @@
         transform: translateY(-2px);
       }
     }
+  }
+}
+
+// Pagination
+.pagination-info {
+  text-align: center;
+  margin-top: 32px;
+  padding: 16px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #4a5568;
+    font-weight: 500;
   }
 }
 

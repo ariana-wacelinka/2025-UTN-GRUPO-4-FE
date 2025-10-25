@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, delay, tap } from 'rxjs';
 import { OfertaListaDTO, EstadoAplicacion, AplicacionDTO, CrearOfertaDTO, PagedResponseDTO } from '../models/oferta.dto';
-import { AplicanteDTO, AplicanteListaDTO } from '../models/aplicante.dto';
+import { AplicanteDTO, AplicantesPagedResponse, StudentDTO } from '../models/aplicante.dto';
 import { API_URL } from '../app.config';
 
 @Injectable({
@@ -60,8 +60,8 @@ export class offersService {
     );
   }
 
-  getAplicantesPorOferta(ofertaId: number): Observable<AplicanteListaDTO> {
-    return this.http.get<AplicanteListaDTO>(
+  getAplicantesPorOferta(ofertaId: number): Observable<AplicantesPagedResponse> {
+    return this.http.get<AplicantesPagedResponse>(
       `${this.apiUrl}/applies?offerId=${ofertaId}`
     );
   }
@@ -71,12 +71,13 @@ export class offersService {
   }
 
   descargarCV(aplicante: AplicanteDTO): void {
-    if (aplicante.cvUrl) {
+    const student = aplicante.student;
+    if (student.cvUrl) {
       const a = document.createElement('a');
-      a.href = aplicante.cvUrl;
+      a.href = student.cvUrl;
       a.download =
-        aplicante.cvFileName ||
-        `CV_${aplicante.nombre.replace(/\s/g, '_')}.pdf`;
+        student.cvFileName ||
+        `CV_${student.name.replace(/\s/g, '_')}_${student.surname.replace(/\s/g, '_')}.pdf`;
       a.click();
     }
   }

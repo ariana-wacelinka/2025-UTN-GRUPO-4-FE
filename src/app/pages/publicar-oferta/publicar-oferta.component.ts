@@ -16,6 +16,7 @@ import { CrearOfertaDTO, Modalidad } from '../../models/oferta.dto';
 import { offersService } from '../../services/ofertas.service';
 import { AtributosService } from '../../services/atributos.service';
 import { UsuarioService } from '../../services/usuario.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-publicar-oferta',
@@ -213,14 +214,12 @@ export class PublicarOfertaComponent implements OnInit {
   constructor(
     private ofertasService: offersService,
     private atributosService: AtributosService,
-    private usuarioService: UsuarioService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.usuarioService.getCurrentUser().subscribe(user => {
-      this.oferta.bidderId = user.id;
-    });
+    this.oferta.bidderId = this.authService.keycloakUser!.id;
   }
 
   buscarAtributos(event: any): void {
