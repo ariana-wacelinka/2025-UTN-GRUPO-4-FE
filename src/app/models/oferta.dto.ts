@@ -9,9 +9,17 @@ export enum Modalidad {
   PRESENCIAL = 'presencial'
 }
 
-export interface Empresa {
+export interface Bidder {
   id: number;
-  nombre: string;
+  description: string | null;
+  phone: string;
+  email: string;
+  location: string;
+  name: string;
+  surname: string;
+  imageUrl: string | null;
+  linkedinUrl: string | null;
+  role: string;
 }
 
 export interface AplicacionDTO {
@@ -22,15 +30,16 @@ export interface AplicacionDTO {
 
 export interface OfertaListaDTO {
   id: number;
-  titulo: string;
-  descripcion: string;
-  requisitos: string;
-  modalidad: string; // "remoto" | "híbrido" | "presencial"
-  locacion: string;
-  pagoAprox: string; // ejemplo: "USD 1500-2000"
-  atributos: string[]; // ejemplo: ["Java", "Spring Boot", "Docker"]
-  estado: EstadoAplicacion;
-  empresa: Empresa;
+  title: string;
+  description: string;
+  requirements: string;
+  modality: string;
+  location: string;
+  estimatedPayment: string;
+  applyList: any[];
+  bidder: Bidder;
+  estado?: EstadoAplicacion;
+  attributes?: string[];
 }
 
 export interface CrearOfertaDTO {
@@ -46,10 +55,12 @@ export interface CrearOfertaDTO {
 
 export interface PagedResponseDTO<T> {
   content: T[];
-  currentPage: number;
-  pageSize: number;
-  totalElements: number;
   totalPages: number;
-  isFirst: boolean;
-  isLast: boolean;
+  totalElements: number;
+  last: boolean;
+  size: number;
+  number: number;
+  numberOfElements: number;
+  first: boolean;
+  empty: boolean;
 }

@@ -36,11 +36,15 @@ export class offersService {
       });
     }
 
-    return this.http.get<PagedResponseDTO<OfertaListaDTO>>(`${this.apiUrl}/offers`, { params: httpParams });
+    return this.http.get<PagedResponseDTO<OfertaListaDTO>>(`${this.apiUrl}/offers`, { params: httpParams }).pipe(
+      tap(result => console.log(result))
+    );
   }
 
   getOfertaById(id: number): Observable<OfertaListaDTO> {
-    return this.http.get<OfertaListaDTO>(`${this.apiUrl}/offers/${id}`);
+    return this.http.get<OfertaListaDTO>(`${this.apiUrl}/offers/${id}`).pipe(
+      tap(result => console.log(result))
+    );
   }
 
   aplicarAOferta(aplicacion: AplicacionDTO): Observable<void> {

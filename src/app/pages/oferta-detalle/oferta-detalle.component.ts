@@ -24,19 +24,19 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
             <mat-icon>arrow_back</mat-icon>
           </button>
           <div class="header-info">
-            <h1 class="job-title">{{ oferta.titulo }}</h1>
-            <div class="company-name">{{ oferta.empresa.nombre }}</div>
+            <h1 class="job-title">{{ oferta.title }}</h1>
+            <div class="company-name">{{ oferta.bidder.name }} {{ oferta.bidder.surname }}</div>
             <div class="job-meta">
               <div class="meta-item">
                 <mat-icon>location_on</mat-icon>
-                <span>{{ oferta.locacion }}</span>
+                <span>{{ oferta.location }}</span>
               </div>
               <div class="meta-item">
                 <mat-icon>work</mat-icon>
-                <span>{{ oferta.modalidad }}</span>
+                <span>{{ oferta.modality }}</span>
               </div>
               <div class="salary-highlight">
-                {{ oferta.pagoAprox }}
+                {{ oferta.estimatedPayment }}
               </div>
             </div>
           </div>
@@ -53,7 +53,7 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <p class="description-text">{{ oferta.descripcion }}</p>
+              <p class="description-text">{{ oferta.description }}</p>
             </mat-card-content>
           </mat-card>
 
@@ -65,7 +65,7 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <p class="requirements-text">{{ oferta.requisitos }}</p>
+              <p class="requirements-text">{{ oferta.requirements }}</p>
             </mat-card-content>
           </mat-card>
 
@@ -78,7 +78,7 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
             </mat-card-header>
             <mat-card-content>
               <div class="tech-grid">
-                @for (atributo of oferta.atributos; track atributo) {
+                @for (atributo of oferta.attributes || []; track atributo) {
                 <mat-chip class="tech-chip" selected>{{ atributo }}</mat-chip>
                 }
               </div>
@@ -140,21 +140,21 @@ import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-
                   <mat-icon>schedule</mat-icon>
                   <div>
                     <strong>Modalidad</strong>
-                    <span>{{ oferta.modalidad }}</span>
+                    <span>{{ oferta.modality }}</span>
                   </div>
                 </div>
                 <div class="info-item">
                   <mat-icon>payments</mat-icon>
                   <div>
                     <strong>Salario</strong>
-                    <span>{{ oferta.pagoAprox }}</span>
+                    <span>{{ oferta.estimatedPayment }}</span>
                   </div>
                 </div>
                 <div class="info-item">
                   <mat-icon>location_on</mat-icon>
                   <div>
                     <strong>Ubicación</strong>
-                    <span>{{ oferta.locacion }}</span>
+                    <span>{{ oferta.location }}</span>
                   </div>
                 </div>
               </div>
@@ -539,7 +539,7 @@ export class OfertaDetalleComponent implements OnInit {
 
     const dialogRef = this.dialog.open(AplicarDialogComponent, {
       width: '500px',
-      data: { ofertaTitulo: this.oferta.titulo },
+      data: { ofertaTitulo: this.oferta.title },
     });
 
     dialogRef.afterClosed().subscribe((cartaPresentacion) => {
