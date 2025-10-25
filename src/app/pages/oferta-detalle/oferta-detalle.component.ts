@@ -102,7 +102,22 @@ import { tap } from 'rxjs';
                   Ver Aplicantes
                 </button>
                 } @else {
-                  @if (oferta.estado === 'APLICADO') {
+                  @if (loadingApplicationStatus) {
+                  <!-- Botón de carga mientras verifica el estado o aplica -->
+                  <button mat-raised-button class="loading-button" disabled>
+                    @if (isApplying) {
+                      <ng-container>
+                        <mat-icon>send</mat-icon>
+                        Enviando aplicación...
+                      </ng-container>
+                    } @else {
+                      <ng-container>
+                        <mat-icon>hourglass_empty</mat-icon>
+                        Verificando...
+                      </ng-container>
+                    }
+                  </button>
+                  } @else if (oferta.estado === 'APLICADO') {
                   <button mat-raised-button class="applied-button" disabled>
                     <mat-icon>check</mat-icon>
                     Ya Aplicado
@@ -112,6 +127,7 @@ import { tap } from 'rxjs';
                     mat-raised-button
                     class="apply-button"
                     color="primary"
+                    [disabled]="!dataLoaded"
                     (click)="abrirDialogoAplicar()"
                   >
                     <mat-icon>send</mat-icon>
@@ -390,6 +406,25 @@ import { tap } from 'rxjs';
         padding: 16px !important;
       }
 
+      .loading-button {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%) !important;
+        color: #718096 !important;
+        font-weight: 500 !important;
+        text-transform: none !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        cursor: not-allowed !important;
+      }
+
+      .loading-button mat-icon {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
       .view-applicants-button {
         background: var(--primary-gradient) !important;
         color: var(--white) !important;
@@ -510,6 +545,9 @@ import { tap } from 'rxjs';
 export class OfertaDetalleComponent implements OnInit {
   oferta?: OfertaListaDTO;
   keycloakUser?: KeycloakUser;
+  loadingApplicationStatus = true; // Estado de carga para verificar si ya aplicó
+  dataLoaded = false; // Para controlar si los datos necesarios ya están cargados
+  isApplying = false; // Para mostrar cuando se está enviando la aplicación
 
   constructor(
     private route: ActivatedRoute,
@@ -525,13 +563,13 @@ export class OfertaDetalleComponent implements OnInit {
     // Cargar la oferta
     this.ofertasService.getOfertaById(id).subscribe((oferta) => {
       this.oferta = oferta;
-      this.verificarEstadoAplicacion(); // Verificar estado después de cargar la oferta
+      this.checkIfDataLoaded(); // Verificar si ya tenemos todos los datos
     });
 
     // Esperar a que el usuario esté cargado y luego obtenerlo
     this.authService.waitForUserLoad().subscribe(() => {
       this.keycloakUser = this.authService.keycloakUser || undefined;
-      this.verificarEstadoAplicacion(); // Verificar estado después de cargar el usuario
+      this.checkIfDataLoaded(); // Verificar si ya tenemos todos los datos
     });
   }
 
@@ -553,6 +591,10 @@ export class OfertaDetalleComponent implements OnInit {
       console.log('Oferta ID:', this.oferta?.id);
       console.log('Usuario ID:', this.keycloakUser?.id);
         console.log('Enviando aplicación...');
+        // Mostrar estado de carga mientras se aplica
+        this.isApplying = true;
+        this.loadingApplicationStatus = true;
+
         this.ofertasService.aplicarAOferta({
           offerId: this.oferta!.id,
           studentId: this.keycloakUser!.id,
@@ -564,9 +606,13 @@ export class OfertaDetalleComponent implements OnInit {
             if (this.oferta) {
               this.oferta.estado = EstadoAplicacion.APLICADO;
             }
+            this.isApplying = false;
+            this.loadingApplicationStatus = false;
           },
           error: (error) => {
             console.error('❌ Error al aplicar a la oferta:', error);
+            this.isApplying = false;
+            this.loadingApplicationStatus = false;
             // Aquí puedes agregar manejo de errores, como mostrar un mensaje al usuario
           }
         });
@@ -584,16 +630,27 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   /**
+   * Verifica si todos los datos necesarios están cargados y procede con la verificación
+   */
+  private checkIfDataLoaded(): void {
+    if (this.oferta && this.keycloakUser && !this.dataLoaded) {
+      this.dataLoaded = true;
+      this.verificarEstadoAplicacion();
+    }
+  }
+
+  /**
    * Verifica si el usuario ya aplicó a esta oferta y actualiza el estado
    */
   private verificarEstadoAplicacion(): void {
-    // Solo verificar si tenemos tanto la oferta como el usuario
-    if (!this.oferta || !this.keycloakUser) {
+    // No verificar si es nuestra propia oferta
+    if (this.isMyOffer()) {
+      this.loadingApplicationStatus = false;
       return;
     }
 
-    // No verificar si es nuestra propia oferta
-    if (this.isMyOffer()) {
+    // Asegurarse de que tenemos los datos necesarios
+    if (!this.oferta || !this.keycloakUser) {
       return;
     }
 
@@ -604,9 +661,15 @@ export class OfertaDetalleComponent implements OnInit {
         } else if (this.oferta) {
           this.oferta.estado = EstadoAplicacion.NO_APLICADO;
         }
+        this.loadingApplicationStatus = false;
       },
       error: (error) => {
         console.error('❌ Error al verificar estado de aplicación:', error);
+        this.loadingApplicationStatus = false;
+        // En caso de error, asumir que no ha aplicado
+        if (this.oferta) {
+          this.oferta.estado = EstadoAplicacion.NO_APLICADO;
+        }
       }
     });
   }
