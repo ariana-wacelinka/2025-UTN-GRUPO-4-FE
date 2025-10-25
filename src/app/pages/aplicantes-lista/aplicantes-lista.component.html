@@ -94,17 +94,17 @@
 
         <div class="aplicante-acciones">
           <!-- CA2: Botón para descargar CV -->
-          <button 
-            class="btn-descargar-cv" 
+          <button
+            class="btn-descargar-cv"
             (click)="descargarCV(aplicante, $event)"
             [disabled]="!aplicante.student.cvUrl"
             title="Descargar CV de {{ aplicante.student.name }} {{ aplicante.student.surname }}"
           >
             📄 {{ aplicante.student.cvUrl ? 'Descargar CV' : 'CV no disponible' }}
           </button>
-          
-          <button 
-            class="btn-ver-perfil" 
+
+          <button
+            class="btn-ver-perfil"
             (click)="verPerfil(aplicante)"
             title="Ver perfil completo"
           >
@@ -117,7 +117,7 @@
     <!-- Pagination -->
     <div class="pagination-info" *ngIf="aplicantes.length > 0">
       <p>
-        Página {{ aplicantesData.number + 1 }} de {{ aplicantesData.totalPages }} 
+        Página {{ aplicantesData.number + 1 }} de {{ aplicantesData.totalPages }}
         ({{ aplicantesData.totalElements }} aplicantes en total)
       </p>
     </div>
