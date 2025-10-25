@@ -8,16 +8,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 
 import { PerfilAlumnoComponent } from './perfil-alumno.component';
-import { PerfilAlumnoService, PerfilAlumnoDTO } from '../../services/perfil-alumno.service';
+import { PerfilAlumnoService, PerfilAlumnoDTO, MateriasState } from '../../services/perfil-alumno.service';
 
 describe('PerfilAlumnoComponent', () => {
   let component: PerfilAlumnoComponent;
   let fixture: ComponentFixture<PerfilAlumnoComponent>;
   let mockPerfilService: jasmine.SpyObj<PerfilAlumnoService>;
+  let snackBar: MatSnackBar;
 
   const mockPerfil: PerfilAlumnoDTO = {
     id: 1,
@@ -40,11 +42,23 @@ describe('PerfilAlumnoComponent', () => {
     curriculumUrl: '/assets/test-cv.pdf'
   };
 
+  const mockMateriasState: MateriasState = {
+    materias: [
+      { codigo: '123', nombre: 'Algoritmos', nota: 9, estado: 'Aprobada', fechaAprobacion: '2024-01-10' },
+      { codigo: '456', nombre: 'Álgebra', nota: 8, estado: 'Aprobada', fechaAprobacion: '2023-11-20' }
+    ],
+    promedioGeneral: 8.5,
+    totalMaterias: 2
+  };
+
   beforeEach(async () => {
     const spy = jasmine.createSpyObj('PerfilAlumnoService', [
       'getPerfil',
       'actualizarPerfil',
-      'descargarCV'
+      'descargarCV',
+      'obtenerMateriasState',
+      'cargarMateriasDesdeBackend',
+      'subirMateriasExcel'
     ]);
 
     await TestBed.configureTestingModule({
@@ -58,7 +72,8 @@ describe('PerfilAlumnoComponent', () => {
         MatInputModule,
         MatSelectModule,
         MatChipsModule,
-        MatDividerModule,
+    MatDividerModule,
+    MatSnackBarModule,
         BrowserAnimationsModule
       ],
       providers: [
@@ -69,6 +84,12 @@ describe('PerfilAlumnoComponent', () => {
     fixture = TestBed.createComponent(PerfilAlumnoComponent);
     component = fixture.componentInstance;
     mockPerfilService = TestBed.inject(PerfilAlumnoService) as jasmine.SpyObj<PerfilAlumnoService>;
+    snackBar = TestBed.inject(MatSnackBar);
+
+    mockPerfilService.getPerfil.and.returnValue(of(mockPerfil));
+    mockPerfilService.obtenerMateriasState.and.returnValue(of(mockMateriasState));
+    mockPerfilService.cargarMateriasDesdeBackend.and.returnValue(of(mockMateriasState));
+    mockPerfilService.subirMateriasExcel.and.returnValue(of(mockMateriasState));
   });
 
   describe('Component Initialization', () => {
@@ -92,8 +113,10 @@ describe('PerfilAlumnoComponent', () => {
       component.ngOnInit();
 
       expect(mockPerfilService.getPerfil).toHaveBeenCalled();
+      expect(mockPerfilService.cargarMateriasDesdeBackend).toHaveBeenCalled();
       expect(component.perfilAlumno).toEqual(mockPerfil);
       expect(component.isLoading).toBe(false);
+      expect(component.materiasAlumno.length).toBe(mockMateriasState.materias.length);
     });
   });
 
@@ -155,6 +178,42 @@ describe('PerfilAlumnoComponent', () => {
       expect(component.editForm.get('nombre')?.value).toBe(mockPerfil.nombre);
     });
   });
+  
+    describe('Materias upload', () => {
+      beforeEach(() => {
+        component.ngOnInit();
+      });
+
+      it('should show materias state after init', () => {
+        expect(component.materiasAlumno.length).toBe(mockMateriasState.materias.length);
+        expect(component.promedioMaterias).toBe(mockMateriasState.promedioGeneral);
+      });
+
+      it('should reject invalid file extensions', () => {
+        const snackSpy = spyOn(snackBar, 'open');
+        const mockInput = { files: [new File(['content'], 'materias.pdf', { type: 'application/pdf' })], value: 'materias.pdf' } as unknown as HTMLInputElement;
+
+        component.onMateriasFileSelected({ target: mockInput } as unknown as Event);
+
+        expect(mockPerfilService.subirMateriasExcel).not.toHaveBeenCalled();
+        expect(snackSpy).toHaveBeenCalled();
+        expect(mockInput.value).toBe('');
+      });
+
+      it('should upload materias excel and reset file name', () => {
+        const snackSpy = spyOn(snackBar, 'open');
+        const xlsFile = new File(['content'], 'materias.xls', { type: 'application/vnd.ms-excel' });
+        const mockInput = { files: [xlsFile], value: 'materias.xls' } as unknown as HTMLInputElement;
+
+        component.onMateriasFileSelected({ target: mockInput } as unknown as Event);
+
+        expect(mockPerfilService.subirMateriasExcel).toHaveBeenCalledWith(xlsFile);
+        expect(component.selectedMateriasFileName).toBeNull();
+        expect(component.isMateriasUploading).toBeFalse();
+        expect(snackSpy).toHaveBeenCalled();
+        expect(mockInput.value).toBe('');
+      });
+    });
 
   describe('External Actions', () => {
     beforeEach(() => {
