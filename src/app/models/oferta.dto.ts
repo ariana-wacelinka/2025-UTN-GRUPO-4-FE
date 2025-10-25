@@ -23,9 +23,9 @@ export interface Bidder {
 }
 
 export interface AplicacionDTO {
-  ofertaId: number;
-  usuarioId: number;
-  cartaPresentacion?: string;
+  offerId: number;
+  studentId: number;
+  customCoverLetter?: string;
 }
 
 export interface OfertaListaDTO {

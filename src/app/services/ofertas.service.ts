@@ -47,8 +47,9 @@ export class offersService {
     );
   }
 
-  aplicarAOferta(aplicacion: AplicacionDTO): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/offers/aplicar`, aplicacion);
+  aplicarAOferta(aplicacion: AplicacionDTO): Observable<any> {
+    console.log('Aplicando a oferta:', aplicacion);
+    return this.http.post(`${this.apiUrl}/applies`, aplicacion);
   }
 
   getAplicantesPorOferta(ofertaId: number): Observable<AplicanteListaDTO> {

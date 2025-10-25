@@ -543,14 +543,17 @@ export class OfertaDetalleComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((cartaPresentacion) => {
-      if (cartaPresentacion !== undefined && this.oferta && this.usuario) {
+      console.log('El diálogo se cerró');
+      console.log('Carta de presentación:', cartaPresentacion);
+      console.log('Oferta ID:', this.oferta?.id);
+      console.log('Usuario ID:', this.usuario?.id);
+        console.log('Enviando aplicación...');
         this.ofertasService.aplicarAOferta({
-          ofertaId: this.oferta.id,
-          usuarioId: this.usuario.id,
-          cartaPresentacion,
+          offerId: this.oferta!.id,
+          studentId: this.usuario!.id,
+          customCoverLetter: cartaPresentacion,
         });
-        this.oferta.estado = EstadoAplicacion.APLICADO;
-      }
+        this.oferta!.estado = EstadoAplicacion.APLICADO;
     });
   }
 
