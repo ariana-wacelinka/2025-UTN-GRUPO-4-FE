@@ -229,7 +229,12 @@ export class NavbarComponent implements OnInit {
   }
 
   irPerfil(): void {
-    this.router.navigate(['/perfil']);
+    // Navegar según el tipo de usuario
+    if (this.authService.isEmpresa()) {
+      this.router.navigate(['/perfil-empresa']);
+    } else {
+      this.router.navigate(['/perfil']);
+    }
   }
 
   irLogin(): void {
