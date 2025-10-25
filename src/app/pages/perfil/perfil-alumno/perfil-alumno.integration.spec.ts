@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,9 +12,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
+import { of } from 'rxjs';
 
 import { PerfilAlumnoComponent } from './perfil-alumno.component';
-import { PerfilAlumnoService } from '../../../services/perfil-alumno.service';
+import { PerfilAlumnoService, DEFAULT_MATERIAS_STATE } from '../../../services/perfil-alumno.service';
+import { API_URL } from '../../../app.config';
 
 describe('PerfilAlumnoComponent - Integration Tests', () => {
     let component: PerfilAlumnoComponent;
@@ -24,6 +27,7 @@ describe('PerfilAlumnoComponent - Integration Tests', () => {
         await TestBed.configureTestingModule({
             imports: [
                 PerfilAlumnoComponent,
+                HttpClientTestingModule,
                 ReactiveFormsModule,
                 MatCardModule,
                 MatButtonModule,
@@ -35,12 +39,17 @@ describe('PerfilAlumnoComponent - Integration Tests', () => {
                 MatDividerModule,
                 BrowserAnimationsModule
             ],
-            providers: [PerfilAlumnoService]
+            providers: [
+                PerfilAlumnoService,
+                { provide: API_URL, useValue: 'http://localhost:3000/api' }
+            ]
         }).compileComponents();
 
         fixture = TestBed.createComponent(PerfilAlumnoComponent);
         component = fixture.componentInstance;
         service = TestBed.inject(PerfilAlumnoService);
+
+        spyOn(service, 'cargarMateriasDesdeBackend').and.returnValue(of(DEFAULT_MATERIAS_STATE));
     });
 
     describe('Profile Display Integration', () => {
@@ -153,6 +162,33 @@ describe('PerfilAlumnoComponent - Integration Tests', () => {
 
             expect(languageName).toBeTruthy();
             expect(languageLevel).toBeTruthy();
+        });
+    });
+
+    describe('Subjects Section Integration', () => {
+        beforeEach(() => {
+            component.ngOnInit();
+            fixture.detectChanges();
+        });
+
+        it('should render subjects card with summary data', () => {
+            const subjectsCard = fixture.debugElement.query(By.css('.subjects-card'));
+            expect(subjectsCard).toBeTruthy();
+
+            const summaryValues = subjectsCard.queryAll(By.css('.summary-value'));
+            expect(summaryValues.length).toBeGreaterThan(0);
+            expect(summaryValues[0].nativeElement.textContent).toContain(DEFAULT_MATERIAS_STATE.totalMaterias.toString());
+        });
+
+        it('should list materias rows', () => {
+            const rows = fixture.debugElement.queryAll(By.css('.subjects-table .table-row'));
+            expect(rows.length).toBe(DEFAULT_MATERIAS_STATE.materias.length);
+        });
+
+        it('should have upload button available', () => {
+            const uploadButton = fixture.debugElement.query(By.css('.subjects-card .upload-btn'));
+            expect(uploadButton).toBeTruthy();
+            expect(uploadButton.nativeElement.disabled).toBeFalse();
         });
     });
 

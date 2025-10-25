@@ -257,6 +257,86 @@
                         </div>
                     </mat-card-content>
                 </mat-card>
+
+                <!-- Materias Aprobadas -->
+                <mat-card class="modern-card subjects-card">
+                    <mat-card-header>
+                        <mat-card-title class="section-title">
+                            <mat-icon class="section-icon">library_books</mat-icon>
+                            Materias Aprobadas
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="subjects-summary" *ngIf="materiasAlumno.length">
+                            <div class="summary-item">
+                                <span class="summary-label">Materias cargadas</span>
+                                <span class="summary-value">{{totalMaterias}}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Promedio general</span>
+                                <span class="summary-value">{{promedioMaterias | number:'1.2-2'}}</span>
+                            </div>
+                        </div>
+
+                        <div class="subjects-upload">
+                            <div class="upload-info">
+                                <mat-icon>upload_file</mat-icon>
+                                <div>
+                                    <h4>Planilla de materias</h4>
+                                    <p>Formato permitido: .xls (Alumnos Web)</p>
+                                </div>
+                            </div>
+                            <div class="upload-actions">
+                                <input type="file" #materiasInput accept=".xls" (change)="onMateriasFileSelected($event)" hidden>
+                                <button mat-stroked-button class="upload-btn" (click)="materiasInput.click()" [disabled]="isMateriasUploading">
+                                    <mat-icon *ngIf="!isMateriasUploading">cloud_upload</mat-icon>
+                                    <mat-icon *ngIf="isMateriasUploading" class="spin">autorenew</mat-icon>
+                                    {{isMateriasUploading ? 'Subiendo...' : 'Subir .xls'}}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="file-processing" *ngIf="selectedMateriasFileName && isMateriasUploading">
+                            Procesando {{selectedMateriasFileName}}...
+                        </div>
+
+                        <div class="subjects-error" *ngIf="materiasError">
+                            <mat-icon>error_outline</mat-icon>
+                            <span>{{materiasError}}</span>
+                        </div>
+
+                        <div class="subjects-loading" *ngIf="isMateriasLoading">
+                            <div class="loading-spinner"></div>
+                            <p>Actualizando materias...</p>
+                        </div>
+
+                        <ng-container *ngIf="!isMateriasLoading">
+                            <div class="subjects-table" *ngIf="materiasAlumno.length; else emptySubjects">
+                                <div class="table-header">
+                                    <span>Materia</span>
+                                    <span>Fecha</span>
+                                    <span>Nota</span>
+                                    <span>Estado</span>
+                                </div>
+                                <div class="table-row" *ngFor="let materia of materiasAlumno; trackBy: trackByMateria">
+                                    <div class="materia-name">
+                                        <span class="materia-title">{{materia.nombre}}</span>
+                                        <span class="materia-code" *ngIf="materia.codigo">Código {{materia.codigo}}</span>
+                                    </div>
+                                    <span class="materia-date">{{materia.fechaAprobacion | date:'dd/MM/yyyy'}}</span>
+                                    <span class="materia-grade">{{materia.nota | number:'1.0-1'}}</span>
+                                    <span class="materia-status">{{materia.estado}}</span>
+                                </div>
+                            </div>
+                            <ng-template #emptySubjects>
+                                <div class="subjects-empty">
+                                    <mat-icon>inventory_2</mat-icon>
+                                    <p>Subí tu .xls de Alumnos Web para visualizar tus materias aprobadas.</p>
+                                </div>
+                            </ng-template>
+                        </ng-container>
+                    </mat-card-content>
+                </mat-card>
             </div>
         </div>
     </div>

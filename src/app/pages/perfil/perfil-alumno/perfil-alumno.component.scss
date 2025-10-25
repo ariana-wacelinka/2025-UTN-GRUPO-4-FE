@@ -402,6 +402,231 @@
     }
 }
 
+.subjects-card {
+    .subjects-summary {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding: 16px;
+        border-radius: var(--border-radius);
+        background: var(--muted-bg);
+        border: 1px solid var(--chip-border);
+
+        .summary-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .summary-label {
+                color: var(--text-muted);
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            .summary-value {
+                font-size: 1.6rem;
+                font-weight: 700;
+                color: var(--primary-color);
+            }
+        }
+    }
+
+    .subjects-upload {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px;
+        border-radius: var(--border-radius);
+        border: 1px dashed var(--chip-border);
+        background: var(--chip-bg);
+        margin-bottom: 16px;
+
+        .upload-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+
+            mat-icon {
+                color: var(--primary-color);
+                font-size: 1.5rem;
+            }
+
+            h4 {
+                margin: 0 0 4px 0;
+                font-size: 1rem;
+                color: var(--text-primary);
+                font-weight: 600;
+            }
+
+            p {
+                margin: 0;
+                color: var(--text-muted);
+                font-size: 0.9rem;
+            }
+        }
+
+        .upload-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .upload-btn {
+            color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+
+            &:hover {
+                background: var(--primary-color) !important;
+                color: white !important;
+            }
+
+            .spin {
+                animation: spin 1s linear infinite;
+            }
+
+            mat-icon {
+                margin-right: 8px;
+            }
+        }
+    }
+
+    .file-processing {
+        margin-bottom: 12px;
+        color: var(--primary-color);
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .subjects-error {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 12px;
+        border-radius: var(--border-radius);
+        background: rgba(244, 67, 54, 0.08);
+        color: #f44336;
+
+        mat-icon {
+            font-size: 1.2rem;
+        }
+    }
+
+    .subjects-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: 24px 0;
+
+        p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+    }
+
+    .subjects-table {
+        border: 1px solid var(--chip-border);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        background: var(--glass-white);
+
+        .table-header,
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 0.6fr 1fr;
+            gap: 12px;
+            padding: 16px;
+
+            @media (max-width: 768px) {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .table-header {
+            background: var(--chip-bg);
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .table-row {
+            border-top: 1px solid var(--chip-border);
+
+            &:first-of-type {
+                border-top: none;
+            }
+
+            .materia-name {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                .materia-title {
+                    font-weight: 600;
+                    color: var(--text-primary);
+                }
+
+                .materia-code {
+                    font-size: 0.85rem;
+                    color: var(--text-muted);
+                }
+            }
+
+            .materia-date,
+            .materia-grade,
+            .materia-status {
+                align-self: center;
+                font-weight: 500;
+                color: var(--text-secondary);
+            }
+
+            .materia-grade {
+                color: var(--primary-color);
+                font-size: 1.1rem;
+            }
+
+            .materia-status {
+                justify-self: start;
+                padding: 6px 12px;
+                border-radius: 20px;
+                background: var(--chip-bg);
+                border: 1px solid var(--chip-border);
+                color: var(--primary-color);
+            }
+        }
+    }
+
+    .subjects-empty {
+        margin: 24px 0;
+        padding: 24px;
+        border-radius: var(--border-radius);
+        background: var(--muted-bg);
+        text-align: center;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+
+        mat-icon {
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+
+        p {
+            margin: 0;
+            font-size: 0.95rem;
+            max-width: 320px;
+        }
+    }
+}
+
 @media (max-width: 768px) {
     .perfil-container {
         padding: 16px 0;
@@ -421,6 +646,34 @@
 
     .info-item {
         padding: 10px;
+    }
+
+    .subjects-card {
+        .subjects-summary {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .subjects-upload {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .subjects-table {
+            .table-header {
+                display: none;
+            }
+
+            .table-row {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .materia-status {
+                align-self: flex-start;
+            }
+        }
     }
 }
 
@@ -775,6 +1028,256 @@
         .upload-btn {
             min-width: auto;
             width: 100%;
+        }
+    }
+}
+
+// ============= ESTILOS PARA MATERIAS =============
+
+.subjects-card {
+    .subjects-summary {
+        display: flex;
+        gap: 32px;
+        padding: 20px;
+        background: var(--glass-white);
+        border-radius: 12px;
+        border: 1px solid var(--glass-border);
+        margin-bottom: 24px;
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+
+            .summary-label {
+                font-size: 0.875rem;
+                color: var(--text-secondary);
+                margin-bottom: 4px;
+            }
+
+            .summary-value {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--primary-color);
+            }
+        }
+    }
+
+    .subjects-upload {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: var(--glass-white);
+        border-radius: 12px;
+        border: 1px solid var(--glass-border);
+        margin-bottom: 24px;
+
+        .upload-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+
+            mat-icon {
+                color: var(--primary-color);
+                font-size: 32px;
+                width: 32px;
+                height: 32px;
+            }
+
+            h4 {
+                margin: 0 0 4px 0;
+                color: var(--text-primary);
+            }
+
+            p {
+                margin: 0;
+                color: var(--text-secondary);
+                font-size: 0.875rem;
+            }
+        }
+
+        .upload-actions {
+            .upload-btn {
+                min-width: 120px;
+            }
+        }
+    }
+
+    .file-processing {
+        text-align: center;
+        padding: 16px;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .subjects-error {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 16px;
+        background: rgba(244, 67, 54, 0.1);
+        color: var(--error-color);
+        border-radius: 8px;
+        margin-bottom: 16px;
+
+        mat-icon {
+            color: var(--error-color);
+        }
+    }
+
+    .subjects-loading {
+        text-align: center;
+        padding: 32px;
+
+        .loading-spinner {
+            margin: 0 auto 16px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+    }
+
+    .subjects-table {
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 16px;
+            padding: 16px 20px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 16px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--divider-color);
+            transition: background-color 0.2s;
+
+            &:hover {
+                background: var(--glass-white);
+            }
+
+            &:last-child {
+                border-bottom: none;
+                border-radius: 0 0 8px 8px;
+            }
+
+            .materia-name {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                .materia-title {
+                    font-weight: 500;
+                    color: var(--text-primary);
+                }
+
+                .materia-code {
+                    font-size: 0.75rem;
+                    color: var(--text-secondary);
+                }
+            }
+
+            .materia-date {
+                color: var(--text-secondary);
+            }
+
+            .materia-grade {
+                font-weight: 600;
+                color: var(--primary-color);
+            }
+
+            .materia-status {
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                font-weight: 500;
+                text-align: center;
+                background: var(--success-color);
+                color: white;
+            }
+        }
+    }
+
+    .subjects-empty {
+        text-align: center;
+        padding: 48px 20px;
+        color: var(--text-secondary);
+
+        mat-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            color: var(--divider-color);
+        }
+
+        p {
+            margin: 0;
+            font-size: 1rem;
+        }
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .subjects-card {
+        .subjects-summary {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .subjects-upload {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+
+        .subjects-table {
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .table-header {
+                display: none; // Ocultar headers en móvil
+            }
+
+            .table-row {
+                padding: 16px;
+                border: 1px solid var(--divider-color);
+                border-radius: 8px;
+                margin-bottom: 8px;
+
+                .materia-name,
+                .materia-date,
+                .materia-grade,
+                .materia-status {
+                    margin-bottom: 8px;
+                }
+
+                .materia-name {
+                    text-align: center;
+                }
+            }
         }
     }
 }

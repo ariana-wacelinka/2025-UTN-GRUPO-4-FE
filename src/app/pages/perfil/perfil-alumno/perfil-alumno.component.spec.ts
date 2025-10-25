@@ -8,43 +8,61 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 
 import { PerfilAlumnoComponent } from './perfil-alumno.component';
 import { EstudianteDTO } from '../../../models/aplicante.dto';
-import { PerfilAlumnoService } from '../../../services/perfil-alumno.service';
+import { PerfilAlumnoService, MateriasState } from '../../../services/perfil-alumno.service';
 
 describe('PerfilAlumnoComponent', () => {
   let component: PerfilAlumnoComponent;
   let fixture: ComponentFixture<PerfilAlumnoComponent>;
   let mockPerfilService: jasmine.SpyObj<PerfilAlumnoService>;
+  let snackBar: MatSnackBar;
 
   const mockPerfil: EstudianteDTO = {
     id: 1,
-    nombre: 'Test',
-    apellido: 'User',
-    imagen: 'test-image.jpg',
+    description: 'Test description',
+    phone: '+54 123 456 789',
     email: 'test@test.com',
-    linkedin: 'https://linkedin.com/test',
-    github: 'https://github.com/test',
-    carrera: 'Test Career',
-    anio: '4to año',
-    universidad: 'Test University',
-    descripcion: 'Test description',
-    habilidades: ['JavaScript', 'Angular'],
-    idiomas: [{ idioma: 'Español', nivel: 'Nativo' }],
-    telefono: '+54 123 456 789',
-    ubicacion: 'Test City',
-    fechaNacimiento: '01/01/2000',
-    cvUrl: '/assets/test-cv.pdf'
+    location: 'Test City',
+    name: 'Test',
+    surname: 'User',
+    imageUrl: 'test-image.jpg',
+    linkedinUrl: 'https://linkedin.com/test',
+    role: 'estudiante',
+    githubUrl: 'https://github.com/test',
+    career: 'Test Career',
+    currentYearLevel: 4,
+    institution: 'Test University',
+    skills: ['JavaScript', 'Angular'],
+    incomeDate: '2020-03-01',
+    dateOfBirth: '01/01/2000',
+    cvUrl: '/assets/test-cv.pdf',
+    cvFileName: 'test-cv.pdf',
+    coverLetter: 'Test cover letter',
+    languages: [{ id: 1, name: 'Español', level: 5 }]
+  };
+
+  const mockMateriasState: MateriasState = {
+    materias: [
+      { codigo: '123', nombre: 'Algoritmos', nota: 9, estado: 'Aprobada', fechaAprobacion: '2024-01-10' },
+      { codigo: '456', nombre: 'Álgebra', nota: 8, estado: 'Aprobada', fechaAprobacion: '2023-11-20' }
+    ],
+    promedioGeneral: 8.5,
+    totalMaterias: 2
   };
 
   beforeEach(async () => {
     const spy = jasmine.createSpyObj('PerfilAlumnoService', [
       'getPerfil',
       'actualizarPerfil',
-      'descargarCV'
+      'descargarCV',
+      'obtenerMateriasState',
+      'cargarMateriasDesdeBackend',
+      'subirMateriasExcel'
     ]);
 
     await TestBed.configureTestingModule({
@@ -58,7 +76,8 @@ describe('PerfilAlumnoComponent', () => {
         MatInputModule,
         MatSelectModule,
         MatChipsModule,
-        MatDividerModule,
+    MatDividerModule,
+    MatSnackBarModule,
         BrowserAnimationsModule
       ],
       providers: [
@@ -69,6 +88,12 @@ describe('PerfilAlumnoComponent', () => {
     fixture = TestBed.createComponent(PerfilAlumnoComponent);
     component = fixture.componentInstance;
     mockPerfilService = TestBed.inject(PerfilAlumnoService) as jasmine.SpyObj<PerfilAlumnoService>;
+    snackBar = TestBed.inject(MatSnackBar);
+
+    mockPerfilService.getPerfil.and.returnValue(of(mockPerfil));
+    mockPerfilService.obtenerMateriasState.and.returnValue(of(mockMateriasState));
+    mockPerfilService.cargarMateriasDesdeBackend.and.returnValue(of(mockMateriasState));
+    mockPerfilService.subirMateriasExcel.and.returnValue(of(mockMateriasState));
   });
 
   describe('Component Initialization', () => {
@@ -92,8 +117,10 @@ describe('PerfilAlumnoComponent', () => {
       component.ngOnInit();
 
       expect(mockPerfilService.getPerfil).toHaveBeenCalled();
+      expect(mockPerfilService.cargarMateriasDesdeBackend).toHaveBeenCalled();
       expect(component.perfilAlumno).toEqual(mockPerfil);
       expect(component.isLoading).toBe(false);
+      expect(component.materiasAlumno.length).toBe(mockMateriasState.materias.length);
     });
   });
 
@@ -155,6 +182,42 @@ describe('PerfilAlumnoComponent', () => {
       expect(component.editForm.get('nombre')?.value).toBe(mockPerfil.nombre);
     });
   });
+  
+    describe('Materias upload', () => {
+      beforeEach(() => {
+        component.ngOnInit();
+      });
+
+      it('should show materias state after init', () => {
+        expect(component.materiasAlumno.length).toBe(mockMateriasState.materias.length);
+        expect(component.promedioMaterias).toBe(mockMateriasState.promedioGeneral);
+      });
+
+      it('should reject invalid file extensions', () => {
+        const snackSpy = spyOn(snackBar, 'open');
+        const mockInput = { files: [new File(['content'], 'materias.pdf', { type: 'application/pdf' })], value: 'materias.pdf' } as unknown as HTMLInputElement;
+
+        component.onMateriasFileSelected({ target: mockInput } as unknown as Event);
+
+        expect(mockPerfilService.subirMateriasExcel).not.toHaveBeenCalled();
+        expect(snackSpy).toHaveBeenCalled();
+        expect(mockInput.value).toBe('');
+      });
+
+      it('should upload materias excel and reset file name', () => {
+        const snackSpy = spyOn(snackBar, 'open');
+        const xlsFile = new File(['content'], 'materias.xls', { type: 'application/vnd.ms-excel' });
+        const mockInput = { files: [xlsFile], value: 'materias.xls' } as unknown as HTMLInputElement;
+
+        component.onMateriasFileSelected({ target: mockInput } as unknown as Event);
+
+        expect(mockPerfilService.subirMateriasExcel).toHaveBeenCalledWith(xlsFile);
+        expect(component.selectedMateriasFileName).toBeNull();
+        expect(component.isMateriasUploading).toBeFalse();
+        expect(snackSpy).toHaveBeenCalled();
+        expect(mockInput.value).toBe('');
+      });
+    });
 
   describe('External Actions', () => {
     beforeEach(() => {
