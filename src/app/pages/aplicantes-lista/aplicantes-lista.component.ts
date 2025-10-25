@@ -26,13 +26,6 @@ export class AplicantesListaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Verificar que sea una empresa
-    if (!this.authService.isEmpresa()) {
-      this.error = 'Solo las empresas pueden ver los aplicantes';
-      this.loading = false;
-      return;
-    }
-
     // Obtener el ID de la oferta de la ruta
     this.route.params.subscribe(params => {
       this.ofertaId = +params['id'];

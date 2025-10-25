@@ -52,7 +52,7 @@ export class offersService {
   }
 
   getAplicantesPorOferta(ofertaId: number): Observable<AplicanteListaDTO> {
-    return this.http.get<AplicanteListaDTO>(`${this.apiUrl}/aplicantes/oferta/${ofertaId}`);
+    return this.http.get<AplicanteListaDTO>(`${this.apiUrl}/applies?offerId=${ofertaId}`);
   }
 
   crearOferta(oferta: CrearOfertaDTO): Observable<any> {
