@@ -16,35 +16,35 @@ import { MatChipInputEvent } from '@angular/material/chips';
 
 import { OfertasLaboralesService } from '../../services/ofertas-laborales.service';
 import {
-    CreateOfertaDTO,
-    UpdateOfertaDTO,
-    OfertaLaboralDTO,
-    ModalidadTrabajo
+  CreateOfertaDTO,
+  UpdateOfertaDTO,
+  OfertaLaboralDTO,
+  ModalidadTrabajo
 } from '../../models/oferta-laboral.dto';
 
 export interface OfertaFormDialogData {
-    oferta?: OfertaLaboralDTO;
-    isEditing: boolean;
+  oferta?: OfertaLaboralDTO;
+  isEditing: boolean;
 }
 
 @Component({
-    selector: 'app-oferta-form-dialog',
-    standalone: true,
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatIconModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatSnackBarModule,
-        MatChipsModule
-    ],
-    template: `
+  selector: 'app-oferta-form-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSnackBarModule,
+    MatChipsModule
+  ],
+  template: `
     <div class="oferta-form-dialog">
       <div class="dialog-header">
         <h2 mat-dialog-title>
@@ -211,160 +211,160 @@ export interface OfertaFormDialogData {
       </mat-dialog-actions>
     </div>
   `,
-    styleUrls: ['./oferta-form-dialog.component.scss']
+  styleUrls: ['./oferta-form-dialog.component.scss']
 })
 export class OfertaFormDialogComponent implements OnInit {
-    ofertaForm!: FormGroup;
-    isSubmitting = signal(false);
-    skills = signal<string[]>([]);
+  ofertaForm!: FormGroup;
+  isSubmitting = signal(false);
+  skills = signal<string[]>([]);
 
-    readonly separatorKeysCodes = [ENTER, COMMA] as const;
+  readonly separatorKeysCodes = [ENTER, COMMA] as const;
 
-    modalidadesDisponibles = [
-        { value: ModalidadTrabajo.PRESENCIAL, label: 'Presencial' },
-        { value: ModalidadTrabajo.REMOTO, label: 'Remoto' },
-        { value: ModalidadTrabajo.HIBRIDO, label: 'Híbrido' }
-    ];
+  modalidadesDisponibles = [
+    { value: ModalidadTrabajo.PRESENCIAL, label: 'Presencial' },
+    { value: ModalidadTrabajo.REMOTO, label: 'Remoto' },
+    { value: ModalidadTrabajo.HIBRIDO, label: 'Híbrido' }
+  ];
 
-    constructor(
-        private fb: FormBuilder,
-        private dialogRef: MatDialogRef<OfertaFormDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: OfertaFormDialogData,
-        private ofertasLaboralesService: OfertasLaboralesService,
-        private snackBar: MatSnackBar
-    ) {
-        this.initializeForm();
+  constructor(
+    private fb: FormBuilder,
+    private dialogRef: MatDialogRef<OfertaFormDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: OfertaFormDialogData,
+    private ofertasLaboralesService: OfertasLaboralesService,
+    private snackBar: MatSnackBar
+  ) {
+    this.initializeForm();
+  }
+
+  ngOnInit() {
+    if (this.data.isEditing && this.data.oferta) {
+      this.loadOfertaData();
+    }
+  }
+
+  private initializeForm() {
+    this.ofertaForm = this.fb.group({
+      title: ['', [Validators.required, Validators.minLength(5)]],
+      description: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(1000)]],
+      requirements: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(800)]],
+      modality: ['', [Validators.required]],
+      location: ['', [Validators.required]],
+      estimatedPayment: ['', [Validators.required, Validators.min(1)]],
+      fechaVencimiento: ['', [this.futureDateValidator]]
+    });
+  }
+
+  private loadOfertaData() {
+    const oferta = this.data.oferta!;
+    this.ofertaForm.patchValue({
+      title: oferta.title,
+      description: oferta.description,
+      requirements: oferta.requirements,
+      modality: oferta.modality,
+      location: oferta.location,
+      estimatedPayment: oferta.estimatedPayment,
+      fechaVencimiento: oferta.fechaVencimiento
+    });
+
+    // Cargar skills si existen (simulado por ahora)
+    // En el futuro, esto podría venir de un campo específico
+    this.skills.set(['JavaScript', 'Angular', 'TypeScript']); // Mock data
+  }
+
+  private futureDateValidator(control: any) {
+    if (!control.value) return null;
+
+    const selectedDate = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return selectedDate <= today ? { futureDate: true } : null;
+  }
+
+  // Gestión de skills/chips
+  addSkill(event: MatChipInputEvent): void {
+    const value = (event.value || '').trim();
+
+    if (value && !this.skills().includes(value)) {
+      this.skills.update(skills => [...skills, value]);
     }
 
-    ngOnInit() {
-        if (this.data.isEditing && this.data.oferta) {
-            this.loadOfertaData();
-        }
+    event.chipInput!.clear();
+  }
+
+  removeSkill(skill: string): void {
+    this.skills.update(skills => skills.filter(s => s !== skill));
+  }
+
+  showValidationSummary(): boolean {
+    return this.ofertaForm.invalid && this.ofertaForm.touched;
+  }
+
+  onSubmit() {
+    if (this.ofertaForm.valid) {
+      this.isSubmitting.set(true);
+
+      const formData = this.ofertaForm.value;
+      const ofertaData = {
+        title: formData.title,
+        description: formData.description,
+        requirements: formData.requirements,
+        modality: formData.modality,
+        location: formData.location,
+        estimatedPayment: Number(formData.estimatedPayment),
+        fechaVencimiento: formData.fechaVencimiento || undefined
+      };
+
+      if (this.data.isEditing && this.data.oferta) {
+        // Actualizar oferta existente
+        this.updateOferta(ofertaData as UpdateOfertaDTO);
+      } else {
+        // Crear nueva oferta
+        this.createOferta(ofertaData as CreateOfertaDTO);
+      }
+    } else {
+      this.markFormGroupTouched();
     }
+  }
 
-    private initializeForm() {
-        this.ofertaForm = this.fb.group({
-            title: ['', [Validators.required, Validators.minLength(5)]],
-            description: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(1000)]],
-            requirements: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(800)]],
-            modality: ['', [Validators.required]],
-            location: ['', [Validators.required]],
-            estimatedPayment: ['', [Validators.required, Validators.min(1)]],
-            fechaVencimiento: ['', [this.futureDateValidator]]
-        });
-    }
+  private createOferta(ofertaData: CreateOfertaDTO) {
+    this.ofertasLaboralesService.createOferta(ofertaData).subscribe({
+      next: (nuevaOferta) => {
+        this.isSubmitting.set(false);
+        this.snackBar.open('Oferta creada exitosamente', 'Cerrar', { duration: 3000 });
+        this.dialogRef.close(nuevaOferta);
+      },
+      error: (error) => {
+        this.isSubmitting.set(false);
+        console.error('Error al crear oferta:', error);
+        this.snackBar.open('Error al crear la oferta', 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
 
-    private loadOfertaData() {
-        const oferta = this.data.oferta!;
-        this.ofertaForm.patchValue({
-            title: oferta.title,
-            description: oferta.description,
-            requirements: oferta.requirements,
-            modality: oferta.modality,
-            location: oferta.location,
-            estimatedPayment: oferta.estimatedPayment,
-            fechaVencimiento: oferta.fechaVencimiento
-        });
+  private updateOferta(ofertaData: UpdateOfertaDTO) {
+    const ofertaId = this.data.oferta!.id;
+    this.ofertasLaboralesService.updateOferta(ofertaId, ofertaData).subscribe({
+      next: (ofertaActualizada) => {
+        this.isSubmitting.set(false);
+        this.snackBar.open('Oferta actualizada exitosamente', 'Cerrar', { duration: 3000 });
+        this.dialogRef.close(ofertaActualizada);
+      },
+      error: (error) => {
+        this.isSubmitting.set(false);
+        console.error('Error al actualizar oferta:', error);
+        this.snackBar.open('Error al actualizar la oferta', 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
 
-        // Cargar skills si existen (simulado por ahora)
-        // En el futuro, esto podría venir de un campo específico
-        this.skills.set(['JavaScript', 'Angular', 'TypeScript']); // Mock data
-    }
+  private markFormGroupTouched() {
+    Object.keys(this.ofertaForm.controls).forEach(key => {
+      this.ofertaForm.get(key)?.markAsTouched();
+    });
+  }
 
-    private futureDateValidator(control: any) {
-        if (!control.value) return null;
-
-        const selectedDate = new Date(control.value);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        return selectedDate <= today ? { futureDate: true } : null;
-    }
-
-    // Gestión de skills/chips
-    addSkill(event: MatChipInputEvent): void {
-        const value = (event.value || '').trim();
-
-        if (value && !this.skills().includes(value)) {
-            this.skills.update(skills => [...skills, value]);
-        }
-
-        event.chipInput!.clear();
-    }
-
-    removeSkill(skill: string): void {
-        this.skills.update(skills => skills.filter(s => s !== skill));
-    }
-
-    showValidationSummary(): boolean {
-        return this.ofertaForm.invalid && this.ofertaForm.touched;
-    }
-
-    onSubmit() {
-        if (this.ofertaForm.valid) {
-            this.isSubmitting.set(true);
-
-            const formData = this.ofertaForm.value;
-            const ofertaData = {
-                title: formData.title,
-                description: formData.description,
-                requirements: formData.requirements,
-                modality: formData.modality,
-                location: formData.location,
-                estimatedPayment: Number(formData.estimatedPayment),
-                fechaVencimiento: formData.fechaVencimiento || undefined
-            };
-
-            if (this.data.isEditing && this.data.oferta) {
-                // Actualizar oferta existente
-                this.updateOferta(ofertaData as UpdateOfertaDTO);
-            } else {
-                // Crear nueva oferta
-                this.createOferta(ofertaData as CreateOfertaDTO);
-            }
-        } else {
-            this.markFormGroupTouched();
-        }
-    }
-
-    private createOferta(ofertaData: CreateOfertaDTO) {
-        this.ofertasLaboralesService.createOferta(ofertaData).subscribe({
-            next: (nuevaOferta) => {
-                this.isSubmitting.set(false);
-                this.snackBar.open('Oferta creada exitosamente', 'Cerrar', { duration: 3000 });
-                this.dialogRef.close(nuevaOferta);
-            },
-            error: (error) => {
-                this.isSubmitting.set(false);
-                console.error('Error al crear oferta:', error);
-                this.snackBar.open('Error al crear la oferta', 'Cerrar', { duration: 3000 });
-            }
-        });
-    }
-
-    private updateOferta(ofertaData: UpdateOfertaDTO) {
-        const ofertaId = this.data.oferta!.id;
-        this.ofertasLaboralesService.updateOferta(ofertaId, ofertaData).subscribe({
-            next: (ofertaActualizada) => {
-                this.isSubmitting.set(false);
-                this.snackBar.open('Oferta actualizada exitosamente', 'Cerrar', { duration: 3000 });
-                this.dialogRef.close(ofertaActualizada);
-            },
-            error: (error) => {
-                this.isSubmitting.set(false);
-                console.error('Error al actualizar oferta:', error);
-                this.snackBar.open('Error al actualizar la oferta', 'Cerrar', { duration: 3000 });
-            }
-        });
-    }
-
-    private markFormGroupTouched() {
-        Object.keys(this.ofertaForm.controls).forEach(key => {
-            this.ofertaForm.get(key)?.markAsTouched();
-        });
-    }
-
-    get f() {
-        return this.ofertaForm.controls;
-    }
+  get f() {
+    return this.ofertaForm.controls;
+  }
 }

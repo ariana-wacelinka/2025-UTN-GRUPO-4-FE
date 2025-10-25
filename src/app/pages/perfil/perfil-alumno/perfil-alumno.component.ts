@@ -13,6 +13,7 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { PerfilAlumnoService, MateriasState } from '../../../services/perfil-alumno.service';
+import { AuthService } from '../../../services/auth.service';
 import { EstudianteDTO, ActualizarEstudianteDTO } from '../../../models/aplicante.dto';
 import { IdiomaDTO } from '../../../models/usuario.dto';
 import { Subject, takeUntil } from 'rxjs';
@@ -85,11 +86,20 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     const perfil = this.perfilAlumno();
     if (!perfil) return null;
 
+    // Usar información del usuario actual si está disponible
+    const currentUser = this.authService.keycloakUser;
+    const displayName = currentUser ?
+      `${currentUser.name || perfil.name} ${currentUser.surname || perfil.surname}` :
+      `${perfil.name} ${perfil.surname}`;
+
+    // Priorizar imagen del usuario actual si está disponible
+    const imageUrl = currentUser?.imageUrl || perfil.imageUrl;
+
     return {
-      name: `${perfil.name} ${perfil.surname}`,
+      name: displayName,
       subtitle: `${perfil.career} - ${perfil.currentYearLevel}º año`,
       description: perfil.institution,
-      imageUrl: perfil.imageUrl,
+      imageUrl: imageUrl,
       showDownloadCV: true
     };
   });
@@ -165,6 +175,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private perfilService: PerfilAlumnoService,
+    private authService: AuthService,
     private snackBar: MatSnackBar,
     private route: ActivatedRoute
   ) {

@@ -5,34 +5,48 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 export interface ProfileHeaderData {
-    name: string;
-    subtitle: string;
-    description?: string;
-    imageUrl?: string;
-    showDownloadCV?: boolean;
+  name: string;
+  subtitle: string;
+  description?: string;
+  imageUrl?: string;
+  showDownloadCV?: boolean;
 }
 
 export interface SocialLink {
-    icon: string;
-    label: string;
-    url: string;
+  icon: string;
+  label: string;
+  url: string;
 }
 
 @Component({
-    selector: 'app-profile-header',
-    standalone: true,
-    imports: [
-        CommonModule,
-        MatCardModule,
-        MatButtonModule,
-        MatIconModule
-    ],
-    template: `
+  selector: 'app-profile-header',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule
+  ],
+  template: `
     <mat-card class="modern-card profile-header">
       <div class="header-content">
         <div class="profile-image-section">
           <div class="image-container">
-            <img [src]="getImageUrl()" [alt]="data.name" class="profile-image">
+            <!-- Imagen normal o imagen con iniciales -->
+            <div class="profile-image-wrapper">
+              <img *ngIf="hasValidImage()" 
+                   [src]="getImageUrl()" 
+                   [alt]="data.name" 
+                   class="profile-image"
+                   (error)="onImageError($event)">
+              
+              <!-- Avatar con iniciales si no hay imagen -->
+              <div *ngIf="!hasValidImage()" 
+                   class="profile-avatar"
+                   [style.background]="getGradientColor()">
+                <span class="avatar-initials">{{ getInitials() }}</span>
+              </div>
+            </div>
             
             <div *ngIf="isEditing()" class="image-hover-overlay">
               <input type="file" #imageInput accept="image/*" 
@@ -107,34 +121,74 @@ export interface SocialLink {
       </div>
     </mat-card>
   `,
-    styleUrls: ['./profile-header.component.scss']
+  styleUrls: ['./profile-header.component.scss']
 })
 export class ProfileHeaderComponent {
-    @Input() data!: ProfileHeaderData;
-    @Input() socialLinks: SocialLink[] = [];
-    @Input() isEditing = signal(false);
-    @Input() imagePreview = signal<string | null>(null);
+  @Input() data!: ProfileHeaderData;
+  @Input() socialLinks: SocialLink[] = [];
+  @Input() isEditing = signal(false);
+  @Input() imagePreview = signal<string | null>(null);
 
-    @Output() editProfile = new EventEmitter<void>();
-    @Output() saveChanges = new EventEmitter<void>();
-    @Output() cancelEdit = new EventEmitter<void>();
-    @Output() downloadCV = new EventEmitter<void>();
-    @Output() imageSelected = new EventEmitter<File>();
+  @Output() editProfile = new EventEmitter<void>();
+  @Output() saveChanges = new EventEmitter<void>();
+  @Output() cancelEdit = new EventEmitter<void>();
+  @Output() downloadCV = new EventEmitter<void>();
+  @Output() imageSelected = new EventEmitter<File>();
 
-    onImageSelected(event: Event) {
-        const input = event.target as HTMLInputElement;
-        if (input.files && input.files[0]) {
-            this.imageSelected.emit(input.files[0]);
-        }
+  private imageLoadError = signal(false);
+
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.imageSelected.emit(input.files[0]);
+    }
+  }
+
+  onImageError(event: Event) {
+    this.imageLoadError.set(true);
+  }
+
+  hasValidImage(): boolean {
+    const preview = this.imagePreview();
+    if (preview) return true;
+
+    return !!(this.data.imageUrl && !this.imageLoadError());
+  }
+
+  getImageUrl(): string {
+    const preview = this.imagePreview();
+    if (preview) return preview;
+
+    return this.data.imageUrl || '';
+  }
+
+  getInitials(): string {
+    const names = this.data.name.trim().split(' ');
+    if (names.length >= 2) {
+      return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+    }
+    return names[0] ? names[0][0].toUpperCase() : 'U';
+  }
+
+  getGradientColor(): string {
+    // Generar un color basado en el nombre para consistencia
+    const name = this.data.name;
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
 
-    getImageUrl(): string {
-        const preview = this.imagePreview();
-        if (preview) return preview;
+    const colors = [
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+      'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'
+    ];
 
-        if (this.data.imageUrl) return this.data.imageUrl;
-
-        // Imagen por defecto usando el nombre
-        return `https://ui-avatars.com/api/?name=${encodeURIComponent(this.data.name)}&background=6366f1&color=ffffff&size=150`;
-    }
+    return colors[Math.abs(hash) % colors.length];
+  }
 }

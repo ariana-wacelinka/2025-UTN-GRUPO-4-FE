@@ -1,4 +1,8 @@
 .skills-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
     .section-title {
         display: flex;
         align-items: center;
@@ -12,13 +16,25 @@
             font-size: 1.5rem;
         }
     }
+
+    mat-card-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 .skills-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
     .skills-chips {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+        align-content: flex-start;
+        /* Alinear chips al inicio pero permitir expansión */
 
         .skill-chip {
             background: var(--chip-bg);

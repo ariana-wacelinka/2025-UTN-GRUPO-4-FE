@@ -212,14 +212,14 @@
                 </mat-card>
             </div>
 
-            <!-- Vista normal (no edición) usando componentes compartidos -->
-            <div *ngIf="!isEditing()" class="profile-grid">
+            <!-- Vista normal (no edición) con grid layout -->
+            <div *ngIf="!isEditing()" class="profile-content">
 
-                <!-- Información Personal usando info-card compartido -->
+                <!-- 1. Información Personal (grid-area: info-personal) -->
                 <app-info-card *ngIf="personalInfoData()" [data]="personalInfoData()!">
                 </app-info-card>
 
-                <!-- Sobre Mí -->
+                <!-- 2. Sobre Mí (grid-area: sobre-mi) -->
                 <mat-card class="modern-card about-card">
                     <mat-card-header>
                         <mat-card-title class="section-title">
@@ -232,12 +232,12 @@
                     </mat-card-content>
                 </mat-card>
 
-                <!-- Habilidades usando skills-card compartido -->
+                <!-- 3. Habilidades (grid-area: skills) -->
                 <app-skills-card *ngIf="perfilAlumno()?.skills" title="Habilidades Técnicas"
                     [skills]="perfilAlumno()!.skills">
                 </app-skills-card>
 
-                <!-- Idiomas -->
+                <!-- 4. Idiomas (grid-area: idiomas) -->
                 <mat-card class="modern-card languages-card">
                     <mat-card-header>
                         <mat-card-title class="section-title">
@@ -258,7 +258,7 @@
                     </mat-card-content>
                 </mat-card>
 
-                <!-- Materias Aprobadas -->
+                <!-- 5. Materias Aprobadas (grid-area: materias) -->
                 <mat-card class="modern-card subjects-card">
                     <mat-card-header>
                         <mat-card-title class="section-title">
@@ -287,8 +287,10 @@
                                 </div>
                             </div>
                             <div class="upload-actions">
-                                <input type="file" #materiasInput accept=".xls" (change)="onMateriasFileSelected($event)" hidden>
-                                <button mat-stroked-button class="upload-btn" (click)="materiasInput.click()" [disabled]="isMateriasUploading">
+                                <input type="file" #materiasInput accept=".xls"
+                                    (change)="onMateriasFileSelected($event)" hidden>
+                                <button mat-stroked-button class="upload-btn" (click)="materiasInput.click()"
+                                    [disabled]="isMateriasUploading">
                                     <mat-icon *ngIf="!isMateriasUploading">cloud_upload</mat-icon>
                                     <mat-icon *ngIf="isMateriasUploading" class="spin">autorenew</mat-icon>
                                     {{isMateriasUploading ? 'Subiendo...' : 'Subir .xls'}}
@@ -321,7 +323,8 @@
                                 <div class="table-row" *ngFor="let materia of materiasAlumno; trackBy: trackByMateria">
                                     <div class="materia-name">
                                         <span class="materia-title">{{materia.nombre}}</span>
-                                        <span class="materia-code" *ngIf="materia.codigo">Código {{materia.codigo}}</span>
+                                        <span class="materia-code" *ngIf="materia.codigo">Código
+                                            {{materia.codigo}}</span>
                                     </div>
                                     <span class="materia-date">{{materia.fechaAprobacion | date:'dd/MM/yyyy'}}</span>
                                     <span class="materia-grade">{{materia.nota | number:'1.0-1'}}</span>

@@ -25,13 +25,36 @@
         width: 120px;
         height: 120px;
 
-        .profile-image {
+        .profile-image-wrapper {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            object-fit: cover;
+            overflow: hidden;
             border: 4px solid var(--glass-border);
             box-shadow: var(--shadow-medium);
+        }
+
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 2.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+            .avatar-initials {
+                user-select: none;
+            }
         }
 
         .image-hover-overlay {

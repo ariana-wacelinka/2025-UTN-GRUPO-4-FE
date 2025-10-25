@@ -137,74 +137,135 @@
     }
 }
 
-.profile-grid {
+// Layout principal con grid específico
+.profile-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 16px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    /* 3 columnas uniformes */
-    grid-template-rows: auto auto;
-    /* 2 filas automáticas */
+    grid-template-rows: auto 1fr auto;
+    /* Segunda fila toma el espacio disponible */
     gap: 24px;
+    min-height: 70vh;
+    /* Altura mínima para que el grid tenga espacio para expandirse */
     grid-template-areas:
         "info-personal sobre-mi sobre-mi"
-        "info-personal skills idiomas";
-
-    /* Card de Información Personal - primer elemento (app-info-card) */
-    >*:nth-child(1) {
-        grid-area: info-personal;
-    }
-
-    /* Card "Sobre mí" - segundo elemento (mat-card con clase about-card) */
-    >*:nth-child(2),
-    .about-card {
-        grid-area: sobre-mi;
-        width: 100% !important;
-        min-width: auto !important;
-        max-width: none !important;
-        height: fit-content !important;
-
-        mat-card-content {
-            padding: 24px !important;
-        }
-
-        .about-text {
-            line-height: 1.6;
-            text-align: justify;
-            hyphens: auto;
-        }
-    }
-
-    /* Card de Skills - tercer elemento (app-skills-card) */
-    >*:nth-child(3) {
-        grid-area: skills;
-    }
-
-    /* Card de Idiomas - cuarto elemento (mat-card con clase languages-card) */
-    >*:nth-child(4),
-    .languages-card {
-        grid-area: idiomas;
-    }
+        "info-personal skills idiomas"
+        "materias materias materias";
 
     @media (max-width: 1200px) {
-        /* En tablets, cambiar a layout de 2 columnas */
         grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto 1fr auto;
+        /* Skills tendrá más espacio */
         grid-template-areas:
             "info-personal sobre-mi"
-            "skills idiomas";
+            "skills skills"
+            "idiomas idiomas"
+            "materias materias";
     }
 
     @media (max-width: 768px) {
-        /* En móviles, layout vertical */
         grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr auto auto;
+        /* Skills sigue teniendo espacio expandible */
+        gap: 16px;
         grid-template-areas:
             "info-personal"
             "sobre-mi"
             "skills"
-            "idiomas";
-        gap: 16px;
+            "idiomas"
+            "materias";
     }
 }
 
+// Asignación de grid areas a cada elemento
+.profile-content>*:nth-child(1) {
+    grid-area: info-personal;
+}
+
+.profile-content>*:nth-child(2) {
+    grid-area: sobre-mi;
+}
+
+.profile-content>*:nth-child(3) {
+    grid-area: skills;
+    /* Hacer que ocupe toda la altura disponible */
+    display: flex;
+    flex-direction: column;
+
+    /* Asegurar que la card interna también se expanda */
+    app-skills-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        mat-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+
+            mat-card-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+        }
+    }
+}
+
+.profile-content>*:nth-child(4) {
+    grid-area: idiomas;
+}
+
+.profile-content>*:nth-child(5) {
+    grid-area: materias;
+}
+
 /* Removed layout específico para pantallas grandes - now using flexbox above */
+
+// Estilos específicos para las cards del perfil
+.about-card {
+    .about-text {
+        line-height: 1.6;
+        text-align: justify;
+        hyphens: auto;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+}
+
+.languages-card {
+    .languages-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .language-item {
+        padding: 12px 0;
+
+        .language-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .language-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .language-level {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            background: var(--muted-bg);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+    }
+}
 
 .modern-card {
     background: var(--glass-white) !important;
@@ -363,8 +424,6 @@
 
 .languages-list {
     .language-item {
-        margin-bottom: 16px;
-
         &:last-child {
             margin-bottom: 0;
 
@@ -377,7 +436,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
 
             .language-name {
                 font-size: 1.1rem;
@@ -1032,34 +1090,36 @@
     }
 }
 
-// ============= ESTILOS PARA MATERIAS =============
+// ============= ESTILOS MEJORADOS PARA MATERIAS =============
 
 .subjects-card {
     .subjects-summary {
-        display: flex;
-        gap: 32px;
-        padding: 20px;
-        background: var(--glass-white);
-        border-radius: 12px;
-        border: 1px solid var(--glass-border);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 24px;
+        padding: 24px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, rgba(79, 172, 254, 0.8) 100%);
+        border-radius: 16px;
         margin-bottom: 24px;
+        box-shadow: 0 8px 32px rgba(79, 172, 254, 0.15);
 
         .summary-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             text-align: center;
 
             .summary-label {
                 font-size: 0.875rem;
-                color: var(--text-secondary);
-                margin-bottom: 4px;
+                color: rgba(255, 255, 255, 0.9);
+                margin-bottom: 8px;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
 
             .summary-value {
-                font-size: 1.5rem;
-                font-weight: 600;
-                color: var(--primary-color);
+                font-size: 2rem;
+                font-weight: 700;
+                color: white;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
         }
     }
@@ -1068,11 +1128,17 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 20px;
+        padding: 24px;
         background: var(--glass-white);
-        border-radius: 12px;
+        border-radius: 16px;
         border: 1px solid var(--glass-border);
         margin-bottom: 24px;
+        transition: all 0.3s ease;
+
+        &:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 20px rgba(79, 172, 254, 0.1);
+        }
 
         .upload-info {
             display: flex;
@@ -1081,14 +1147,16 @@
 
             mat-icon {
                 color: var(--primary-color);
-                font-size: 32px;
-                width: 32px;
-                height: 32px;
+                font-size: 36px;
+                width: 36px;
+                height: 36px;
             }
 
             h4 {
-                margin: 0 0 4px 0;
+                margin: 0 0 6px 0;
                 color: var(--text-primary);
+                font-size: 1.1rem;
+                font-weight: 600;
             }
 
             p {
@@ -1100,7 +1168,16 @@
 
         .upload-actions {
             .upload-btn {
-                min-width: 120px;
+                min-width: 140px;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+
+                &:hover:not(:disabled) {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.3);
+                }
             }
         }
     }
@@ -1108,174 +1185,227 @@
     .file-processing {
         text-align: center;
         padding: 16px;
-        color: var(--text-secondary);
+        color: var(--primary-color);
         font-style: italic;
+        font-weight: 500;
+        background: rgba(79, 172, 254, 0.05);
+        border-radius: 8px;
+        margin-bottom: 16px;
     }
 
     .subjects-error {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
         padding: 16px;
-        background: rgba(244, 67, 54, 0.1);
-        color: var(--error-color);
-        border-radius: 8px;
+        background: rgba(244, 67, 54, 0.05);
+        color: #d32f2f;
+        border-radius: 12px;
+        border-left: 4px solid #d32f2f;
         margin-bottom: 16px;
 
         mat-icon {
-            color: var(--error-color);
+            color: #d32f2f;
+            font-size: 20px;
         }
     }
 
     .subjects-loading {
         text-align: center;
-        padding: 32px;
+        padding: 48px 24px;
 
         .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--chip-bg);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
             margin: 0 auto 16px;
         }
 
         p {
             color: var(--text-secondary);
             margin: 0;
+            font-size: 0.95rem;
         }
     }
 
     .subjects-table {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--glass-border);
+
         .table-header {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 0.8fr 1fr;
             gap: 16px;
-            padding: 16px 20px;
-            background: var(--primary-color);
+            padding: 20px 24px;
+            background: linear-gradient(135deg, var(--primary-color), rgba(79, 172, 254, 0.9));
             color: white;
             font-weight: 600;
-            border-radius: 8px 8px 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.875rem;
         }
 
         .table-row {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 0.8fr 1fr;
             gap: 16px;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--divider-color);
-            transition: background-color 0.2s;
+            padding: 20px 24px;
+            background: white;
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.2s ease;
 
             &:hover {
-                background: var(--glass-white);
+                background: rgba(79, 172, 254, 0.02);
+                transform: translateX(4px);
             }
 
             &:last-child {
                 border-bottom: none;
-                border-radius: 0 0 8px 8px;
             }
 
             .materia-name {
                 display: flex;
                 flex-direction: column;
-                gap: 4px;
+                gap: 6px;
 
                 .materia-title {
-                    font-weight: 500;
+                    font-weight: 600;
                     color: var(--text-primary);
+                    font-size: 0.95rem;
+                    line-height: 1.4;
                 }
 
                 .materia-code {
-                    font-size: 0.75rem;
+                    font-size: 0.8rem;
                     color: var(--text-secondary);
+                    background: var(--chip-bg);
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    align-self: flex-start;
                 }
             }
 
             .materia-date {
                 color: var(--text-secondary);
+                font-weight: 500;
+                align-self: center;
             }
 
             .materia-grade {
-                font-weight: 600;
+                font-weight: 700;
                 color: var(--primary-color);
+                font-size: 1.1rem;
+                align-self: center;
+                text-align: center;
             }
 
             .materia-status {
-                padding: 4px 8px;
-                border-radius: 12px;
-                font-size: 0.75rem;
-                font-weight: 500;
+                align-self: center;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 600;
                 text-align: center;
-                background: var(--success-color);
+                background: linear-gradient(135deg, #4caf50, #66bb6a);
                 color: white;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
             }
         }
     }
 
     .subjects-empty {
         text-align: center;
-        padding: 48px 20px;
-        color: var(--text-secondary);
+        padding: 48px 24px;
+        background: var(--glass-white);
+        border-radius: 16px;
+        border: 2px dashed var(--glass-border);
 
         mat-icon {
+            color: var(--primary-color);
             font-size: 48px;
             width: 48px;
             height: 48px;
             margin-bottom: 16px;
-            color: var(--divider-color);
         }
 
         p {
             margin: 0;
+            color: var(--text-secondary);
             font-size: 1rem;
+            max-width: 300px;
+            margin: 0 auto;
+            line-height: 1.5;
         }
     }
-}
-
-.spin {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 @media (max-width: 768px) {
     .subjects-card {
         .subjects-summary {
-            flex-direction: column;
+            grid-template-columns: 1fr;
             gap: 16px;
+            padding: 20px;
+
+            .summary-item {
+                .summary-value {
+                    font-size: 1.75rem;
+                }
+            }
         }
 
         .subjects-upload {
             flex-direction: column;
-            gap: 16px;
+            gap: 20px;
             text-align: center;
+            padding: 20px;
+
+            .upload-actions .upload-btn {
+                width: 100%;
+                min-width: auto;
+            }
         }
 
         .subjects-table {
-            .table-header,
+            .table-header {
+                display: none;
+            }
+
             .table-row {
                 grid-template-columns: 1fr;
-                gap: 8px;
-                text-align: center;
-            }
+                gap: 12px;
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
-            .table-header {
-                display: none; // Ocultar headers en móvil
-            }
-
-            .table-row {
-                padding: 16px;
-                border: 1px solid var(--divider-color);
-                border-radius: 8px;
-                margin-bottom: 8px;
-
-                .materia-name,
-                .materia-date,
-                .materia-grade,
-                .materia-status {
-                    margin-bottom: 8px;
+                &:hover {
+                    transform: none;
                 }
 
                 .materia-name {
                     text-align: center;
+
+                    .materia-code {
+                        align-self: center;
+                    }
+                }
+
+                .materia-date,
+                .materia-grade,
+                .materia-status {
+                    text-align: center;
+                    justify-self: center;
+                }
+
+                .materia-status {
+                    max-width: 120px;
                 }
             }
         }

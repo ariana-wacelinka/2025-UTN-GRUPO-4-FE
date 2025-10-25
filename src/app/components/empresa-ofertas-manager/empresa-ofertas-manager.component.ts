@@ -51,12 +51,6 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirma
             Gestiona todas tus publicaciones de trabajo
           </p>
         </div>
-        <div class="header-actions">
-          <button mat-raised-button color="primary" class="create-offer-btn" (click)="crearNuevaOferta()">
-            <mat-icon>add</mat-icon>
-            Nueva Oferta
-          </button>
-        </div>
       </div>
 
       <!-- Stats Cards -->

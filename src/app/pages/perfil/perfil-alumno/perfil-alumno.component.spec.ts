@@ -76,8 +76,8 @@ describe('PerfilAlumnoComponent', () => {
         MatInputModule,
         MatSelectModule,
         MatChipsModule,
-    MatDividerModule,
-    MatSnackBarModule,
+        MatDividerModule,
+        MatSnackBarModule,
         BrowserAnimationsModule
       ],
       providers: [
@@ -105,9 +105,9 @@ describe('PerfilAlumnoComponent', () => {
     it('should initialize with default values', () => {
       mockPerfilService.getPerfil.and.returnValue(of(mockPerfil));
 
-      expect(component.isEditing).toBe(false);
-      expect(component.isLoading).toBe(false);
-      expect(component.perfilAlumno).toBeNull();
+      expect(component.isEditing()).toBe(false);
+      expect(component.isLoading()).toBe(false);
+      expect(component.perfilAlumno()).toBeNull();
       expect(component.editForm).toBeDefined();
     });
 
@@ -118,8 +118,8 @@ describe('PerfilAlumnoComponent', () => {
 
       expect(mockPerfilService.getPerfil).toHaveBeenCalled();
       expect(mockPerfilService.cargarMateriasDesdeBackend).toHaveBeenCalled();
-      expect(component.perfilAlumno).toEqual(mockPerfil);
-      expect(component.isLoading).toBe(false);
+      expect(component.perfilAlumno()).toEqual(mockPerfil);
+      expect(component.isLoading()).toBe(false);
       expect(component.materiasAlumno.length).toBe(mockMateriasState.materias.length);
     });
   });
@@ -140,21 +140,21 @@ describe('PerfilAlumnoComponent', () => {
       expect(emailControl?.hasError('email')).toBe(false);
     });
 
-    it('should validate minimum length for nombre and apellido', () => {
-      const nombreControl = component.editForm.get('nombre');
-      const apellidoControl = component.editForm.get('apellido');
+    it('should validate minimum length for name and surname', () => {
+      const nameControl = component.editForm.get('name');
+      const surnameControl = component.editForm.get('surname');
 
-      nombreControl?.setValue('A');
-      apellidoControl?.setValue('B');
+      nameControl?.setValue('A');
+      surnameControl?.setValue('B');
 
-      expect(nombreControl?.hasError('minlength')).toBe(true);
-      expect(apellidoControl?.hasError('minlength')).toBe(true);
+      expect(nameControl?.hasError('minlength')).toBe(true);
+      expect(surnameControl?.hasError('minlength')).toBe(true);
 
-      nombreControl?.setValue('Ana');
-      apellidoControl?.setValue('García');
+      nameControl?.setValue('Ana');
+      surnameControl?.setValue('García');
 
-      expect(nombreControl?.hasError('minlength')).toBe(false);
-      expect(apellidoControl?.hasError('minlength')).toBe(false);
+      expect(nameControl?.hasError('minlength')).toBe(false);
+      expect(surnameControl?.hasError('minlength')).toBe(false);
     });
   });
 
@@ -165,59 +165,59 @@ describe('PerfilAlumnoComponent', () => {
     });
 
     it('should enter edit mode', () => {
-      component.editarPerfil();
+      component.onEditProfile();
 
-      expect(component.isEditing).toBe(true);
-      expect(component.editForm.get('nombre')?.value).toBe(mockPerfil.nombre);
+      expect(component.isEditing()).toBe(true);
+      expect(component.editForm.get('name')?.value).toBe(mockPerfil.name);
       expect(component.editForm.get('email')?.value).toBe(mockPerfil.email);
     });
 
     it('should exit edit mode on cancel', () => {
-      component.editarPerfil();
-      component.editForm.get('nombre')?.setValue('Changed Name');
+      component.onEditProfile();
+      component.editForm.get('name')?.setValue('Changed Name');
 
-      component.cancelarEdicion();
+      component.onCancelEdit();
 
-      expect(component.isEditing).toBe(false);
-      expect(component.editForm.get('nombre')?.value).toBe(mockPerfil.nombre);
+      expect(component.isEditing()).toBe(false);
+      expect(component.editForm.get('name')?.value).toBe(mockPerfil.name);
     });
   });
-  
-    describe('Materias upload', () => {
-      beforeEach(() => {
-        component.ngOnInit();
-      });
 
-      it('should show materias state after init', () => {
-        expect(component.materiasAlumno.length).toBe(mockMateriasState.materias.length);
-        expect(component.promedioMaterias).toBe(mockMateriasState.promedioGeneral);
-      });
-
-      it('should reject invalid file extensions', () => {
-        const snackSpy = spyOn(snackBar, 'open');
-        const mockInput = { files: [new File(['content'], 'materias.pdf', { type: 'application/pdf' })], value: 'materias.pdf' } as unknown as HTMLInputElement;
-
-        component.onMateriasFileSelected({ target: mockInput } as unknown as Event);
-
-        expect(mockPerfilService.subirMateriasExcel).not.toHaveBeenCalled();
-        expect(snackSpy).toHaveBeenCalled();
-        expect(mockInput.value).toBe('');
-      });
-
-      it('should upload materias excel and reset file name', () => {
-        const snackSpy = spyOn(snackBar, 'open');
-        const xlsFile = new File(['content'], 'materias.xls', { type: 'application/vnd.ms-excel' });
-        const mockInput = { files: [xlsFile], value: 'materias.xls' } as unknown as HTMLInputElement;
-
-        component.onMateriasFileSelected({ target: mockInput } as unknown as Event);
-
-        expect(mockPerfilService.subirMateriasExcel).toHaveBeenCalledWith(xlsFile);
-        expect(component.selectedMateriasFileName).toBeNull();
-        expect(component.isMateriasUploading).toBeFalse();
-        expect(snackSpy).toHaveBeenCalled();
-        expect(mockInput.value).toBe('');
-      });
+  describe('Materias upload', () => {
+    beforeEach(() => {
+      component.ngOnInit();
     });
+
+    it('should show materias state after init', () => {
+      expect(component.materiasAlumno.length).toBe(mockMateriasState.materias.length);
+      expect(component.promedioMaterias).toBe(mockMateriasState.promedioGeneral);
+    });
+
+    it('should reject invalid file extensions', () => {
+      const snackSpy = spyOn(snackBar, 'open');
+      const mockInput = { files: [new File(['content'], 'materias.pdf', { type: 'application/pdf' })], value: 'materias.pdf' } as unknown as HTMLInputElement;
+
+      component.onMateriasFileSelected({ target: mockInput } as unknown as Event);
+
+      expect(mockPerfilService.subirMateriasExcel).not.toHaveBeenCalled();
+      expect(snackSpy).toHaveBeenCalled();
+      expect(mockInput.value).toBe('');
+    });
+
+    it('should upload materias excel and reset file name', () => {
+      const snackSpy = spyOn(snackBar, 'open');
+      const xlsFile = new File(['content'], 'materias.xls', { type: 'application/vnd.ms-excel' });
+      const mockInput = { files: [xlsFile], value: 'materias.xls' } as unknown as HTMLInputElement;
+
+      component.onMateriasFileSelected({ target: mockInput } as unknown as Event);
+
+      expect(mockPerfilService.subirMateriasExcel).toHaveBeenCalledWith(xlsFile);
+      expect(component.selectedMateriasFileName).toBeNull();
+      expect(component.isMateriasUploading).toBeFalse();
+      expect(snackSpy).toHaveBeenCalled();
+      expect(mockInput.value).toBe('');
+    });
+  });
 
   describe('External Actions', () => {
     beforeEach(() => {

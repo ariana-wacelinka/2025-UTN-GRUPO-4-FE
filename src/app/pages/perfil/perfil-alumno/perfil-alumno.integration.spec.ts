@@ -67,7 +67,7 @@ describe('PerfilAlumnoComponent - Integration Tests', () => {
         });
 
         it('should show loading state initially', () => {
-            component.isLoading = true;
+            component.isLoading.set(true);
             fixture.detectChanges();
 
             const loadingElement = fixture.debugElement.query(By.css('.loading-container'));
@@ -102,27 +102,27 @@ describe('PerfilAlumnoComponent - Integration Tests', () => {
             editButton.nativeElement.click();
             fixture.detectChanges();
 
-            expect(component.isEditing).toBe(true);
+            expect(component.isEditing()).toBe(true);
 
             const editForm = fixture.debugElement.query(By.css('.edit-form'));
             expect(editForm).toBeTruthy();
         });
 
         it('should show form fields in edit mode', () => {
-            component.editarPerfil();
+            component.onEditProfile();
             fixture.detectChanges();
 
-            const nombreField = fixture.debugElement.query(By.css('input[formControlName="nombre"]'));
+            const nameField = fixture.debugElement.query(By.css('input[formControlName="name"]'));
             const emailField = fixture.debugElement.query(By.css('input[formControlName="email"]'));
-            const descripcionField = fixture.debugElement.query(By.css('textarea[formControlName="descripcion"]'));
+            const descriptionField = fixture.debugElement.query(By.css('textarea[formControlName="description"]'));
 
-            expect(nombreField).toBeTruthy();
+            expect(nameField).toBeTruthy();
             expect(emailField).toBeTruthy();
-            expect(descripcionField).toBeTruthy();
+            expect(descriptionField).toBeTruthy();
         });
 
         it('should show save and cancel buttons in edit mode', () => {
-            component.editarPerfil();
+            component.onEditProfile();
             fixture.detectChanges();
 
             const saveButton = fixture.debugElement.query(By.css('button:contains("Guardar Cambios")'));
@@ -230,16 +230,16 @@ describe('PerfilAlumnoComponent - Integration Tests', () => {
     describe('Form Validation Integration', () => {
         beforeEach(() => {
             component.ngOnInit();
-            component.editarPerfil();
+            component.onEditProfile();
             fixture.detectChanges();
         });
 
         it('should show validation errors for empty required fields', () => {
-            const nombreInput = fixture.debugElement.query(By.css('input[formControlName="nombre"]'));
+            const nameInput = fixture.debugElement.query(By.css('input[formControlName="name"]'));
 
-            nombreInput.nativeElement.value = '';
-            nombreInput.nativeElement.dispatchEvent(new Event('input'));
-            nombreInput.nativeElement.blur();
+            nameInput.nativeElement.value = '';
+            nameInput.nativeElement.dispatchEvent(new Event('input'));
+            nameInput.nativeElement.blur();
 
             fixture.detectChanges();
 
