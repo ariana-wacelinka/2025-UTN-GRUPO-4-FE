@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import { delay, map, tap, catchError } from 'rxjs/operators';
+import { delay, map, tap, catchError, switchMap } from 'rxjs/operators';
 import { API_URL } from '../app.config';
+import { KeycloakUser } from '../models/keycloak-user.model';
 
 export interface LoginCredentials {
   username: string;
@@ -54,6 +55,7 @@ export class AuthService {
   public loggedIn$ = this.loggedInSubject.asObservable();
 
   public idKeycloakUser: string | null = null;
+  public keycloakUser: KeycloakUser | null = null;
 
   constructor(
     private http: HttpClient,
@@ -70,7 +72,7 @@ export class AuthService {
   login(credentials: LoginCredentials): Observable<LoginResponse> {
     console.log('=== LOGIN CREDENTIALS ENVIADAS ===');
     return this.http.post<any>(`${this.apiUrl}/auth/login`, credentials).pipe(
-      map((response) => {
+      switchMap((response) => {
         console.log('=== LOGIN RESPONSE COMPLETO ===');
         console.log(JSON.stringify(response, null, 2));
 
@@ -78,12 +80,19 @@ export class AuthService {
           this.extractSubFromIdToken(response.id_token);
           this.saveIdTokenToCookie(response.id_token);
           this.loggedInSubject.next(true);
+
+          return this.fetchKeycloakUser().pipe(
+            map(() => ({
+              success: true,
+              message: 'Login exitoso'
+            }))
+          );
         }
 
-        return {
+        return of({
           success: true,
           message: 'Login exitoso'
-        };
+        });
       }),
       catchError((error) => {
         console.error('Login error:', error);
@@ -93,6 +102,28 @@ export class AuthService {
         });
       })
     );
+  }
+
+  private fetchKeycloakUser(): Observable<KeycloakUser> {
+    if (!this.idKeycloakUser) {
+      return of();
+    }
+
+    console.log('=== FETCHING KEYCLOAK USER ===');
+    return this.http
+      .get<KeycloakUser>(`${this.apiUrl}/users/keycloak/${this.idKeycloakUser}`)
+      .pipe(
+        tap((user) => {
+          console.log('=== KEYCLOAK USER FETCHED ===');
+          this.keycloakUser = user;
+          console.log('=== KEYCLOAK USER ===');
+          console.log(JSON.stringify(user, null, 2));
+        }),
+        catchError((error) => {
+          console.error('Error fetching keycloak user:', error);
+          return of();
+        })
+      );
   }
 
   register(credentials: RegisterCredentials): Observable<RegisterResponse> {
@@ -170,6 +201,7 @@ export class AuthService {
   logout(): void {
     document.cookie = `${this.COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     this.idKeycloakUser = null;
+    this.keycloakUser = null;
     this.loggedInSubject.next(false);
   }
 
