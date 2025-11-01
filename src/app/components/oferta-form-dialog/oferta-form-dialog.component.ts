@@ -102,6 +102,18 @@ export interface OfertaFormDialogData {
                 </mat-error>
               </mat-form-field>
             </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Pago Estimado (USD) </mat-label>
+                <input matInput type="number" formControlName="estimatedPayment" placeholder="2000">
+                <mat-hint>Ingrese el monto mensual en dólares</mat-hint>
+                <mat-error *ngIf="f['estimatedPayment'].invalid && f['estimatedPayment'].touched">
+                  <span *ngIf="f['estimatedPayment'].errors?.['required']">El salario es requerido</span>
+                  <span *ngIf="f['estimatedPayment'].errors?.['min']">El salario debe ser mayor a 0</span>
+                </mat-error>
+              </mat-form-field>
+            </div>
           </div>
 
           <!-- Descripción -->
