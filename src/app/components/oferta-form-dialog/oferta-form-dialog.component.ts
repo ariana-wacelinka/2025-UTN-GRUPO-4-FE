@@ -268,11 +268,15 @@ export class OfertaFormDialogComponent implements OnInit {
 
   private loadOfertaData() {
     const oferta = this.data.oferta!;
+    
+    // Mapear modalidad al enum correcto
+    const modalityValue = this.mapModalityToEnum(oferta.modality);
+    
     this.ofertaForm.patchValue({
       title: oferta.title,
       description: oferta.description,
       requirements: oferta.requirements,
-      modality: oferta.modality,
+      modality: modalityValue,
       location: oferta.location,
       estimatedPayment: oferta.estimatedPayment,
       fechaVencimiento: oferta.fechaVencimiento
@@ -281,6 +285,23 @@ export class OfertaFormDialogComponent implements OnInit {
     // Cargar atributos si existen
     if ((oferta as any).attributes && (oferta as any).attributes.length > 0) {
       this.skills.set((oferta as any).attributes);
+    }
+  }
+
+  private mapModalityToEnum(modality: string): ModalidadTrabajo {
+    const modalityUpper = modality.toUpperCase();
+    switch (modalityUpper) {
+      case 'REMOTO':
+      case 'REMOTE':
+        return ModalidadTrabajo.REMOTO;
+      case 'HIBRIDO':
+      case 'HYBRID':
+        return ModalidadTrabajo.HIBRIDO;
+      case 'PRESENCIAL':
+      case 'ONSITE':
+        return ModalidadTrabajo.PRESENCIAL;
+      default:
+        return ModalidadTrabajo.REMOTO;
     }
   }
 
