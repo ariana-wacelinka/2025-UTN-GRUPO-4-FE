@@ -4,18 +4,22 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { OfertaListaDTO, EstadoAplicacion } from '../../models/oferta.dto';
 import { offersService } from '../../services/ofertas.service';
 import { KeycloakUser } from '../../models/keycloak-user.model';
 import { AuthService } from '../../services/auth.service';
 import { AplicarDialogComponent } from '../../components/aplicar-dialog/aplicar-dialog.component';
+import { OfertaFormDialogComponent, OfertaFormDialogData } from '../../components/oferta-form-dialog/oferta-form-dialog.component';
+import { OfertaLaboralDTO, ModalidadTrabajo } from '../../models/oferta-laboral.dto';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { tap } from 'rxjs';
 
 @Component({
   selector: 'app-oferta-detalle',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, MatChipsModule, MatIconModule],
+  imports: [MatCardModule, MatButtonModule, MatChipsModule, MatIconModule, MatSnackBarModule],
   template: `
     @if (oferta) {
     <div class="detalle-page">
@@ -92,6 +96,15 @@ import { tap } from 'rxjs';
             <mat-card-content>
               <div class="action-buttons">
                 @if (isMyOffer()) {
+                <button
+                  mat-raised-button
+                  class="edit-offer-button"
+                  color="primary"
+                  (click)="editarOferta()"
+                >
+                  <mat-icon>edit</mat-icon>
+                  Editar Oferta
+                </button>
                 <button
                   mat-raised-button
                   class="view-applicants-button"
@@ -441,6 +454,22 @@ import { tap } from 'rxjs';
         box-shadow: 0 12px 32px rgba(103, 58, 183, 0.4) !important;
       }
 
+      .edit-offer-button {
+        background: var(--secondary-gradient) !important;
+        color: var(--white) !important;
+        font-weight: 600 !important;
+        text-transform: none !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        font-size: 1rem !important;
+        box-shadow: 0 8px 24px var(--shadow-primary) !important;
+      }
+
+      .edit-offer-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px var(--shadow-primary-hover) !important;
+      }
+
       .save-button {
         border: 2px solid var(--border-light) !important;
         color: var(--text-muted) !important;
@@ -554,7 +583,8 @@ export class OfertaDetalleComponent implements OnInit {
     private router: Router,
     private ofertasService: offersService,
     private authService: AuthService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -623,6 +653,55 @@ export class OfertaDetalleComponent implements OnInit {
     if (this.oferta) {
       this.router.navigate(['/oferta', this.oferta.id, 'aplicantes']);
     }
+  }
+
+  editarOferta(): void {
+    if (!this.oferta || !this.isMyOffer()) {
+      this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    // Convertir OfertaListaDTO a OfertaLaboralDTO para el formulario
+    const ofertaParaEditar: OfertaLaboralDTO = {
+      id: this.oferta.id,
+      title: this.oferta.title,
+      description: this.oferta.description,
+      requirements: this.oferta.requirements,
+      modality: this.oferta.modality as ModalidadTrabajo,
+      location: this.oferta.location,
+      estimatedPayment: this.extractSalaryNumber(this.oferta.estimatedPayment),
+      applyList: [],
+      bidder: {
+        id: this.oferta.bidder.id,
+        name: this.oferta.bidder.name,
+        industry: 'Tecnología',
+        imageUrl: this.oferta.bidder.imageUrl || undefined
+      },
+      attributes: this.oferta.attributes || []
+    } as any;
+
+    const dialogRef = this.dialog.open(OfertaFormDialogComponent, {
+      width: '800px',
+      maxWidth: '95vw',
+      disableClose: true,
+      data: {
+        isEditing: true,
+        oferta: ofertaParaEditar
+      } as OfertaFormDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Recargar la oferta para mostrar los cambios
+        this.ngOnInit();
+        this.snackBar.open('Oferta actualizada exitosamente', 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
+
+  private extractSalaryNumber(salarioTexto: string): number {
+    const matches = salarioTexto.match(/\d+/);
+    return matches ? parseInt(matches[0]) : 0;
   }
 
   isMyOffer(): boolean {

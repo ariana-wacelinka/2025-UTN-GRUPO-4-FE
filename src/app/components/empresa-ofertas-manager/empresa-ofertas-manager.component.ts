@@ -122,7 +122,7 @@ import { AuthService } from '../../services/auth.service';
                       <mat-icon>visibility</mat-icon>
                       <span>Ver Detalle</span>
                     </button>
-                    <button mat-menu-item (click)="editarOferta(oferta)">
+                    <button mat-menu-item (click)="editarOferta(oferta)" [disabled]="!canEditOferta(oferta)">
                       <mat-icon>edit</mat-icon>
                       <span>Editar</span>
                     </button>
@@ -386,7 +386,17 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
     this.router.navigate(['/oferta', oferta.id]);
   }
 
+  canEditOferta(oferta: OfertaListaDTO): boolean {
+    const currentUserId = this.authService.keycloakUser?.id;
+    return currentUserId !== undefined && oferta.bidder.id === currentUserId;
+  }
+
   editarOferta(oferta: OfertaListaDTO) {
+    if (!this.canEditOferta(oferta)) {
+      this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
     // Convertir OfertaListaDTO a OfertaLaboralDTO para el formulario
     const ofertaParaEditar: OfertaLaboralDTO = {
       id: oferta.id,
@@ -402,8 +412,9 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
         name: oferta.bidder.name,
         industry: 'Tecnología', // Mock
         imageUrl: oferta.bidder.imageUrl || undefined
-      }
-    };
+      },
+      attributes: oferta.attributes || []
+    } as any;
 
     const dialogRef = this.dialog.open(OfertaFormDialogComponent, {
       width: '800px',

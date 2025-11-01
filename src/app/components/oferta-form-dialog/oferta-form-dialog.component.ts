@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,16 +11,21 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 
 import { OfertasLaboralesService } from '../../services/ofertas-laborales.service';
+import { AuthService } from '../../services/auth.service';
+import { AtributosService } from '../../services/atributos.service';
 import {
   CreateOfertaDTO,
   UpdateOfertaDTO,
   OfertaLaboralDTO,
   ModalidadTrabajo
 } from '../../models/oferta-laboral.dto';
+import { Observable, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 export interface OfertaFormDialogData {
   oferta?: OfertaLaboralDTO;
@@ -33,6 +38,7 @@ export interface OfertaFormDialogData {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -42,7 +48,8 @@ export interface OfertaFormDialogData {
     MatDatepickerModule,
     MatNativeDateModule,
     MatSnackBarModule,
-    MatChipsModule
+    MatChipsModule,
+    MatAutocompleteModule
   ],
   template: `
     <div class="oferta-form-dialog">
@@ -161,30 +168,41 @@ export interface OfertaFormDialogData {
               </mat-error>
             </mat-form-field>
 
-            <!-- Chips para tecnologías/habilidades -->
+            <!-- Atributos con autocomplete -->
             <div class="skills-section">
               <label class="skills-label">Tecnologías y Habilidades Clave</label>
               <mat-form-field appearance="outline" class="skills-input">
-                <mat-label>Agregar habilidad</mat-label>
-                <mat-chip-grid #chipGrid>
-                  @for (skill of skills(); track skill) {
-                    <mat-chip-row (removed)="removeSkill(skill)" class="skill-chip">
-                      {{ skill }}
-                      <button matChipRemove>
-                        <mat-icon>cancel</mat-icon>
-                      </button>
-                    </mat-chip-row>
+                <mat-label>Atributos</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="atributoInput"
+                  name="atributoInput"
+                  (input)="buscarAtributos($event)"
+                  [matAutocomplete]="auto"
+                  placeholder="Buscar o crear atributo..."
+                />
+                <mat-autocomplete
+                  #auto="matAutocomplete"
+                  (optionSelected)="seleccionarAtributo($event)"
+                >
+                  @for (atributo of atributosSugeridos$ | async; track atributo) {
+                    <mat-option [value]="atributo">{{ atributo }}</mat-option>
                   }
-                </mat-chip-grid>
-                <input 
-                  placeholder="Presiona Enter para agregar..." 
-                  [matChipInputFor]="chipGrid"
-                  [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                  (matChipInputTokenEnd)="addSkill($event)">
+                </mat-autocomplete>
               </mat-form-field>
+
+              <mat-chip-set class="chips">
+                @for (skill of skills(); track skill) {
+                  <mat-chip (removed)="removeSkill(skill)" class="skill-chip">
+                    {{ skill }}
+                    <mat-icon matChipRemove>cancel</mat-icon>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+              
               <div class="skills-hint">
                 <mat-icon class="hint-icon">info</mat-icon>
-                <span>Agrega tecnologías, frameworks, herramientas o habilidades importantes</span>
+                <span>Busca tecnologías existentes o crea nuevas escribiendo el nombre</span>
               </div>
             </div>
           </div>
@@ -217,6 +235,8 @@ export class OfertaFormDialogComponent implements OnInit {
   ofertaForm!: FormGroup;
   isSubmitting = signal(false);
   skills = signal<string[]>([]);
+  atributoInput = '';
+  atributosSugeridos$: Observable<string[]> = of([]);
 
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
 
@@ -231,6 +251,8 @@ export class OfertaFormDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<OfertaFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: OfertaFormDialogData,
     private ofertasLaboralesService: OfertasLaboralesService,
+    private authService: AuthService,
+    private atributosService: AtributosService,
     private snackBar: MatSnackBar
   ) {
     this.initializeForm();
@@ -238,8 +260,21 @@ export class OfertaFormDialogComponent implements OnInit {
 
   ngOnInit() {
     if (this.data.isEditing && this.data.oferta) {
-      this.loadOfertaData();
+      this.validateEditPermissions();
     }
+  }
+
+  private validateEditPermissions() {
+    const currentUserId = this.authService.keycloakUser?.id;
+    const oferta = this.data.oferta!;
+    
+    if (!currentUserId || !this.ofertasLaboralesService.canEditOferta(oferta, currentUserId)) {
+      this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 5000 });
+      this.dialogRef.close();
+      return;
+    }
+    
+    this.loadOfertaData();
   }
 
   private initializeForm() {
@@ -266,9 +301,10 @@ export class OfertaFormDialogComponent implements OnInit {
       fechaVencimiento: oferta.fechaVencimiento
     });
 
-    // Cargar skills si existen (simulado por ahora)
-    // En el futuro, esto podría venir de un campo específico
-    this.skills.set(['JavaScript', 'Angular', 'TypeScript']); // Mock data
+    // Cargar atributos si existen
+    if ((oferta as any).attributes && (oferta as any).attributes.length > 0) {
+      this.skills.set((oferta as any).attributes);
+    }
   }
 
   private futureDateValidator(control: any) {
@@ -281,7 +317,43 @@ export class OfertaFormDialogComponent implements OnInit {
     return selectedDate <= today ? { futureDate: true } : null;
   }
 
-  // Gestión de skills/chips
+  // Gestión de atributos con autocomplete
+  buscarAtributos(event: any): void {
+    const query = event.target.value;
+    if (query.length > 0) {
+      this.atributosSugeridos$ = of(query).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((q) => this.atributosService.buscarAtributos(q))
+      );
+    } else {
+      this.atributosSugeridos$ = of([]);
+    }
+  }
+
+  seleccionarAtributo(event: any): void {
+    const atributoSeleccionado = event.option.value;
+
+    if (atributoSeleccionado.startsWith('"') && atributoSeleccionado.endsWith('"')) {
+      // Extraer el nombre del atributo de 'Crear "NombreAtributo"'
+      const nombreAtributo = atributoSeleccionado.match(/"(.+)"/)?.[1] || '';
+      this.atributosService.crearAtributo(nombreAtributo).subscribe(nuevoAtributo => {
+        this.agregarAtributoALista(nuevoAtributo);
+      });
+    } else {
+      this.agregarAtributoALista(atributoSeleccionado);
+    }
+
+    this.atributoInput = '';
+  }
+
+  private agregarAtributoALista(atributo: string): void {
+    if (!this.skills().includes(atributo)) {
+      this.skills.update(skills => [...skills, atributo]);
+    }
+  }
+
+  // Gestión de skills/chips (mantener compatibilidad)
   addSkill(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
 
@@ -312,7 +384,8 @@ export class OfertaFormDialogComponent implements OnInit {
         modality: formData.modality,
         location: formData.location,
         estimatedPayment: Number(formData.estimatedPayment),
-        fechaVencimiento: formData.fechaVencimiento || undefined
+        fechaVencimiento: formData.fechaVencimiento || undefined,
+        attributes: this.skills() // Incluir atributos en el formato de la API
       };
 
       if (this.data.isEditing && this.data.oferta) {
@@ -344,6 +417,33 @@ export class OfertaFormDialogComponent implements OnInit {
 
   private updateOferta(ofertaData: UpdateOfertaDTO) {
     const ofertaId = this.data.oferta!.id;
+    const currentUserId = this.authService.keycloakUser?.id;
+    
+    if (!currentUserId) {
+      this.snackBar.open('Debes estar autenticado para editar ofertas', 'Cerrar', { duration: 3000 });
+      this.isSubmitting.set(false);
+      return;
+    }
+
+    // Validar permisos antes de actualizar
+    this.ofertasLaboralesService.validateEditPermissions(ofertaId, currentUserId).subscribe({
+      next: (canEdit) => {
+        if (canEdit) {
+          this.performUpdate(ofertaId, ofertaData);
+        } else {
+          this.isSubmitting.set(false);
+          this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 3000 });
+        }
+      },
+      error: (error) => {
+        this.isSubmitting.set(false);
+        console.error('Error al validar permisos:', error);
+        this.snackBar.open(error.message || 'Error al validar permisos', 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
+
+  private performUpdate(ofertaId: number, ofertaData: UpdateOfertaDTO) {
     this.ofertasLaboralesService.updateOferta(ofertaId, ofertaData).subscribe({
       next: (ofertaActualizada) => {
         this.isSubmitting.set(false);
@@ -353,7 +453,8 @@ export class OfertaFormDialogComponent implements OnInit {
       error: (error) => {
         this.isSubmitting.set(false);
         console.error('Error al actualizar oferta:', error);
-        this.snackBar.open('Error al actualizar la oferta', 'Cerrar', { duration: 3000 });
+        const errorMessage = error.message || 'Error al actualizar la oferta';
+        this.snackBar.open(errorMessage, 'Cerrar', { duration: 5000 });
       }
     });
   }

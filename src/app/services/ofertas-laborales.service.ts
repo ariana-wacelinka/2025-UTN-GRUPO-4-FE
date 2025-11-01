@@ -106,13 +106,31 @@ export class OfertasLaboralesService {
     }
 
     /**
+     * Verifica si el usuario actual puede editar la oferta
+     * @param oferta Oferta a verificar
+     * @param currentUserId ID del usuario actual
+     * @returns true si puede editar, false si no
+     */
+    canEditOferta(oferta: OfertaLaboralDTO, currentUserId: number): boolean {
+        return oferta.bidder.id === currentUserId;
+    }
+
+    /**
      * Actualiza una oferta existente
-     * PUT /api/ofertas/{id}
+     * PUT /api/offers/{id}
      */
     updateOferta(id: number, oferta: UpdateOfertaDTO): Observable<OfertaLaboralDTO> {
-        const ofertaForAPI = this.transformOfertaToAPI(oferta);
+        const ofertaForAPI = {
+            title: oferta.title,
+            description: oferta.description,
+            requirements: oferta.requirements,
+            modality: oferta.modality,
+            location: oferta.location,
+            estimatedPayment: oferta.estimatedPayment?.toString(),
+            attributes: (oferta as any).attributes || []
+        };
 
-        return this.http.put<OfertaLaboralDTO>(`${this.apiUrl}/${id}`, ofertaForAPI)
+        return this.http.put<OfertaLaboralDTO>(`${environment.apiUrl}/offers/${id}`, ofertaForAPI)
             .pipe(
                 map(response => this.transformOfertaFromAPI(response)),
                 catchError(this.handleError)
@@ -237,6 +255,21 @@ export class OfertasLaboralesService {
         return errores;
     }
 
+    /**
+     * Valida permisos de edición antes de actualizar
+     * @param ofertaId ID de la oferta
+     * @param currentUserId ID del usuario actual
+     * @returns Observable que emite true si puede editar
+     */
+    validateEditPermissions(ofertaId: number, currentUserId: number): Observable<boolean> {
+        return this.getOfertaById(ofertaId).pipe(
+            map(oferta => this.canEditOferta(oferta, currentUserId)),
+            catchError(() => {
+                return throwError(() => new Error('No tienes permisos para editar esta oferta'));
+            })
+        );
+    }
+
     private handleError = (error: any): Observable<never> => {
         console.error('Error en OfertasLaboralesService:', error);
 
@@ -247,7 +280,7 @@ export class OfertasLaboralesService {
         } else if (error.status === 401) {
             errorMessage = 'No tienes autorización para realizar esta acción';
         } else if (error.status === 403) {
-            errorMessage = 'No tienes permisos para acceder a este recurso';
+            errorMessage = 'No tienes permisos para editar esta oferta. Solo el creador puede modificarla';
         } else if (error.status === 404) {
             errorMessage = 'El recurso solicitado no fue encontrado';
         } else if (error.status === 500) {
