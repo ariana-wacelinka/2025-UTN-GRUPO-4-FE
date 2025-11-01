@@ -34,22 +34,22 @@ export interface SocialLink {
           <div class="image-container">
             <!-- Imagen normal o imagen con iniciales -->
             <div class="profile-image-wrapper">
-              <img *ngIf="hasValidImage()" 
-                   [src]="getImageUrl()" 
-                   [alt]="data.name" 
+              <img *ngIf="hasValidImage()"
+                   [src]="getImageUrl()"
+                   [alt]="data.name"
                    class="profile-image"
                    (error)="onImageError($event)">
-              
+
               <!-- Avatar con iniciales si no hay imagen -->
-              <div *ngIf="!hasValidImage()" 
+              <div *ngIf="!hasValidImage()"
                    class="profile-avatar"
                    [style.background]="getGradientColor()">
                 <span class="avatar-initials">{{ getInitials() }}</span>
               </div>
             </div>
-            
+
             <div *ngIf="isEditing()" class="image-hover-overlay">
-              <input type="file" #imageInput accept="image/*" 
+              <input type="file" #imageInput accept="image/*"
                      (change)="onImageSelected($event)" style="display: none">
               <div class="image-hover-content" (click)="imageInput.click()">
                 <mat-icon>camera_alt</mat-icon>
@@ -63,53 +63,53 @@ export interface SocialLink {
           <div class="profile-info-header">
             <div class="profile-text">
               <h1 class="profile-name">{{ data.name }}</h1>
-              <p class="profile-title">{{ data.subtitle }}</p>
-              <p *ngIf="data.description" class="profile-description">{{ data.description }}</p>
+              <p class="profile-title">{{ data.subtitle ? data.subtitle : '' }}</p>
+              <p *ngIf="data.description" class="profile-description">{{ data.description ? data.description : '' }}</p>
             </div>
-            
+
             <div class="profile-actions">
               <!-- Social Links Compact -->
               <div *ngIf="socialLinks.length > 0" class="social-links-compact">
-                <a *ngFor="let link of socialLinks" 
-                   [href]="link.url" 
+                <a *ngFor="let link of socialLinks"
+                   [href]="link.url"
                    [title]="link.label"
-                   target="_blank" 
-                   rel="noopener noreferrer" 
+                   target="_blank"
+                   rel="noopener noreferrer"
                    class="social-link-icon">
                   <mat-icon>{{ link.icon }}</mat-icon>
                 </a>
               </div>
-              
+
               <div class="contact-buttons">
-                <button *ngIf="!isEditing()" 
-                        mat-raised-button 
-                        color="primary" 
+                <button *ngIf="!isEditing()"
+                        mat-raised-button
+                        color="primary"
                         class="modern-button"
                         (click)="editProfile.emit()">
                   <mat-icon>edit</mat-icon>
                   Editar Perfil
                 </button>
-                
-                <button *ngIf="isEditing()" 
-                        mat-raised-button 
-                        color="primary" 
+
+                <button *ngIf="isEditing()"
+                        mat-raised-button
+                        color="primary"
                         class="modern-button"
                         (click)="saveChanges.emit()">
                   <mat-icon>save</mat-icon>
                   Guardar Cambios
                 </button>
-                
-                <button *ngIf="isEditing()" 
-                        mat-stroked-button 
+
+                <button *ngIf="isEditing()"
+                        mat-stroked-button
                         class="modern-button"
                         (click)="cancelEdit.emit()">
                   <mat-icon>cancel</mat-icon>
                   Cancelar
                 </button>
-                
-                <button *ngIf="!isEditing() && data.showDownloadCV" 
-                        mat-stroked-button 
-                        class="modern-button" 
+
+                <button *ngIf="!isEditing() && data.showDownloadCV"
+                        mat-stroked-button
+                        class="modern-button"
                         (click)="downloadCV.emit()">
                   <mat-icon>download</mat-icon>
                   Descargar CV

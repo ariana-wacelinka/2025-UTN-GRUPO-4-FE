@@ -233,7 +233,7 @@
                 </mat-card>
 
                 <!-- 3. Habilidades (grid-area: skills) -->
-                <app-skills-card *ngIf="perfilAlumno()?.skills" title="Habilidades Técnicas"
+                <app-skills-card title="Habilidades Técnicas"
                     [skills]="perfilAlumno()!.skills">
                 </app-skills-card>
 
@@ -271,7 +271,7 @@
                             <div class="summary-item">
                                 <span class="summary-label">Materias cargadas</span>
                                 <span class="summary-value">{{totalMaterias}}</span>
-                            </div>
+                             </div>
                             <div class="summary-item">
                                 <span class="summary-label">Promedio general</span>
                                 <span class="summary-value">{{promedioMaterias | number:'1.2-2'}}</span>

@@ -1,9 +1,10 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { API_URL } from '../app.config';
 import { EstudianteDTO, ActualizarEstudianteDTO, IdiomaDTO } from '../models/aplicante.dto';
+import { AuthService } from './auth.service';
 
 export interface MateriaDTO {
     codigo?: string;
@@ -67,6 +68,7 @@ export class PerfilAlumnoService {
     public perfil$ = this.perfilSubject.asObservable();
     private materiasSubject = new BehaviorSubject<MateriasState>(DEFAULT_MATERIAS_STATE);
     public materias$ = this.materiasSubject.asObservable();
+    authService = inject(AuthService);
 
     private readonly materiasEndpoint: string;
 
@@ -108,8 +110,12 @@ export class PerfilAlumnoService {
         this.materiasEndpoint = `${this.apiUrl}/students/profile/subjects`;
     }
 
-    getPerfil(): Observable<EstudianteDTO> {
-        return of({ ...this.mockPerfil });
+    getPerfil(userId: any): Observable<EstudianteDTO> {
+        //return of({ ...this.mockPerfil });
+        const id = userId ? userId : this.authService.keycloakUser?.id;
+        return this.http.get<EstudianteDTO>(`${this.apiUrl}/students/${id}`).pipe(
+            tap(response => this.perfilSubject.next(response))
+        );
     }
 
     actualizarPerfil(datosActualizados: ActualizarEstudianteDTO): Observable<EstudianteDTO> {

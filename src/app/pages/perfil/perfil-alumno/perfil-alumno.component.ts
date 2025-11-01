@@ -97,7 +97,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
 
     return {
       name: displayName,
-      subtitle: `${perfil.career} - ${perfil.currentYearLevel}º año`,
+      subtitle: perfil.career && perfil.currentYearLevel ? `${perfil.career} - ${perfil.currentYearLevel}º año` : '',
       description: perfil.institution,
       imageUrl: imageUrl,
       showDownloadCV: true
@@ -219,13 +219,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     this.route.queryParams.subscribe(params => {
       const userId = params['userId'];
 
-      if (userId) {
-        // TODO Sprint 2: Reemplazar con llamada al backend
-        this.perfilAlumno.set(this.getMockPerfilByUserId(Number(userId)));
-        this.isLoading.set(false);
-      } else {
-        // Cargar perfil del usuario actual
-        this.perfilService.getPerfil()
+        this.perfilService.getPerfil(userId)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (perfil) => {
@@ -237,7 +231,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
               this.isLoading.set(false);
             }
           });
-      }
     });
   }
 
