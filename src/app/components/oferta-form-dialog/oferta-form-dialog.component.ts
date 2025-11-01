@@ -394,7 +394,8 @@ export class OfertaFormDialogComponent implements OnInit {
 
   private updateOferta(ofertaData: UpdateOfertaDTO) {
     const ofertaId = this.data.oferta!.id;
-    const currentUserId = this.authService.keycloakUser?.id;
+    const currentUserId = this.authService.keycloakUser!.id;
+    const bidderId = this.data.oferta!.bidder.id;
     
     if (!currentUserId) {
       this.snackBar.open('Debes estar autenticado para editar ofertas', 'Cerrar', { duration: 3000 });
@@ -402,22 +403,9 @@ export class OfertaFormDialogComponent implements OnInit {
       return;
     }
 
-    // Validar permisos antes de actualizar
-    this.ofertasLaboralesService.validateEditPermissions(ofertaId, currentUserId).subscribe({
-      next: (canEdit) => {
-        if (canEdit) {
-          this.performUpdate(ofertaId, ofertaData);
-        } else {
-          this.isSubmitting.set(false);
-          this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 3000 });
-        }
-      },
-      error: (error) => {
-        this.isSubmitting.set(false);
-        console.error('Error al validar permisos:', error);
-        this.snackBar.open(error.message || 'Error al validar permisos', 'Cerrar', { duration: 3000 });
-      }
-    });
+    console.log('Validando permisos para editar oferta ID:', ofertaId, "Usuario ID:", currentUserId, "Bidder ID:", bidderId);
+
+    this.performUpdate(ofertaId, ofertaData);
   }
 
   private performUpdate(ofertaId: number, ofertaData: UpdateOfertaDTO) {
