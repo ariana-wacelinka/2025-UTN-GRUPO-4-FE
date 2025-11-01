@@ -119,15 +119,18 @@ export class PerfilAlumnoService {
     }
 
     actualizarPerfil(datosActualizados: ActualizarEstudianteDTO): Observable<EstudianteDTO> {
-        const perfilActualizado = {
-            ...this.mockPerfil,
-            ...datosActualizados
-        };
+        const id = this.authService.keycloakUser?.id;
+        if (!id) {
+            return throwError(() => new Error('Usuario no autenticado'));
+        }
 
-        this.mockPerfil = perfilActualizado;
-        this.perfilSubject.next(perfilActualizado);
-
-        return of(perfilActualizado);
+        return this.http.patch<EstudianteDTO>(`${this.apiUrl}/students/${id}`, datosActualizados).pipe(
+            tap(response => this.perfilSubject.next(response)),
+            catchError(error => {
+                console.error('Error al actualizar perfil:', error);
+                return throwError(() => error);
+            })
+        );
     }
 
     subirImagenPerfil(archivo: File): Observable<{ imageUrl: string }> {
