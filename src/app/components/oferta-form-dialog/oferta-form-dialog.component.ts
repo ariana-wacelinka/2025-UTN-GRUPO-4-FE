@@ -102,29 +102,6 @@ export interface OfertaFormDialogData {
                 </mat-error>
               </mat-form-field>
             </div>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="form-field">
-                <mat-label>Salario Estimado (USD) </mat-label>
-                <input matInput type="number" formControlName="estimatedPayment" placeholder="2000">
-                <mat-hint>Ingrese el monto mensual en dólares</mat-hint>
-                <mat-error *ngIf="f['estimatedPayment'].invalid && f['estimatedPayment'].touched">
-                  <span *ngIf="f['estimatedPayment'].errors?.['required']">El salario es requerido</span>
-                  <span *ngIf="f['estimatedPayment'].errors?.['min']">El salario debe ser mayor a 0</span>
-                </mat-error>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="form-field">
-                <mat-label>Fecha de Vencimiento</mat-label>
-                <input matInput [matDatepicker]="picker" formControlName="fechaVencimiento">
-                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-                <mat-hint>Opcional - Fecha límite para aplicar</mat-hint>
-                <mat-error *ngIf="f['fechaVencimiento'].invalid && f['fechaVencimiento'].touched">
-                  La fecha debe ser en el futuro
-                </mat-error>
-              </mat-form-field>
-            </div>
           </div>
 
           <!-- Descripción -->
