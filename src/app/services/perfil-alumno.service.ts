@@ -282,14 +282,40 @@ export class PerfilAlumnoService {
 export interface OfertaAplicada {
     id: number;
     customCoverLetter: string;
-    offer?: {
-        id: number;
-        title: string;
-        description: string;
-        modality: string;
-        location: string;
-        estimatedPayment: string;
-    };
+    applicationDate?: string; // Fecha de aplicación
+    status?: ApplicationStatus; // Estado de la aplicación
+    offer?: OfferDetails;
+}
+
+export interface OfferDetails {
+    id: number;
+    title: string;
+    description: string;
+    requirements?: string; // Requisitos de la oferta
+    modality: string;
+    location: string;
+    estimatedPayment: string;
+    company?: CompanyInfo; // Información de la empresa
+    tags?: string[]; // Tags/categorías de la oferta
+    createdDate?: string; // Fecha de creación de la oferta
+    expirationDate?: string; // Fecha de vencimiento
+    isActive?: boolean; // Si la oferta está activa
+}
+
+export interface CompanyInfo {
+    id: number;
+    name: string;
+    industry?: string;
+    imageUrl?: string;
+    description?: string;
+}
+
+export enum ApplicationStatus {
+    PENDING = 'PENDING', // Pendiente de revisión
+    REVIEWED = 'REVIEWED', // Revisada por la empresa
+    ACCEPTED = 'ACCEPTED', // Aceptada
+    REJECTED = 'REJECTED', // Rechazada
+    WITHDRAWN = 'WITHDRAWN' // Retirada por el estudiante
 }
 
 export interface SortInfo {

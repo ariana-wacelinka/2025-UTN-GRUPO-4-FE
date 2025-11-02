@@ -14,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { PerfilAlumnoService, MateriasState, PagedOfertasAplicadasResponse, OfertaAplicada } from '../../../services/perfil-alumno.service';
+import { PerfilAlumnoService, MateriasState, PagedOfertasAplicadasResponse, OfertaAplicada, ApplicationStatus, OfferDetails } from '../../../services/perfil-alumno.service';
 import { AuthService } from '../../../services/auth.service';
 import { AtributosService } from '../../../services/atributos.service';
 import { EstudianteDTO, ActualizarEstudianteDTO } from '../../../models/aplicante.dto';
@@ -671,5 +671,110 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   isOwnProfile(): boolean {
     // Verificar si estamos viendo el perfil propio (sin userId en query params)
     return !this.route.snapshot.queryParams['userId'];
+  }
+
+  // ============= MÉTODOS PARA UI MEJORADA DE OFERTAS =============
+
+  // Estado de expansión de cartas de presentación
+  private expandedCoverLetters = new Set<number>();
+
+  getStatusClass(status?: string): string {
+    switch(status) {
+      case 'PENDING': return 'status-pending';
+      case 'REVIEWED': return 'status-reviewed';
+      case 'ACCEPTED': return 'status-accepted';
+      case 'REJECTED': return 'status-rejected';
+      case 'WITHDRAWN': return 'status-withdrawn';
+      default: return 'status-pending';
+    }
+  }
+
+  getStatusIcon(status?: string): string {
+    switch(status) {
+      case 'PENDING': return 'schedule';
+      case 'REVIEWED': return 'visibility';
+      case 'ACCEPTED': return 'check_circle';
+      case 'REJECTED': return 'cancel';
+      case 'WITHDRAWN': return 'remove_circle';
+      default: return 'schedule';
+    }
+  }
+
+  getStatusText(status?: string): string {
+    switch(status) {
+      case 'PENDING': return 'Pendiente';
+      case 'REVIEWED': return 'Revisada';
+      case 'ACCEPTED': return 'Aceptada';
+      case 'REJECTED': return 'Rechazada';
+      case 'WITHDRAWN': return 'Retirada';
+      default: return 'Pendiente';
+    }
+  }
+
+  getModalityClass(modality: string): string {
+    switch(modality.toUpperCase()) {
+      case 'REMOTE': return 'modality-remote';
+      case 'HYBRID': return 'modality-hybrid';
+      case 'ON_SITE':
+      case 'PRESENCIAL': return 'modality-onsite';
+      default: return 'modality-hybrid';
+    }
+  }
+
+  getModalityIcon(modality: string): string {
+    switch(modality.toUpperCase()) {
+      case 'REMOTE': return 'home';
+      case 'HYBRID': return 'work_history';
+      case 'ON_SITE':
+      case 'PRESENCIAL': return 'business';
+      default: return 'work_history';
+    }
+  }
+
+  getModalityText(modality: string): string {
+    switch(modality.toUpperCase()) {
+      case 'REMOTE': return 'Remoto';
+      case 'HYBRID': return 'Híbrido';
+      case 'ON_SITE':
+      case 'PRESENCIAL': return 'Presencial';
+      default: return modality;
+    }
+  }
+
+  isDescriptionLong(description: string): boolean {
+    return description ? description.length > 200 : false;
+  }
+
+  toggleCoverLetter(applicationId: number) {
+    if (this.expandedCoverLetters.has(applicationId)) {
+      this.expandedCoverLetters.delete(applicationId);
+    } else {
+      this.expandedCoverLetters.add(applicationId);
+    }
+  }
+
+  isCoverLetterExpanded(applicationId: number): boolean {
+    return this.expandedCoverLetters.has(applicationId);
+  }
+
+  hasTimelineData(aplicacion: OfertaAplicada): boolean {
+    return !!(aplicacion.applicationDate || aplicacion.offer?.expirationDate);
+  }
+
+  contactarEmpresa(offer: any) {
+    // TODO: Implementar navegación a perfil de empresa
+    console.log('Contactar empresa:', offer.company?.name);
+  }
+
+  retirarAplicacion(applicationId: number) {
+    // TODO: Implementar retirar aplicación
+    if (confirm('¿Estás seguro de que quieres retirar tu aplicación?')) {
+      console.log('Retirar aplicación:', applicationId);
+      // Aquí iría la llamada al servicio para retirar la aplicación
+    }
+  }
+
+  canWithdrawApplication(status?: string): boolean {
+    return status === 'PENDING' || status === 'REVIEWED' || !status;
   }
 }

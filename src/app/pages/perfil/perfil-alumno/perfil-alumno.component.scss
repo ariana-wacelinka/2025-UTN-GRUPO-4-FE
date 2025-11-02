@@ -1819,3 +1819,433 @@
         }
     }
 }
+
+// ============= MEJORAS UI OFERTAS APLICADAS =============
+
+.applied-offers-card {
+    .applied-offers-list {
+        .offer-card {
+            position: relative;
+            background: var(--background-soft);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                border-color: var(--primary-color);
+            }
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            // Status Badge
+            .application-status {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 0.8em;
+                font-weight: 500;
+
+                &.status-pending {
+                    background: #fff3cd;
+                    color: #856404;
+                    border: 1px solid #ffeaa7;
+                }
+
+                &.status-reviewed {
+                    background: #d1ecf1;
+                    color: #0c5460;
+                    border: 1px solid #bee5eb;
+                }
+
+                &.status-accepted {
+                    background: #d4edda;
+                    color: #155724;
+                    border: 1px solid #c3e6cb;
+                }
+
+                &.status-rejected {
+                    background: #f8d7da;
+                    color: #721c24;
+                    border: 1px solid #f1b0b7;
+                }
+
+                &.status-withdrawn {
+                    background: #e2e3e5;
+                    color: #383d41;
+                    border: 1px solid #c6c8ca;
+                }
+
+                mat-icon {
+                    font-size: 16px;
+                    width: 16px;
+                    height: 16px;
+                }
+            }
+
+            // Company Section
+            .company-section {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                margin-bottom: 20px;
+                padding: 16px;
+                background: var(--white);
+                border-radius: 12px;
+                border: 1px solid var(--glass-border);
+
+                .company-logo {
+                    flex-shrink: 0;
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 8px;
+                    overflow: hidden;
+
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                }
+
+                .company-info {
+                    .company-name {
+                        margin: 0 0 4px 0;
+                        font-size: 1.1em;
+                        font-weight: 600;
+                        color: var(--text-primary);
+                    }
+
+                    .company-industry {
+                        margin: 0;
+                        font-size: 0.9em;
+                        color: var(--text-muted);
+                    }
+                }
+            }
+
+            // Offer Header
+            .offer-header {
+                margin-bottom: 20px;
+
+                .offer-title-section {
+                    margin-bottom: 16px;
+
+                    .offer-title {
+                        font-size: 1.5em;
+                        font-weight: 700;
+                        color: var(--text-primary);
+                        margin: 0 0 8px 0;
+                        line-height: 1.3;
+                    }
+
+                    .offer-meta {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+
+                        .application-date {
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                            font-size: 0.9em;
+                            color: var(--text-muted);
+
+                            mat-icon {
+                                font-size: 16px;
+                                width: 16px;
+                                height: 16px;
+                            }
+                        }
+                    }
+                }
+
+                .offer-pills {
+                    .info-chips {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+
+                        mat-chip {
+                            font-size: 0.85em;
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+
+                            mat-icon {
+                                font-size: 14px;
+                                width: 14px;
+                                height: 14px;
+                            }
+
+                            &.modality-remote {
+                                background: #e8f5e8;
+                                color: #2e7d32;
+                            }
+
+                            &.modality-hybrid {
+                                background: #fff3e0;
+                                color: #ef6c00;
+                            }
+
+                            &.modality-onsite {
+                                background: #e3f2fd;
+                                color: #1565c0;
+                            }
+
+                            &.location-chip {
+                                background: #f3e5f5;
+                                color: #7b1fa2;
+                            }
+
+                            &.payment-chip {
+                                background: #e8f5e8;
+                                color: #388e3c;
+                                font-weight: 600;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Offer Content
+            .offer-content {
+                margin-bottom: 20px;
+
+                .offer-description {
+                    margin-bottom: 16px;
+
+                    .description-text {
+                        color: var(--text-secondary);
+                        line-height: 1.6;
+                        margin: 0;
+                    }
+
+                    .expand-btn {
+                        margin-top: 8px;
+                        color: var(--primary-color);
+                        font-size: 0.9em;
+
+                        mat-icon {
+                            margin-right: 4px;
+                        }
+                    }
+                }
+
+                .offer-tags {
+                    h6 {
+                        margin: 0 0 12px 0;
+                        font-size: 0.95em;
+                        color: var(--text-primary);
+                        font-weight: 600;
+                    }
+
+                    .skills-chips {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 6px;
+
+                        .skill-tag {
+                            background: var(--background-page);
+                            color: var(--text-primary);
+                            font-size: 0.8em;
+                            border: 1px solid var(--glass-border);
+                        }
+                    }
+                }
+            }
+
+            // Cover Letter Section
+            .cover-letter-section {
+                background: var(--background-page);
+                border-radius: 12px;
+                margin-bottom: 20px;
+                overflow: hidden;
+
+                .cover-letter-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 16px;
+                    cursor: pointer;
+                    transition: background 0.2s ease;
+
+                    &:hover {
+                        background: var(--glass-white);
+                    }
+
+                    .letter-icon {
+                        color: var(--primary-color);
+                        font-size: 20px;
+                        width: 20px;
+                        height: 20px;
+                    }
+
+                    .letter-title {
+                        flex: 1;
+                        font-weight: 500;
+                        color: var(--text-primary);
+                    }
+
+                    .toggle-letter {
+                        color: var(--text-muted);
+                    }
+                }
+
+                .cover-letter-content {
+                    max-height: 0;
+                    overflow: hidden;
+                    transition: max-height 0.3s ease;
+
+                    &.expanded {
+                        max-height: 300px;
+                    }
+
+                    .cover-letter-text {
+                        padding: 0 16px 16px 48px;
+                        color: var(--text-secondary);
+                        line-height: 1.5;
+                        font-style: italic;
+                        margin: 0;
+                    }
+                }
+            }
+
+            // Timeline
+            .application-timeline {
+                margin-bottom: 20px;
+                padding: 16px;
+                background: var(--white);
+                border-radius: 12px;
+                border-left: 4px solid var(--primary-color);
+
+                .timeline-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 8px;
+                    font-size: 0.9em;
+                    color: var(--text-secondary);
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+
+                    .timeline-icon {
+                        color: var(--primary-color);
+                        font-size: 18px;
+                        width: 18px;
+                        height: 18px;
+                    }
+                }
+            }
+
+            // Actions
+            .offer-actions {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+
+                button {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    transition: all 0.2s ease;
+
+                    mat-icon {
+                        font-size: 18px;
+                        width: 18px;
+                        height: 18px;
+                    }
+
+                    &[color="primary"] {
+                        background: var(--primary-color);
+                        color: var(--white);
+
+                        &:hover {
+                            background: var(--primary-dark);
+                            transform: translateY(-1px);
+                            box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+                        }
+                    }
+
+                    &:not([color]) {
+                        border-color: var(--glass-border);
+                        color: var(--text-primary);
+
+                        &:hover {
+                            background: var(--background-soft);
+                            border-color: var(--primary-color);
+                        }
+                    }
+
+                    &[color="warn"] {
+                        border-color: var(--error-color);
+                        color: var(--error-color);
+
+                        &:hover {
+                            background: var(--error-background);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Mobile Responsive
+        @media (max-width: 768px) {
+            .offer-card {
+                padding: 16px;
+
+                .application-status {
+                    position: relative;
+                    top: 0;
+                    right: 0;
+                    margin-bottom: 16px;
+                    align-self: flex-start;
+                }
+
+                .company-section {
+                    flex-direction: column;
+                    text-align: center;
+
+                    .company-logo {
+                        align-self: center;
+                    }
+                }
+
+                .offer-header {
+                    .offer-pills .info-chips {
+                        flex-direction: column;
+                        align-items: stretch;
+
+                        mat-chip {
+                            justify-content: center;
+                        }
+                    }
+                }
+
+                .offer-actions {
+                    flex-direction: column;
+
+                    button {
+                        justify-content: center;
+                    }
+                }
+            }
+        }
+    }
+}

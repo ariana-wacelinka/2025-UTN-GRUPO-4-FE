@@ -322,43 +322,128 @@
                         <!-- Content -->
                         <ng-container *ngIf="!isOfertasLoading && !ofertasError">
                             <div class="applied-offers-list" *ngIf="ofertasAplicadas.length; else emptyOffers">
-                                <div class="offer-item" *ngFor="let aplicacion of ofertasAplicadas; trackBy: trackByOferta">
+                                <div class="offer-card" *ngFor="let aplicacion of ofertasAplicadas; trackBy: trackByOferta">
                                     <!-- Solo mostrar si la oferta existe -->
                                     <ng-container *ngIf="aplicacion.offer">
+                                        <!-- Status Badge -->
+                                        <div class="application-status" [class]="getStatusClass(aplicacion.status)">
+                                            <mat-icon>{{getStatusIcon(aplicacion.status)}}</mat-icon>
+                                            <span>{{getStatusText(aplicacion.status)}}</span>
+                                        </div>
+
+                                        <!-- Company Info (si está disponible) -->
+                                        <div class="company-section" *ngIf="aplicacion.offer.company">
+                                            <div class="company-logo" *ngIf="aplicacion.offer.company.imageUrl">
+                                                <img [src]="aplicacion.offer.company.imageUrl"
+                                                     [alt]="aplicacion.offer.company.name || 'Logo de la empresa'"
+                                                     [title]="aplicacion.offer.company.name || 'Empresa'"
+                                                     onerror="this.style.display='none'">
+                                            </div>
+                                            <div class="company-info">
+                                                <h5 class="company-name">{{aplicacion.offer.company.name}}</h5>
+                                                <p class="company-industry" *ngIf="aplicacion.offer.company.industry">
+                                                    {{aplicacion.offer.company.industry}}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Offer Header -->
                                         <div class="offer-header">
-                                            <h4 class="offer-title">{{aplicacion.offer.title}}</h4>
-                                            <div class="offer-details">
-                                                <span class="offer-modality">
-                                                    <mat-icon>location_on</mat-icon>
-                                                    {{aplicacion.offer.modality}} - {{aplicacion.offer.location}}
-                                                </span>
-                                                <span class="offer-payment" *ngIf="aplicacion.offer.estimatedPayment">
-                                                    <mat-icon>attach_money</mat-icon>
-                                                    {{aplicacion.offer.estimatedPayment}}
-                                                </span>
+                                            <div class="offer-title-section">
+                                                <h4 class="offer-title">{{aplicacion.offer.title}}</h4>
+                                                <div class="offer-meta">
+                                                    <span class="application-date" *ngIf="aplicacion.applicationDate">
+                                                        <mat-icon>calendar_today</mat-icon>
+                                                        Aplicado el {{aplicacion.applicationDate | date:'dd/MM/yyyy'}}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Quick Info Pills -->
+                                            <div class="offer-pills">
+                                                <mat-chip-set class="info-chips">
+                                                    <mat-chip class="modality-chip" [class]="getModalityClass(aplicacion.offer.modality)">
+                                                        <mat-icon>{{getModalityIcon(aplicacion.offer.modality)}}</mat-icon>
+                                                        {{getModalityText(aplicacion.offer.modality)}}
+                                                    </mat-chip>
+                                                    <mat-chip class="location-chip">
+                                                        <mat-icon>place</mat-icon>
+                                                        {{aplicacion.offer.location}}
+                                                    </mat-chip>
+                                                    <mat-chip class="payment-chip" *ngIf="aplicacion.offer.estimatedPayment">
+                                                        <mat-icon>payments</mat-icon>
+                                                        {{aplicacion.offer.estimatedPayment}}
+                                                    </mat-chip>
+                                                </mat-chip-set>
                                             </div>
                                         </div>
 
-                                        <div class="offer-description">
-                                            <p>{{aplicacion.offer.description}}</p>
+                                        <!-- Offer Description -->
+                                        <div class="offer-content">
+                                            <div class="offer-description">
+                                                <p class="description-text">{{aplicacion.offer.description}}</p>
+                                                <button mat-button class="expand-btn" *ngIf="isDescriptionLong(aplicacion.offer.description)">
+                                                    <mat-icon>expand_more</mat-icon>
+                                                    Ver más
+                                                </button>
+                                            </div>
+
+                                            <!-- Tags/Skills si están disponibles -->
+                                            <div class="offer-tags" *ngIf="aplicacion.offer.tags && aplicacion.offer.tags.length">
+                                                <h6>Tecnologías requeridas:</h6>
+                                                <mat-chip-set class="skills-chips">
+                                                    <mat-chip *ngFor="let tag of aplicacion.offer.tags" class="skill-tag">
+                                                        {{tag}}
+                                                    </mat-chip>
+                                                </mat-chip-set>
+                                            </div>
                                         </div>
 
-                                        <div class="cover-letter" *ngIf="aplicacion.customCoverLetter">
+                                        <!-- Custom Cover Letter -->
+                                        <div class="cover-letter-section" *ngIf="aplicacion.customCoverLetter">
                                             <div class="cover-letter-header">
-                                                <mat-icon>mail</mat-icon>
-                                                <span>Tu carta de presentación:</span>
+                                                <mat-icon class="letter-icon">mail_outline</mat-icon>
+                                                <span class="letter-title">Tu carta de presentación</span>
+                                                <button mat-icon-button class="toggle-letter" (click)="toggleCoverLetter(aplicacion.id)">
+                                                    <mat-icon>{{isCoverLetterExpanded(aplicacion.id) ? 'expand_less' : 'expand_more'}}</mat-icon>
+                                                </button>
                                             </div>
-                                            <p class="cover-letter-text">{{aplicacion.customCoverLetter}}</p>
+                                            <div class="cover-letter-content"
+                                                 [class.expanded]="isCoverLetterExpanded(aplicacion.id)"
+                                                 *ngIf="isCoverLetterExpanded(aplicacion.id)">
+                                                <p class="cover-letter-text">{{aplicacion.customCoverLetter}}</p>
+                                            </div>
                                         </div>
 
+                                        <!-- Timeline/Dates -->
+                                        <div class="application-timeline" *ngIf="hasTimelineData(aplicacion)">
+                                            <div class="timeline-item">
+                                                <mat-icon class="timeline-icon">send</mat-icon>
+                                                <span>Aplicación enviada: {{aplicacion.applicationDate | date:'dd/MM/yyyy'}}</span>
+                                            </div>
+                                            <div class="timeline-item" *ngIf="aplicacion.offer.expirationDate">
+                                                <mat-icon class="timeline-icon">schedule</mat-icon>
+                                                <span>Fecha límite: {{aplicacion.offer.expirationDate | date:'dd/MM/yyyy'}}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
                                         <div class="offer-actions">
-                                            <button mat-stroked-button (click)="verDetalleOferta(aplicacion.offer.id)">
+                                            <button mat-flat-button color="primary" (click)="verDetalleOferta(aplicacion.offer.id)">
                                                 <mat-icon>visibility</mat-icon>
-                                                Ver Detalle
+                                                Ver Oferta Completa
+                                            </button>
+                                            <button mat-stroked-button (click)="contactarEmpresa(aplicacion.offer)"
+                                                    *ngIf="aplicacion.offer.company">
+                                                <mat-icon>business</mat-icon>
+                                                Ver Empresa
+                                            </button>
+                                            <button mat-stroked-button color="warn" (click)="retirarAplicacion(aplicacion.id)"
+                                                    *ngIf="canWithdrawApplication(aplicacion.status)">
+                                                <mat-icon>cancel</mat-icon>
+                                                Retirar Aplicación
                                             </button>
                                         </div>
-
-                                        <mat-divider></mat-divider>
                                     </ng-container>
 
                                     <!-- Fallback para cuando la oferta no existe o fue eliminada -->
