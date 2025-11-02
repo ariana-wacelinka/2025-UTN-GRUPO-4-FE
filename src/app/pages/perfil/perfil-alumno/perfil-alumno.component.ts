@@ -767,11 +767,20 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   retirarAplicacion(applicationId: number) {
-    // TODO: Implementar retirar aplicación
-    if (confirm('¿Estás seguro de que quieres retirar tu aplicación?')) {
-      console.log('Retirar aplicación:', applicationId);
-      // Aquí iría la llamada al servicio para retirar la aplicación
-    }
+    this.perfilService.retirarAplicacion(applicationId).subscribe({
+      next: () => {
+        this.snackBar.open('Aplicación retirada exitosamente', 'Cerrar', {
+          duration: 3000
+        });
+        this.cargarOfertasAplicadas();
+      },
+      error: (error) => {
+        console.error('Error al retirar aplicación:', error);
+        this.snackBar.open('No pudimos retirar la aplicación. Intenta nuevamente más tarde.', 'Cerrar', {
+          duration: 3000
+        });
+      }
+    });
   }
 
   canWithdrawApplication(status?: string): boolean {
