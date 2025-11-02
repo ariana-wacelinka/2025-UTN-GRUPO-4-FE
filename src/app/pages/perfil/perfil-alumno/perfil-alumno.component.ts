@@ -369,13 +369,18 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (perfilActualizado) => {
             this.isEditing.set(false);
-            this.isLoading.set(false);
             this.selectedImageFile.set(null);
             this.selectedCVFile.set(null);
+            this.imagePreview.set(null);
+            this.isCVUploadPending.set(false);
+            this.isUploadingCV.set(false);
 
             this.snackBar.open('Perfil actualizado exitosamente', 'Cerrar', {
               duration: 3000
             });
+
+            // Recargar toda la información del perfil
+            this.cargarPerfil();
           },
           error: (error) => {
             console.error('Error al actualizar el perfil:', error);
