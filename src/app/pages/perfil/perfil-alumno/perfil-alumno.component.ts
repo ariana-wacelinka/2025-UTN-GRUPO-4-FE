@@ -11,13 +11,16 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { PerfilAlumnoService, MateriasState } from '../../../services/perfil-alumno.service';
 import { AuthService } from '../../../services/auth.service';
+import { AtributosService } from '../../../services/atributos.service';
 import { EstudianteDTO, ActualizarEstudianteDTO } from '../../../models/aplicante.dto';
 import { IdiomaDTO } from '../../../models/usuario.dto';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, Observable, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 // Importar componentes compartidos
 import { ProfileHeaderComponent, ProfileHeaderData, SocialLink } from '../../../components/profile-header/profile-header.component';
@@ -39,6 +42,7 @@ import { SkillsCardComponent } from '../../../components/skills-card/skills-card
     MatSelectModule,
     MatSnackBarModule,
     MatTooltipModule,
+    MatAutocompleteModule,
     FormsModule,
     ReactiveFormsModule,
     // Componentes compartidos
@@ -75,15 +79,13 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   // Form
   editForm!: FormGroup;
 
+  // Atributos con autocomplete - Similar a oferta-form-dialog
+  skillsSignal = signal<string[]>([]);
+  skillInput = '';
+  skillsSugeridas$: Observable<string[]> = of([]);
+
   // Opciones estáticas
   nivelesIdioma = ['1', '2', '3', '4', '5']; // Cambio a números según el DTO
-  habilidadesDisponibles = [
-    'JavaScript', 'TypeScript', 'Angular', 'React', 'Vue.js', 'Node.js',
-    'Python', 'Java', 'C#', 'PHP', 'MySQL', 'PostgreSQL', 'MongoDB',
-    'Git', 'Docker', 'Kubernetes', 'AWS', 'Azure', 'HTML', 'CSS',
-    'SCSS', 'Bootstrap', 'Tailwind CSS', 'Express.js', 'Spring Boot',
-    'Django', 'Flask', 'Laravel', '.NET', 'REST APIs', 'GraphQL'
-  ];
 
   // Computed properties para componentes compartidos
   profileHeaderData = computed((): ProfileHeaderData | null => {
@@ -180,6 +182,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private perfilService: PerfilAlumnoService,
     private authService: AuthService,
+    private atributosService: AtributosService,
     private snackBar: MatSnackBar,
     private route: ActivatedRoute
   ) {
@@ -200,7 +203,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       description: ['', [Validators.required, Validators.maxLength(500)]],
       linkedinUrl: [''],
       githubUrl: [''],
-      skills: this.formBuilder.array([]),
       languages: this.formBuilder.array([])
     });
   }
@@ -299,7 +301,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       githubUrl: perfil.githubUrl
     });
 
-    this.setSkills(perfil.skills);
+    // Cargar skills en el signal
+    this.skillsSignal.set([...perfil.skills]);
     this.setLanguages(perfil.languages);
   }
 
@@ -336,7 +339,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
 
       const datosActualizados: ActualizarEstudianteDTO = {
         ...this.editForm.value,
-        skills: this.skills.value,
+        skills: this.skillsSignal(),
         languages: this.languages.value
       };
 
@@ -371,29 +374,13 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     return this.editForm.controls;
   }
 
-  get skills(): FormArray {
-    return this.editForm.get('skills') as FormArray;
-  }
-
   get languages(): FormArray {
     return this.editForm.get('languages') as FormArray;
   }
 
   // Métodos de compatibilidad con el template existente
-  get habilidades(): FormArray {
-    return this.skills;
-  }
-
   get idiomas(): FormArray {
     return this.languages;
-  }
-
-  agregarHabilidad() {
-    this.addSkill();
-  }
-
-  eliminarHabilidad(index: number) {
-    this.removeSkill(index);
   }
 
   agregarIdioma() {
@@ -414,20 +401,44 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     this.onDownloadCV();
   }
 
-  private setSkills(skills: string[]) {
-    const skillsArray = this.editForm.get('skills') as FormArray;
-    skillsArray.clear();
-    skills.forEach(skill => {
-      skillsArray.push(this.formBuilder.control(skill, Validators.required));
-    });
+  // Métodos para gestión de habilidades con autocomplete (similar a oferta-form-dialog)
+  buscarHabilidades(event: any): void {
+    const query = event.target.value;
+    if (query.length > 0) {
+      this.skillsSugeridas$ = of(query).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((q) => this.atributosService.buscarAtributos(q))
+      );
+    } else {
+      this.skillsSugeridas$ = of([]);
+    }
   }
 
-  addSkill() {
-    this.skills.push(this.formBuilder.control('', Validators.required));
+  seleccionarHabilidad(event: any): void {
+    const habilidadSeleccionada = event.option.value;
+
+    if (habilidadSeleccionada.startsWith('"') && habilidadSeleccionada.endsWith('"')) {
+      // Extraer el nombre de la habilidad de 'Crear "NombreHabilidad"'
+      const nombreHabilidad = habilidadSeleccionada.match(/"(.+)"/)?.[1] || '';
+      this.atributosService.crearAtributo(nombreHabilidad).subscribe(nuevaHabilidad => {
+        this.agregarHabilidadALista(nuevaHabilidad);
+      });
+    } else {
+      this.agregarHabilidadALista(habilidadSeleccionada);
+    }
+
+    this.skillInput = '';
   }
 
-  removeSkill(index: number) {
-    this.skills.removeAt(index);
+  private agregarHabilidadALista(habilidad: string): void {
+    if (!this.skillsSignal().includes(habilidad)) {
+      this.skillsSignal.update(skills => [...skills, habilidad]);
+    }
+  }
+
+  removeSkill(skill: string): void {
+    this.skillsSignal.update(skills => skills.filter(s => s !== skill));
   }
 
   private setLanguages(languages: IdiomaDTO[]) {
@@ -481,8 +492,10 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
           this.snackBar.open('CV subido exitosamente', 'Cerrar', {
             duration: 3000
           });
-          // Actualizar el perfil con la nueva URL del CV
-          this.cargarPerfil();
+          this.perfilAlumno.update(perfil => {
+            if (!perfil) return null;
+            return { ...perfil, cvUrl: response.cvUrl, cvFileName: response.cvFileName };
+          });
         },
         error: (error) => {
           console.error('Error al subir CV:', error);
@@ -504,8 +517,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       this.editForm.get(key)?.markAsTouched();
     });
 
-    this.skills.controls.forEach(control => control.markAsTouched());
-    this.languages.controls.forEach(group => {
+    // Ya no necesitamos marcar skills como touched porque usamos signals
+    this.languages.controls.forEach((group: any) => {
       Object.keys((group as FormGroup).controls).forEach(key => {
         (group as FormGroup).get(key)?.markAsTouched();
       });

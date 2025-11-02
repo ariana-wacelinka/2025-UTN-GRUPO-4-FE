@@ -1,48 +1,55 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
+import { API_URL } from '../app.config';
+import { AtributoDto } from '../models/atributo.dto';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AtributosService {
-  private atributosExistentes = [
-    'Angular', 'React', 'Vue.js', 'JavaScript', 'TypeScript',
-    'Java', 'Spring Boot', 'Python', 'Django', 'Flask',
-    'Node.js', 'Express', 'MongoDB', 'PostgreSQL', 'MySQL',
-    'Docker', 'Kubernetes', 'AWS', 'Azure', 'Git',
-    'HTML', 'CSS', 'SASS', 'Bootstrap', 'Material Design',
-    'REST API', 'GraphQL', 'Microservicios', 'Testing',
-    'Jest', 'Cypress', 'Selenium', 'Agile', 'Scrum'
-  ];
+  constructor(
+    private http: HttpClient,
+    @Inject(API_URL) private apiUrl: string
+  ) {}
 
   buscarAtributos(query: string): Observable<string[]> {
-    const queryLower = query.toLowerCase();
-    const coincidencias = this.atributosExistentes
-      .filter(attr => attr.toLowerCase().includes(queryLower))
-      .slice(0, 5);
-
-    // Agregar la opción de crear nuevo al final si no existe exactamente
-    const existeExacto = this.atributosExistentes
-      .some(attr => attr.toLowerCase() === queryLower);
-
-    if (!existeExacto && query.trim()) {
-      const nuevoAtributo = this.capitalizarPrimeraLetra(query.trim());
-      coincidencias.push(`"${nuevoAtributo}"`);
+    if (!query.trim()) {
+      return of([]);
     }
 
-    return of(coincidencias);
+    const params = new HttpParams().set('name', query.trim());
+
+    return this.http.get<AtributoDto[]>(`${this.apiUrl}/attributes`, { params }).pipe(
+      map((atributos: AtributoDto[]) => {
+        const nombres = atributos.map(attr => attr.name).slice(0, 5);
+
+        // Verificar si existe una coincidencia exacta
+        const existeExacto = atributos.some(attr =>
+          attr.name.toLowerCase() === query.trim().toLowerCase()
+        );
+
+        // Si no existe exacto, agregar opción de crear nuevo
+        if (!existeExacto && query.trim()) {
+          const nuevoAtributo = this.capitalizarPrimeraLetra(query.trim());
+          nombres.push(`"${nuevoAtributo}"`);
+        }
+
+        return nombres;
+      }),
+      catchError(() => {
+        // En caso de error, permitir crear el atributo nuevo
+        const nuevoAtributo = this.capitalizarPrimeraLetra(query.trim());
+        return of([`"${nuevoAtributo}"`]);
+      })
+    );
   }
 
   crearAtributo(nombre: string): Observable<string> {
-    // Simular creación en backend
+    // Por ahora retornamos directamente el nombre capitalizado
+    // TODO: Implementar endpoint de creación cuando esté disponible en el backend
     const nombreCapitalizado = this.capitalizarPrimeraLetra(nombre);
-
-    // Agregar a la lista local para futuras búsquedas
-    if (!this.atributosExistentes.includes(nombreCapitalizado)) {
-      this.atributosExistentes.push(nombreCapitalizado);
-    }
-
     return of(nombreCapitalizado);
   }
 

@@ -34,7 +34,7 @@
                             <div class="form-row">
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Nombre</mat-label>
-                                    <input matInput formControlName="name" required>
+                                    <input matInput formControlName="name" required placeholder="Ingresa tu nombre">
                                     <mat-error *ngIf="f['name'].invalid && f['name'].touched">
                                         El nombre es requerido y debe tener al menos 2 caracteres
                                     </mat-error>
@@ -42,7 +42,7 @@
 
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Apellido</mat-label>
-                                    <input matInput formControlName="surname" required>
+                                    <input matInput formControlName="surname" required placeholder="Ingresa tu apellido">
                                     <mat-error *ngIf="f['surname'].invalid && f['surname'].touched">
                                         El apellido es requerido y debe tener al menos 2 caracteres
                                     </mat-error>
@@ -52,7 +52,7 @@
                             <div class="form-row">
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Email</mat-label>
-                                    <input matInput formControlName="email" type="email" required>
+                                    <input matInput formControlName="email" type="email" required placeholder="ejemplo@correo.com">
                                     <mat-error *ngIf="f['email'].invalid && f['email'].touched">
                                         Ingrese un email válido
                                     </mat-error>
@@ -60,7 +60,7 @@
 
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Teléfono</mat-label>
-                                    <input matInput formControlName="phone" required>
+                                    <input matInput formControlName="phone" required placeholder="+54 9 11 1234-5678">
                                     <mat-error *ngIf="f['phone'].invalid && f['phone'].touched">
                                         El teléfono es requerido
                                     </mat-error>
@@ -70,7 +70,7 @@
                             <div class="form-row">
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Ubicación</mat-label>
-                                    <input matInput formControlName="location" required>
+                                    <input matInput formControlName="location" required placeholder="Ciudad, País">
                                     <mat-error *ngIf="f['location'].invalid && f['location'].touched">
                                         La ubicación es requerida
                                     </mat-error>
@@ -78,7 +78,7 @@
 
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Fecha de Nacimiento</mat-label>
-                                    <input matInput type="date" formControlName="dateOfBirth" required>
+                                    <input matInput type="date" formControlName="dateOfBirth" required placeholder="dd/mm/aaaa">
                                     <mat-error *ngIf="f['dateOfBirth'].invalid && f['dateOfBirth'].touched">
                                         La fecha de nacimiento es requerida
                                     </mat-error>
@@ -87,7 +87,7 @@
 
                             <mat-form-field appearance="outline" class="form-field full-width">
                                 <mat-label>Descripción</mat-label>
-                                <textarea matInput formControlName="description" rows="4" maxlength="500"></textarea>
+                                <textarea matInput formControlName="description" rows="4" maxlength="500" placeholder="Cuéntanos sobre ti, tus intereses y objetivos profesionales..."></textarea>
                                 <mat-hint>{{f['description'].value?.length || 0}}/500</mat-hint>
                                 <mat-error *ngIf="f['description'].invalid && f['description'].touched">
                                     La descripción no puede exceder 500 caracteres
@@ -100,7 +100,7 @@
                             <div class="form-row">
                                 <mat-form-field appearance="outline" class="form-field">
                                     <mat-label>Carrera</mat-label>
-                                    <input matInput formControlName="career" required>
+                                    <input matInput formControlName="career" required placeholder="Ej. Ingeniería en Sistemas">
                                     <mat-error *ngIf="f['career'].invalid && f['career'].touched">
                                         La carrera es requerida
                                     </mat-error>
@@ -123,38 +123,53 @@
 
                             <mat-form-field appearance="outline" class="form-field full-width">
                                 <mat-label>Institución</mat-label>
-                                <input matInput formControlName="institution" required>
+                                <input matInput formControlName="institution" required placeholder="Ej. UTN FRLP">
                                 <mat-error *ngIf="f['institution'].invalid && f['institution'].touched">
                                     La institución es requerida
                                 </mat-error>
                             </mat-form-field>
 
-                            <!-- Habilidades -->
+                            <!-- Habilidades con autocomplete -->
                             <h3 class="form-section-title">Skills/Habilidades</h3>
                             <div class="skills-edit-section">
-                                <div formArrayName="skills" class="skills-array">
-                                    <div *ngFor="let skill of skills.controls; let i = index" class="skill-input-row">
-                                        <mat-form-field appearance="outline" class="skill-input">
-                                            <mat-label>Habilidad {{i + 1}}</mat-label>
-                                            <mat-select [formControlName]="i" required>
-                                                <mat-option *ngFor="let skillOption of habilidadesDisponibles"
-                                                    [value]="skillOption">
-                                                    {{skillOption}}
-                                                </mat-option>
-                                            </mat-select>
-                                            <mat-error *ngIf="skill.invalid && skill.touched">
-                                                Selecciona una habilidad
-                                            </mat-error>
-                                        </mat-form-field>
-                                        <button type="button" mat-icon-button color="warn" (click)="removeSkill(i)">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-                                    </div>
+                                <label class="skills-label">Tecnologías y Habilidades</label>
+                                <mat-form-field appearance="outline" class="skills-input">
+                                    <mat-label>Habilidades</mat-label>
+                                    <input
+                                        matInput
+                                        [(ngModel)]="skillInput"
+                                        name="skillInput"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (input)="buscarHabilidades($event)"
+                                        [matAutocomplete]="skillsAuto"
+                                        placeholder="Buscar o crear habilidad..."
+                                    />
+                                    <mat-autocomplete
+                                        #skillsAuto="matAutocomplete"
+                                        (optionSelected)="seleccionarHabilidad($event)"
+                                    >
+                                        <mat-option
+                                            *ngFor="let habilidad of skillsSugeridas$ | async"
+                                            [value]="habilidad">
+                                            {{ habilidad }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                                <mat-chip-set class="chips">
+                                    <mat-chip
+                                        *ngFor="let skill of skillsSignal()"
+                                        (removed)="removeSkill(skill)"
+                                        class="skill-chip">
+                                        {{ skill }}
+                                        <mat-icon matChipRemove>cancel</mat-icon>
+                                    </mat-chip>
+                                </mat-chip-set>
+
+                                <div class="skills-hint">
+                                    <mat-icon class="hint-icon">info</mat-icon>
+                                    <span>Busca habilidades existentes o crea nuevas escribiendo el nombre</span>
                                 </div>
-                                <button type="button" mat-stroked-button (click)="addSkill()" class="add-btn">
-                                    <mat-icon>add</mat-icon>
-                                    Agregar Habilidad
-                                </button>
                             </div>
 
                             <!-- Idiomas -->
@@ -165,7 +180,7 @@
                                         class="language-input-row">
                                         <mat-form-field appearance="outline" class="language-input">
                                             <mat-label>Idioma</mat-label>
-                                            <input matInput formControlName="name" required>
+                                            <input matInput formControlName="name" required placeholder="Ej. Español">
                                             <mat-error
                                                 *ngIf="language.get('name')?.invalid && language.get('name')?.touched">
                                                 El idioma es requerido
@@ -198,7 +213,7 @@
                             <h3 class="form-section-title">Curriculum Vitae</h3>
                             <div class="cv-upload-section">
                                 <input type="file" #cvInput accept=".pdf" (change)="onCVSelected($event)"
-                                    style="display: none">
+                                    class="hidden-file-input" title="Seleccionar archivo CV">
 
                                 <!-- Botón de selección de archivo -->
                                 <button type="button" mat-stroked-button (click)="cvInput.click()" class="upload-btn"

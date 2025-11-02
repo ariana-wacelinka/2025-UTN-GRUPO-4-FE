@@ -5,6 +5,7 @@ import { catchError, tap } from 'rxjs/operators';
 import { API_URL } from '../app.config';
 import { EstudianteDTO, ActualizarEstudianteDTO, IdiomaDTO } from '../models/aplicante.dto';
 import { AuthService } from './auth.service';
+import { P } from '@angular/cdk/keycodes';
 
 export interface MateriaDTO {
     codigo?: string;
@@ -141,7 +142,7 @@ export class PerfilAlumnoService {
         return of({ imageUrl: mockImageUrl });
     }
 
-    subirCV(archivo: File): Observable<{ cvUrl: string }> {
+    subirCV(archivo: File): Observable<EstudianteDTO> {
         const id = this.authService.keycloakUser?.id;
         if (!id) {
             return throwError(() => new Error('Usuario no autenticado'));
@@ -150,15 +151,11 @@ export class PerfilAlumnoService {
         const formData = new FormData();
         formData.append('file', archivo);
 
-        return this.http.post<{ cvUrl: string }>(`${this.apiUrl}/students/${id}/upload-cv`, formData).pipe(
+        return this.http.post<EstudianteDTO>(`${this.apiUrl}/students/${id}/upload-cv`, formData).pipe(
             tap(response => {
-                // Actualizar el perfil local con la nueva URL del CV
-                const currentPerfil = this.perfilSubject.value;
-                if (currentPerfil) {
-                    currentPerfil.cvUrl = response.cvUrl;
-                    currentPerfil.cvFileName = archivo.name;
-                    this.perfilSubject.next(currentPerfil);
-                }
+                // devolver la URL del CV actualizado
+                console.log('Respuesta del cv:', response);
+                return response
             }),
             catchError(error => {
                 console.error('Error al subir CV:', error);
@@ -262,4 +259,63 @@ export class PerfilAlumnoService {
 
         return cantidadNotas ? suma / cantidadNotas : 0;
     }
+
+    getOfertasAplicadas(): Observable<PagedOfertasAplicadasResponse> {
+        const studentId = this.authService.keycloakUser?.id;
+        if (!studentId) {
+            return throwError(() => new Error('Usuario no autenticado'));
+        }
+
+        return this.http.get<PagedOfertasAplicadasResponse>(`${this.apiUrl}/applies?studentId/${studentId}`).pipe(
+            catchError(error => {
+                console.error('Error al obtener ofertas aplicadas:', error);
+                return throwError(() => error);
+            })
+        );
+    }
+}
+
+// Interfaces para la respuesta de ofertas aplicadas
+export interface OfertaAplicada {
+    id: number;
+    customCoverLetter: string;
+    offer: {
+        id: number;
+        title: string;
+        description: string;
+        modality: string;
+        location: string;
+        estimatedPayment: string;
+    };
+}
+
+export interface SortInfo {
+    direction: string;
+    nullHandling: string;
+    ascending: boolean;
+    property: string;
+    ignoreCase: boolean;
+}
+
+export interface Pageable {
+    paged: boolean;
+    pageNumber: number;
+    pageSize: number;
+    offset: number;
+    sort: SortInfo[];
+    unpaged: boolean;
+}
+
+export interface PagedOfertasAplicadasResponse {
+    totalPages: number;
+    totalElements: number;
+    pageable: Pageable;
+    size: number;
+    content: OfertaAplicada[];
+    number: number;
+    sort: SortInfo[];
+    numberOfElements: number;
+    first: boolean;
+    last: boolean;
+    empty: boolean;
 }

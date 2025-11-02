@@ -789,6 +789,10 @@
     }
 }
 
+.hidden-file-input {
+    display: none;
+}
+
 .edit-form-container {
     margin-bottom: 32px;
 }
@@ -957,6 +961,61 @@
 .skills-edit-section {
     grid-column: 1 / -1;
     margin-bottom: 24px;
+
+    .skills-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        font-size: 1rem;
+    }
+
+    .skills-input {
+        width: 100%;
+        margin-bottom: 16px;
+    }
+
+    .chips {
+        margin-bottom: 12px;
+        min-height: 40px;
+        border: 1px dashed var(--border-color);
+        border-radius: 8px;
+        padding: 12px;
+        background: var(--chip-bg);
+
+        .skill-chip {
+            background: var(--primary-color) !important;
+            color: white !important;
+            margin: 4px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+
+            &:hover {
+                background: var(--primary-hover) !important;
+                transform: scale(1.05);
+            }
+
+            mat-icon {
+                color: white !important;
+                font-size: 18px !important;
+                margin-left: 4px !important;
+            }
+        }
+    }
+
+    .skills-hint {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+
+        .hint-icon {
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+    }
 
     .skills-array {
         display: flex;
