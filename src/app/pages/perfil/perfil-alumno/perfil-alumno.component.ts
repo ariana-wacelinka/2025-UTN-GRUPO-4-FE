@@ -66,6 +66,12 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   isCVUploadPending = signal(false);
   isUploadingCV = signal(false);
 
+  // Computed para saber si ya hay un CV cargado
+  hasCVUploaded = computed(() => {
+    const perfil = this.perfilAlumno();
+    return perfil?.cvUrl ? true : false;
+  });
+
   // Materias - Nueva funcionalidad
   materiasAlumno: any[] = [];
   promedioMaterias = 0;

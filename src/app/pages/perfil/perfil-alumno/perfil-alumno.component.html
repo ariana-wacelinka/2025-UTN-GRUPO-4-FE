@@ -215,25 +215,43 @@
                                 <input type="file" #cvInput accept=".pdf" (change)="onCVSelected($event)"
                                     class="hidden-file-input" title="Seleccionar archivo CV">
 
-                                <!-- Botón de selección de archivo -->
+                                <!-- Estado: Ya tiene CV cargado -->
+                                <div *ngIf="hasCVUploaded() && !isCVUploadPending() && !isUploadingCV()" class="cv-current-file">
+                                    <div class="current-file-info">
+                                        <mat-icon class="file-icon">check_circle</mat-icon>
+                                        <div class="file-details">
+                                            <span class="file-label">CV cargado</span>
+                                            <span class="file-name">{{perfilAlumno()?.cvFileName || 'curriculum.pdf'}}</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" mat-stroked-button (click)="cvInput.click()" class="replace-btn">
+                                        <mat-icon>sync</mat-icon>
+                                        Reemplazar CV
+                                    </button>
+                                </div>
+
+                                <!-- Botón de selección de archivo (cuando no tiene CV) -->
                                 <button type="button" mat-stroked-button (click)="cvInput.click()" class="upload-btn"
-                                    *ngIf="!isCVUploadPending() && !isUploadingCV()">
+                                    *ngIf="!hasCVUploaded() && !isCVUploadPending() && !isUploadingCV()">
                                     <mat-icon>upload_file</mat-icon>
-                                    {{selectedCVFile() ? 'Cambiar CV' : 'Subir CV (PDF)'}}
+                                    Subir CV (PDF)
                                 </button>
 
                                 <!-- Confirmación de subida -->
                                 <div *ngIf="isCVUploadPending()" class="cv-confirmation">
                                     <div class="file-info">
                                         <mat-icon>description</mat-icon>
-                                        <span>{{selectedCVFile()!.name}}</span>
+                                        <div class="file-text">
+                                            <span class="file-name">{{selectedCVFile()!.name}}</span>
+                                            <span class="file-size">{{(selectedCVFile()!.size / 1024).toFixed(0)}} KB</span>
+                                        </div>
                                     </div>
                                     <div class="confirmation-actions">
-                                        <button type="button" mat-icon-button color="primary"
-                                            (click)="onConfirmCVUpload()" matTooltip="Confirmar">
+                                        <button type="button" mat-mini-fab color="primary"
+                                            (click)="onConfirmCVUpload()" matTooltip="Confirmar subida">
                                             <mat-icon>check</mat-icon>
                                         </button>
-                                        <button type="button" mat-icon-button color="warn"
+                                        <button type="button" mat-mini-fab color="warn"
                                             (click)="onCancelCVUpload()" matTooltip="Cancelar">
                                             <mat-icon>close</mat-icon>
                                         </button>

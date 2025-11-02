@@ -1102,14 +1102,15 @@
     grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     padding: 24px;
     border: 2px dashed var(--border-color);
     border-radius: var(--border-radius);
     background: var(--chip-bg);
     text-align: center;
 
-    .upload-btn {
+    .upload-btn,
+    .replace-btn {
         align-self: center;
         min-width: 200px;
         color: var(--primary-color) !important;
@@ -1125,91 +1126,129 @@
         }
     }
 
-    .cv-confirmation {
+    // Estado: Ya tiene CV cargado
+    .cv-current-file {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 16px;
         padding: 16px;
-        background: rgba(79, 172, 254, 0.05);
+        background: rgba(76, 175, 80, 0.08);
+        border: 1px solid var(--success-color);
+        border-radius: 12px;
+
+        .current-file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+
+            .file-icon {
+                color: var(--success-color);
+                font-size: 28px;
+                width: 28px;
+                height: 28px;
+            }
+
+            .file-details {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+
+                .file-label {
+                    color: var(--success-color);
+                    font-weight: 600;
+                    font-size: 0.875rem;
+                }
+
+                .file-name {
+                    color: var(--text-secondary);
+                    font-size: 0.8rem;
+                }
+            }
+        }
+
+        .replace-btn {
+            min-width: auto;
+            flex-shrink: 0;
+        }
+    }
+
+    .cv-confirmation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 20px;
+        background: rgba(79, 172, 254, 0.08);
         border: 1px solid var(--primary-color);
         border-radius: 12px;
-        margin: 0 auto;
-        max-width: 400px;
-        width: 100%;
 
         .file-info {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             flex: 1;
 
             mat-icon {
                 color: var(--primary-color);
-                font-size: 20px;
+                font-size: 24px;
+                width: 24px;
+                height: 24px;
+                flex-shrink: 0;
             }
 
-            span {
-                color: var(--text-primary);
-                font-weight: 500;
-                font-size: 0.875rem;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+            .file-text {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+                flex: 1;
+                min-width: 0;
+
+                .file-name {
+                    color: var(--text-primary);
+                    font-weight: 500;
+                    font-size: 0.875rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    width: 100%;
+                }
+
+                .file-size {
+                    color: var(--text-muted);
+                    font-size: 0.75rem;
+                }
             }
         }
 
         .confirmation-actions {
             display: flex;
             gap: 8px;
+            flex-shrink: 0;
 
             button {
                 width: 40px !important;
                 height: 40px !important;
-                border-radius: 50% !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                transition: all 0.3s ease !important;
+                min-width: 40px !important;
+                padding: 0 !important;
 
-                // Override Material Design button styles
-                .mat-mdc-button-touch-target {
-                    width: 40px !important;
-                    height: 40px !important;
-                }
-
-                .mdc-button__label {
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    padding: 0 !important;
-                }
-
-                &[color="primary"] {
-                    background-color: var(--success-color) !important;
-                    color: white !important;
+                &.mat-mdc-mini-fab {
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 
                     &:hover {
-                        background-color: #388e3c !important;
-                        transform: scale(1.1);
-                    }
-                }
-
-                &[color="warn"] {
-                    background-color: #f44336 !important;
-                    color: white !important;
-
-                    &:hover {
-                        background-color: #d32f2f !important;
-                        transform: scale(1.1);
+                        transform: scale(1.05);
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
                     }
                 }
 
                 mat-icon {
-                    font-size: 18px !important;
-                    width: 18px !important;
-                    height: 18px !important;
-                    margin: 0 !important;
+                    font-size: 20px !important;
+                    width: 20px !important;
+                    height: 20px !important;
+                    line-height: 20px !important;
                 }
             }
         }
@@ -1226,7 +1265,9 @@
 
         mat-icon.spin {
             animation: spin 1s linear infinite;
-            font-size: 20px;
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
         }
     }
 
@@ -1254,22 +1295,44 @@
     .cv-upload-section {
         padding: 16px;
 
-        .upload-btn {
+        .upload-btn,
+        .replace-btn {
             min-width: auto;
             width: 100%;
         }
 
-        .cv-confirmation {
+        .cv-current-file {
             flex-direction: column;
             gap: 12px;
-            max-width: none;
+
+            .current-file-info {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .replace-btn {
+                width: 100%;
+            }
+        }
+
+        .cv-confirmation {
+            flex-direction: column;
+            gap: 16px;
+            padding: 16px;
 
             .file-info {
+                width: 100%;
                 justify-content: center;
+
+                .file-text {
+                    align-items: center;
+                    text-align: center;
+                }
             }
 
             .confirmation-actions {
                 justify-content: center;
+                gap: 16px;
             }
         }
     }
