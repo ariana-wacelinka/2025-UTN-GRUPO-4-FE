@@ -10,6 +10,7 @@ export interface ProfileHeaderData {
   description?: string;
   imageUrl?: string;
   showDownloadCV?: boolean;
+  hasCVAvailable?: boolean;
 }
 
 export interface SocialLink {
@@ -110,9 +111,11 @@ export interface SocialLink {
                 <button *ngIf="!isEditing() && data.showDownloadCV"
                         mat-stroked-button
                         class="modern-button"
+                        [disabled]="!data.hasCVAvailable"
+                        [class.cv-disabled]="!data.hasCVAvailable"
                         (click)="downloadCV.emit()">
-                  <mat-icon>download</mat-icon>
-                  Descargar CV
+                  <mat-icon>{{ data.hasCVAvailable ? 'download' : 'cloud_off' }}</mat-icon>
+                  {{ data.hasCVAvailable ? 'Descargar CV' : 'Sin CV cargado' }}
                 </button>
               </div>
             </div>

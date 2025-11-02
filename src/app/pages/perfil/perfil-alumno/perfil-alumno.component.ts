@@ -118,7 +118,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       subtitle: perfil.career && perfil.currentYearLevel ? `${perfil.career} - ${perfil.currentYearLevel}º año` : '',
       description: perfil.institution,
       imageUrl: imageUrl,
-      showDownloadCV: true
+      showDownloadCV: true,
+      hasCVAvailable: !!perfil.cvUrl
     };
   });
 
