@@ -266,7 +266,10 @@ export class PerfilAlumnoService {
             return throwError(() => new Error('Usuario no autenticado'));
         }
 
-        return this.http.get<PagedOfertasAplicadasResponse>(`${this.apiUrl}/applies?studentId/${studentId}`).pipe(
+        return this.http.get<PagedOfertasAplicadasResponse>(`${this.apiUrl}/applies?studentId=${studentId}`).pipe(
+            tap(response => {
+                console.log('Respuesta del backend:', response);
+            }),
             catchError(error => {
                 console.error('Error al obtener ofertas aplicadas:', error);
                 return throwError(() => error);
@@ -279,7 +282,7 @@ export class PerfilAlumnoService {
 export interface OfertaAplicada {
     id: number;
     customCoverLetter: string;
-    offer: {
+    offer?: {
         id: number;
         title: string;
         description: string;

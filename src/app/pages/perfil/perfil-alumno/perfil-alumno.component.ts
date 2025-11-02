@@ -14,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { PerfilAlumnoService, MateriasState } from '../../../services/perfil-alumno.service';
+import { PerfilAlumnoService, MateriasState, PagedOfertasAplicadasResponse, OfertaAplicada } from '../../../services/perfil-alumno.service';
 import { AuthService } from '../../../services/auth.service';
 import { AtributosService } from '../../../services/atributos.service';
 import { EstudianteDTO, ActualizarEstudianteDTO } from '../../../models/aplicante.dto';
@@ -75,6 +75,12 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   materiasError: string | null = null;
   selectedMateriasFileName: string | null = null;
   private readonly MAX_MATERIAS_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+  // Ofertas Aplicadas - Nueva funcionalidad
+  ofertasAplicadas: OfertaAplicada[] = [];
+  isOfertasLoading = false;
+  ofertasError: string | null = null;
+  totalOfertasAplicadas = 0;
 
   // Form
   editForm!: FormGroup;
@@ -211,6 +217,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     this.cargarPerfil();
     this.suscribirseAMaterias();
     this.obtenerMateriasDesdeBackend();
+    this.cargarOfertasAplicadas();
   }
 
   ngOnDestroy() {
@@ -622,5 +629,47 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
 
   trackByMateria(index: number, materia: any) {
     return materia.codigo || materia.nombre;
+  }
+
+  // ============= MÉTODOS DE OFERTAS APLICADAS =============
+
+  private cargarOfertasAplicadas() {
+    // Solo cargar si es el perfil del usuario actual (no de otro aplicante)
+    this.route.queryParams.subscribe(params => {
+      const userId = params['userId'];
+      if (!userId) { // Solo para el perfil propio
+        this.isOfertasLoading = true;
+        this.perfilService.getOfertasAplicadas()
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response: PagedOfertasAplicadasResponse) => {
+              this.ofertasAplicadas = response.content;
+              this.totalOfertasAplicadas = response.totalElements;
+              this.isOfertasLoading = false;
+              this.ofertasError = null;
+            },
+            error: (error: any) => {
+              console.error('Error al cargar ofertas aplicadas:', error);
+              this.isOfertasLoading = false;
+              this.ofertasError = 'No pudimos cargar tus aplicaciones. Intenta nuevamente más tarde.';
+            }
+          });
+      }
+    });
+  }
+
+  trackByOferta(index: number, oferta: OfertaAplicada) {
+    return oferta.id;
+  }
+
+  verDetalleOferta(ofertaId: number) {
+    // Navegar al detalle de la oferta
+    // TODO: Implementar navegación cuando esté disponible la ruta
+    console.log('Ver detalle de oferta:', ofertaId);
+  }
+
+  isOwnProfile(): boolean {
+    // Verificar si estamos viendo el perfil propio (sin userId en query params)
+    return !this.route.snapshot.queryParams['userId'];
   }
 }

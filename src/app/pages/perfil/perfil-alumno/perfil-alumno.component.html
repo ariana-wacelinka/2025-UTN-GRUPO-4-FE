@@ -297,7 +297,105 @@
                     </mat-card-content>
                 </mat-card>
 
-                <!-- 5. Materias Aprobadas (grid-area: materias) -->
+                <!-- 5. Ofertas Aplicadas (solo para perfil propio) -->
+                <mat-card class="modern-card applied-offers-card" *ngIf="isOwnProfile()">
+                    <mat-card-header>
+                        <mat-card-title class="section-title">
+                            <mat-icon class="section-icon">work_outline</mat-icon>
+                            Mis Aplicaciones
+                            <span class="applications-count" *ngIf="totalOfertasAplicadas > 0">({{totalOfertasAplicadas}})</span>
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <!-- Loading state -->
+                        <div class="ofertas-loading" *ngIf="isOfertasLoading">
+                            <div class="loading-spinner"></div>
+                            <p>Cargando aplicaciones...</p>
+                        </div>
+
+                        <!-- Error state -->
+                        <div class="ofertas-error" *ngIf="ofertasError && !isOfertasLoading">
+                            <mat-icon>error_outline</mat-icon>
+                            <span>{{ofertasError}}</span>
+                        </div>
+
+                        <!-- Content -->
+                        <ng-container *ngIf="!isOfertasLoading && !ofertasError">
+                            <div class="applied-offers-list" *ngIf="ofertasAplicadas.length; else emptyOffers">
+                                <div class="offer-item" *ngFor="let aplicacion of ofertasAplicadas; trackBy: trackByOferta">
+                                    <!-- Solo mostrar si la oferta existe -->
+                                    <ng-container *ngIf="aplicacion.offer">
+                                        <div class="offer-header">
+                                            <h4 class="offer-title">{{aplicacion.offer.title}}</h4>
+                                            <div class="offer-details">
+                                                <span class="offer-modality">
+                                                    <mat-icon>location_on</mat-icon>
+                                                    {{aplicacion.offer.modality}} - {{aplicacion.offer.location}}
+                                                </span>
+                                                <span class="offer-payment" *ngIf="aplicacion.offer.estimatedPayment">
+                                                    <mat-icon>attach_money</mat-icon>
+                                                    {{aplicacion.offer.estimatedPayment}}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="offer-description">
+                                            <p>{{aplicacion.offer.description}}</p>
+                                        </div>
+
+                                        <div class="cover-letter" *ngIf="aplicacion.customCoverLetter">
+                                            <div class="cover-letter-header">
+                                                <mat-icon>mail</mat-icon>
+                                                <span>Tu carta de presentación:</span>
+                                            </div>
+                                            <p class="cover-letter-text">{{aplicacion.customCoverLetter}}</p>
+                                        </div>
+
+                                        <div class="offer-actions">
+                                            <button mat-stroked-button (click)="verDetalleOferta(aplicacion.offer.id)">
+                                                <mat-icon>visibility</mat-icon>
+                                                Ver Detalle
+                                            </button>
+                                        </div>
+
+                                        <mat-divider></mat-divider>
+                                    </ng-container>
+
+                                    <!-- Fallback para cuando la oferta no existe o fue eliminada -->
+                                    <ng-container *ngIf="!aplicacion.offer">
+                                        <div class="offer-header">
+                                            <h4 class="offer-title error-title">Oferta no disponible</h4>
+                                            <div class="offer-details">
+                                                <span class="offer-error">
+                                                    <mat-icon>error_outline</mat-icon>
+                                                    Esta oferta ya no está disponible o fue eliminada
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="cover-letter" *ngIf="aplicacion.customCoverLetter">
+                                            <div class="cover-letter-header">
+                                                <mat-icon>mail</mat-icon>
+                                                <span>Tu carta de presentación:</span>
+                                            </div>
+                                            <p class="cover-letter-text">{{aplicacion.customCoverLetter}}</p>
+                                        </div>
+
+                                        <mat-divider></mat-divider>
+                                    </ng-container>
+                                </div>
+                            </div>                            <ng-template #emptyOffers>
+                                <div class="offers-empty">
+                                    <mat-icon>work_off</mat-icon>
+                                    <h4>No has aplicado a ninguna oferta aún</h4>
+                                    <p>Explora las ofertas disponibles y comienza a aplicar a las que más te interesen.</p>
+                                </div>
+                            </ng-template>
+                        </ng-container>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- 6. Materias Aprobadas (grid-area: materias) -->
                 <mat-card class="modern-card subjects-card">
                     <mat-card-header>
                         <mat-card-title class="section-title">
