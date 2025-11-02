@@ -1098,9 +1098,26 @@
             gap: 8px;
 
             button {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
+                width: 40px !important;
+                height: 40px !important;
+                border-radius: 50% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                transition: all 0.3s ease !important;
+
+                // Override Material Design button styles
+                .mat-mdc-button-touch-target {
+                    width: 40px !important;
+                    height: 40px !important;
+                }
+
+                .mdc-button__label {
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    padding: 0 !important;
+                }
 
                 &[color="primary"] {
                     background-color: var(--success-color) !important;
@@ -1123,7 +1140,10 @@
                 }
 
                 mat-icon {
-                    font-size: 18px;
+                    font-size: 18px !important;
+                    width: 18px !important;
+                    height: 18px !important;
+                    margin: 0 !important;
                 }
             }
         }
