@@ -129,6 +129,31 @@
                                 </mat-error>
                             </mat-form-field>
 
+                            <!-- Redes Sociales y Enlaces Profesionales -->
+                            <h3 class="form-section-title">Redes Sociales y Enlaces</h3>
+
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="form-field">
+                                    <mat-label>LinkedIn</mat-label>
+                                    <input matInput formControlName="linkedinUrl" type="url" placeholder="https://linkedin.com/in/tu-perfil">
+                                    <mat-icon matPrefix class="social-icon linkedin-icon">work</mat-icon>
+                                    <mat-hint>URL de tu perfil de LinkedIn (opcional)</mat-hint>
+                                    <mat-error *ngIf="f['linkedinUrl'].hasError('invalidUrl')">
+                                        Ingresa una URL válida (ej: https://linkedin.com/in/usuario)
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="form-field">
+                                    <mat-label>GitHub</mat-label>
+                                    <input matInput formControlName="githubUrl" type="url" placeholder="https://github.com/tu-usuario">
+                                    <mat-icon matPrefix class="social-icon github-icon">code</mat-icon>
+                                    <mat-hint>URL de tu perfil de GitHub (opcional)</mat-hint>
+                                    <mat-error *ngIf="f['githubUrl'].hasError('invalidUrl')">
+                                        Ingresa una URL válida (ej: https://github.com/usuario)
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
                             <!-- Habilidades con autocomplete -->
                             <h3 class="form-section-title">Skills/Habilidades</h3>
                             <div class="skills-edit-section">

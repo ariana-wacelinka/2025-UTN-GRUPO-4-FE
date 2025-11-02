@@ -886,6 +886,20 @@
             color: var(--text-primary) !important;
             font-weight: 500 !important;
         }
+
+        // Iconos de prefijo para redes sociales
+        .social-icon {
+            margin-right: 12px;
+            color: var(--text-muted);
+
+            &.linkedin-icon {
+                color: #0077b5;
+            }
+
+            &.github-icon {
+                color: #333;
+            }
+        }
     }
 
     mat-error {

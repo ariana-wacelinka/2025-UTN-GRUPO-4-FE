@@ -203,6 +203,13 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   private initializeForm() {
+    // Validador personalizado para URLs opcionales
+    const urlValidator = (control: any) => {
+      if (!control.value) return null; // Si está vacío, es válido (opcional)
+      const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+      return urlPattern.test(control.value) ? null : { invalidUrl: true };
+    };
+
     this.editForm = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       surname: ['', [Validators.required, Validators.minLength(2)]],
@@ -214,8 +221,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       currentYearLevel: ['', [Validators.required]],
       institution: ['', [Validators.required]],
       description: ['', [Validators.required, Validators.maxLength(500)]],
-      linkedinUrl: [''],
-      githubUrl: [''],
+      linkedinUrl: ['', [urlValidator]],
+      githubUrl: ['', [urlValidator]],
       languages: this.formBuilder.array([])
     });
   }
