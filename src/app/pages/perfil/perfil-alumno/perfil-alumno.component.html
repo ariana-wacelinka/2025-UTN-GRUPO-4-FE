@@ -326,10 +326,10 @@
                                     <!-- Solo mostrar si la oferta existe -->
                                     <ng-container *ngIf="aplicacion.offer">
                                         <!-- Status Badge -->
-                                        <div class="application-status" [class]="getStatusClass(aplicacion.status)">
+                                        <!-- <div class="application-status" [class]="getStatusClass(aplicacion.status)">
                                             <mat-icon>{{getStatusIcon(aplicacion.status)}}</mat-icon>
                                             <span>{{getStatusText(aplicacion.status)}}</span>
-                                        </div>
+                                        </div> -->
 
                                         <!-- Company Info (si está disponible) -->
                                         <div class="company-section" *ngIf="aplicacion.offer.company">
@@ -389,14 +389,14 @@
                                             </div>
 
                                             <!-- Tags/Skills si están disponibles -->
-                                            <div class="offer-tags" *ngIf="aplicacion.offer.tags && aplicacion.offer.tags.length">
+                                            <!-- <div class="offer-tags" *ngIf="aplicacion.offer.tags && aplicacion.offer.tags.length">
                                                 <h6>Tecnologías requeridas:</h6>
                                                 <mat-chip-set class="skills-chips">
                                                     <mat-chip *ngFor="let tag of aplicacion.offer.tags" class="skill-tag">
                                                         {{tag}}
                                                     </mat-chip>
                                                 </mat-chip-set>
-                                            </div>
+                                            </div> -->
                                         </div>
 
                                         <!-- Custom Cover Letter -->
@@ -431,17 +431,12 @@
                                         <div class="offer-actions">
                                             <button mat-flat-button color="primary" (click)="verDetalleOferta(aplicacion.offer.id)">
                                                 <mat-icon>visibility</mat-icon>
-                                                Ver Oferta Completa
-                                            </button>
-                                            <button mat-stroked-button (click)="contactarEmpresa(aplicacion.offer)"
-                                                    *ngIf="aplicacion.offer.company">
-                                                <mat-icon>business</mat-icon>
-                                                Ver Empresa
+                                                Ver Detalle
                                             </button>
                                             <button mat-stroked-button color="warn" (click)="retirarAplicacion(aplicacion.id)"
                                                     *ngIf="canWithdrawApplication(aplicacion.status)">
                                                 <mat-icon>cancel</mat-icon>
-                                                Retirar Aplicación
+                                                Cancelar Aplicación
                                             </button>
                                         </div>
                                     </ng-container>

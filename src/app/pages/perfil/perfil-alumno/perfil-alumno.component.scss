@@ -152,7 +152,8 @@
     grid-template-areas:
         "info-personal sobre-mi sobre-mi"
         "info-personal skills idiomas"
-        "materias materias materias";
+        "materias materias materias"
+        "applied-offers applied-offers applied-offers";
 
     @media (max-width: 1200px) {
         grid-template-columns: 1fr 1fr;
@@ -162,7 +163,8 @@
             "info-personal sobre-mi"
             "skills skills"
             "idiomas idiomas"
-            "materias materias";
+            "materias materias"
+            "applied-offers applied-offers";
     }
 
     @media (max-width: 768px) {
@@ -175,7 +177,8 @@
             "sobre-mi"
             "skills"
             "idiomas"
-            "materias";
+            "materias"
+            "applied-offers";
     }
 }
 
@@ -218,8 +221,12 @@
     grid-area: idiomas;
 }
 
-.profile-content>*:nth-child(5) {
+.profile-content>*:nth-child(6) {
     grid-area: materias;
+}
+
+.profile-content>*:nth-child(5) {
+    grid-area: applied-offers;
 }
 
 /* Removed layout específico para pantallas grandes - now using flexbox above */
