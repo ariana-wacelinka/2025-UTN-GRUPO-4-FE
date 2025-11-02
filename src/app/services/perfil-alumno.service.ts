@@ -142,11 +142,29 @@ export class PerfilAlumnoService {
     }
 
     subirCV(archivo: File): Observable<{ cvUrl: string }> {
-        const mockCvUrl = `/assets/documents/${archivo.name}`;
-        this.mockPerfil.cvUrl = mockCvUrl;
-        this.perfilSubject.next(this.mockPerfil);
+        const id = this.authService.keycloakUser?.id;
+        if (!id) {
+            return throwError(() => new Error('Usuario no autenticado'));
+        }
 
-        return of({ cvUrl: mockCvUrl });
+        const formData = new FormData();
+        formData.append('file', archivo);
+
+        return this.http.post<{ cvUrl: string }>(`${this.apiUrl}/students/${id}/upload-cv`, formData).pipe(
+            tap(response => {
+                // Actualizar el perfil local con la nueva URL del CV
+                const currentPerfil = this.perfilSubject.value;
+                if (currentPerfil) {
+                    currentPerfil.cvUrl = response.cvUrl;
+                    currentPerfil.cvFileName = archivo.name;
+                    this.perfilSubject.next(currentPerfil);
+                }
+            }),
+            catchError(error => {
+                console.error('Error al subir CV:', error);
+                return throwError(() => error);
+            })
+        );
     }
 
     descargarCV(): void {

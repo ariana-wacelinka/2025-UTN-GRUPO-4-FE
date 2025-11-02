@@ -199,13 +199,37 @@
                             <div class="cv-upload-section">
                                 <input type="file" #cvInput accept=".pdf" (change)="onCVSelected($event)"
                                     style="display: none">
-                                <button type="button" mat-stroked-button (click)="cvInput.click()" class="upload-btn">
+
+                                <!-- Botón de selección de archivo -->
+                                <button type="button" mat-stroked-button (click)="cvInput.click()" class="upload-btn"
+                                    *ngIf="!isCVUploadPending() && !isUploadingCV()">
                                     <mat-icon>upload_file</mat-icon>
                                     {{selectedCVFile() ? 'Cambiar CV' : 'Subir CV (PDF)'}}
                                 </button>
-                                <span *ngIf="selectedCVFile()" class="file-selected">
-                                    Archivo seleccionado: {{selectedCVFile()!.name}}
-                                </span>
+
+                                <!-- Confirmación de subida -->
+                                <div *ngIf="isCVUploadPending()" class="cv-confirmation">
+                                    <div class="file-info">
+                                        <mat-icon>description</mat-icon>
+                                        <span>{{selectedCVFile()!.name}}</span>
+                                    </div>
+                                    <div class="confirmation-actions">
+                                        <button type="button" mat-icon-button color="primary"
+                                            (click)="onConfirmCVUpload()" matTooltip="Confirmar subida">
+                                            <mat-icon>check</mat-icon>
+                                        </button>
+                                        <button type="button" mat-icon-button color="warn"
+                                            (click)="onCancelCVUpload()" matTooltip="Cancelar">
+                                            <mat-icon>close</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Estado de subida -->
+                                <div *ngIf="isUploadingCV()" class="cv-uploading">
+                                    <mat-icon class="spin">autorenew</mat-icon>
+                                    <span>Subiendo CV...</span>
+                                </div>
                             </div>
                         </form>
                     </mat-card-content>

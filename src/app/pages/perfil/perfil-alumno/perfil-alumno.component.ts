@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { PerfilAlumnoService, MateriasState } from '../../../services/perfil-alumno.service';
@@ -37,6 +38,7 @@ import { SkillsCardComponent } from '../../../components/skills-card/skills-card
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
+    MatTooltipModule,
     FormsModule,
     ReactiveFormsModule,
     // Componentes compartidos
@@ -57,6 +59,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   selectedImageFile = signal<File | null>(null);
   selectedCVFile = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
+  isCVUploadPending = signal(false);
+  isUploadingCV = signal(false);
 
   // Materias - Nueva funcionalidad
   materiasAlumno: any[] = [];
@@ -304,6 +308,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     this.selectedImageFile.set(null);
     this.selectedCVFile.set(null);
     this.imagePreview.set(null);
+    this.isCVUploadPending.set(false);
+    this.isUploadingCV.set(false);
   }
 
   onImageSelected(file: File) {
@@ -451,14 +457,46 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     const file = event.target.files[0];
     if (file && file.type === 'application/pdf') {
       this.selectedCVFile.set(file);
-      this.snackBar.open('CV seleccionado correctamente', 'Cerrar', {
-        duration: 2000
-      });
+      this.isCVUploadPending.set(true);
     } else {
       this.snackBar.open('Por favor selecciona un archivo PDF válido', 'Cerrar', {
         duration: 3000
       });
     }
+  }
+
+  onConfirmCVUpload() {
+    const file = this.selectedCVFile();
+    if (!file) return;
+
+    this.isUploadingCV.set(true);
+    this.isCVUploadPending.set(false);
+
+    this.perfilService.subirCV(file)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.isUploadingCV.set(false);
+          this.selectedCVFile.set(null);
+          this.snackBar.open('CV subido exitosamente', 'Cerrar', {
+            duration: 3000
+          });
+          // Actualizar el perfil con la nueva URL del CV
+          this.cargarPerfil();
+        },
+        error: (error) => {
+          console.error('Error al subir CV:', error);
+          this.isUploadingCV.set(false);
+          this.snackBar.open('Error al subir el CV. Intenta nuevamente.', 'Cerrar', {
+            duration: 3000
+          });
+        }
+      });
+  }
+
+  onCancelCVUpload() {
+    this.selectedCVFile.set(null);
+    this.isCVUploadPending.set(false);
   }
 
   private markFormGroupTouched() {
