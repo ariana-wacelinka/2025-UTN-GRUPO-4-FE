@@ -687,7 +687,12 @@
                         <ng-template #emptySubjects>
                             <div class="subjects-empty">
                                 <mat-icon>inventory_2</mat-icon>
-                                <p>Subí tu .xls o .xlsx de Alumnos Web para visualizar tus materias aprobadas.</p>
+                                <p *ngIf="isOwnProfile()">
+                                    Subí tu .xls o .xlsx de Alumnos Web para visualizar tus materias aprobadas.
+                                </p>
+                                <p *ngIf="!isOwnProfile()">
+                                    Este usuario no tiene materias cargadas actualmente.
+                                </p>
                             </div>
                         </ng-template>
                     </mat-card-content>
