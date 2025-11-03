@@ -15,6 +15,7 @@ import { OfertaFormDialogComponent, OfertaFormDialogData } from '../../component
 import { OfertaLaboralDTO, ModalidadTrabajo } from '../../models/oferta-laboral.dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { tap } from 'rxjs';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-oferta-detalle',
@@ -116,6 +117,15 @@ import { tap } from 'rxjs';
                   Ver Aplicantes
                 </button>
                 }
+                <button
+                  mat-raised-button
+                  class="delete-offer-button"
+                  color="warn"
+                  (click)="eliminarOferta()"
+                >
+                  <mat-icon>delete</mat-icon>
+                  Eliminar Oferta
+                </button>
                 } @else {
                   @if (!canApplyToOffer()) {
                     <!-- Mensaje informativo cuando no se puede aplicar desde la plataforma -->
@@ -523,6 +533,22 @@ import { tap } from 'rxjs';
         box-shadow: 0 12px 32px var(--shadow-primary-hover) !important;
       }
 
+      .delete-offer-button {
+        background: linear-gradient(135deg, #ef5350 0%, #e53935 100%) !important;
+        color: var(--white) !important;
+        font-weight: 600 !important;
+        text-transform: none !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        font-size: 1rem !important;
+        box-shadow: 0 8px 24px rgba(239, 83, 80, 0.3) !important;
+      }
+
+      .delete-offer-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(239, 83, 80, 0.4) !important;
+      }
+
       .save-button {
         border: 2px solid var(--border-light) !important;
         color: var(--text-muted) !important;
@@ -748,6 +774,42 @@ export class OfertaDetalleComponent implements OnInit {
         // Recargar la oferta para mostrar los cambios
         this.ngOnInit();
         this.snackBar.open('Oferta actualizada exitosamente', 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
+
+  eliminarOferta(): void {
+    if (!this.oferta || !this.isMyOffer()) {
+      this.snackBar.open('No tienes permisos para eliminar esta oferta', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    const dialogData: ConfirmationDialogData = {
+      title: '¿Eliminar oferta?',
+      message: `¿Estás seguro que deseas eliminar la oferta "${this.oferta.title}"? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed && this.oferta) {
+        this.ofertasService.eliminarOferta(this.oferta.id).subscribe({
+          next: () => {
+            this.snackBar.open('Oferta eliminada exitosamente', 'Cerrar', { duration: 3000 });
+            // Redirigir a la lista de ofertas o al perfil
+            this.router.navigate(['/ofertas']);
+          },
+          error: (error) => {
+            console.error('Error al eliminar oferta:', error);
+            this.snackBar.open('Error al eliminar la oferta', 'Cerrar', { duration: 3000 });
+          }
+        });
       }
     });
   }

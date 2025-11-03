@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +17,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Va
 import { PerfilAlumnoService, MateriasState, PagedOfertasAplicadasResponse, OfertaAplicada, ApplicationStatus, OfferDetails } from '../../../services/perfil-alumno.service';
 import { AuthService } from '../../../services/auth.service';
 import { AtributosService } from '../../../services/atributos.service';
+import { offersService } from '../../../services/ofertas.service';
+import { OfertaListaDTO, PagedResponseDTO } from '../../../models/oferta.dto';
 import { EstudianteDTO, ActualizarEstudianteDTO } from '../../../models/aplicante.dto';
 import { IdiomaDTO } from '../../../models/usuario.dto';
 import { Subject, takeUntil, Observable, of } from 'rxjs';
@@ -91,6 +93,12 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   isOfertasLoading = false;
   ofertasError: string | null = null;
   totalOfertasAplicadas = 0;
+
+  // Ofertas Publicadas por el alumno
+  ofertasPublicadas: any[] = [];
+  isOfertasPublicadasLoading = false;
+  ofertasPublicadasError: string | null = null;
+  totalOfertasPublicadas = 0;
 
   // Form
   editForm!: FormGroup;
@@ -201,7 +209,9 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private atributosService: AtributosService,
     private snackBar: MatSnackBar,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router,
+    private ofertasService: offersService
   ) {
     this.initializeForm();
   }
@@ -235,6 +245,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     // Ya no necesitamos esperar explícitamente - el servicio lo maneja
     this.cargarPerfil();
     this.cargarOfertasAplicadas();
+    this.cargarOfertasPublicadas();
   }
 
   ngOnDestroy() {
@@ -671,13 +682,53 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
 
   verDetalleOferta(ofertaId: number) {
     // Navegar al detalle de la oferta
-    // TODO: Implementar navegación cuando esté disponible la ruta
-    console.log('Ver detalle de oferta:', ofertaId);
+    this.router.navigate(['/oferta', ofertaId]);
   }
 
   isOwnProfile(): boolean {
     // Verificar si estamos viendo el perfil propio (sin userId en query params)
     return !this.route.snapshot.queryParams['userId'];
+  }
+
+  // ============= MÉTODOS DE OFERTAS PUBLICADAS =============
+
+  private cargarOfertasPublicadas() {
+    // Solo cargar si es el perfil del usuario actual
+    this.route.queryParams
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(params => {
+          const userId = params['userId'];
+          if (!userId) { // Solo para el perfil propio
+            this.isOfertasPublicadasLoading = true;
+            return this.authService.getCurrentUserId().pipe(
+              switchMap(currentUserId =>
+                this.ofertasService.getoffers({ bidderId: currentUserId })
+              )
+            );
+          }
+          return of(null); // No cargar ofertas si es perfil de otro usuario
+        })
+      )
+      .subscribe({
+        next: (response: PagedResponseDTO<OfertaListaDTO> | null) => {
+          if (response) {
+            this.ofertasPublicadas = response.content;
+            this.totalOfertasPublicadas = response.totalElements;
+            this.isOfertasPublicadasLoading = false;
+            this.ofertasPublicadasError = null;
+          }
+        },
+        error: (error: any) => {
+          console.error('Error al cargar ofertas publicadas:', error);
+          this.isOfertasPublicadasLoading = false;
+          this.ofertasPublicadasError = 'No pudimos cargar tus publicaciones. Intenta nuevamente más tarde.';
+        }
+      });
+  }
+
+  trackByOfertaPublicada(index: number, oferta: OfertaListaDTO) {
+    return oferta.id;
   }
 
   // ============= MÉTODOS PARA UI MEJORADA DE OFERTAS =============

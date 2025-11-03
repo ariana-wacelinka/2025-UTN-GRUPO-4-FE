@@ -72,6 +72,17 @@ export class offersService {
     return this.http.post(`${this.apiUrl}/offers`, oferta);
   }
 
+  /**
+   * Elimina una oferta por ID
+   * @param id ID de la oferta a eliminar
+   * @returns Observable<void>
+   */
+  eliminarOferta(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/offers/${id}`).pipe(
+      tap(() => console.log(`✅ Oferta ${id} eliminada exitosamente`))
+    );
+  }
+
   descargarCV(aplicante: AplicanteDTO): void {
     const student = aplicante.student;
     if (student.cvUrl) {
