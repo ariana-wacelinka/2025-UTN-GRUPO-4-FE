@@ -267,11 +267,16 @@ export class PerfilAlumnoService {
     return this.authService.getCurrentUserId().pipe(
       switchMap(id => {
         const formData = new FormData();
+        const authToken = this.authService.getIdTokenFromCookie();
+        // Adjuntar el archivo y los campos requeridos por el backend:
+        // @RequestPart("file"), @RequestPart("aplicante_id"), @RequestPart("auth_token")
         formData.append('file', archivo);
+        formData.append('aplicante_id', String(id));
+        formData.append('auth_token', authToken ?? '');
 
         return this.http
           .post<MateriasState>(
-            `${this.apiUrl}/students/${id}/process-grades`,
+            `https://grade-processor.lafuah.com/procesar-notas`,
             formData
           )
           .pipe(
