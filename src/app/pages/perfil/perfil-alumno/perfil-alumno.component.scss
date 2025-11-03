@@ -2328,3 +2328,355 @@
         }
     }
 }
+
+// ============= ESTILOS PARA OFERTAS PUBLICADAS =============
+
+.published-offers-card {
+    // Reutilizar estilos de ofertas aplicadas para consistencia
+    .applications-count {
+        font-size: 0.9em;
+        color: var(--secondary-color);
+        font-weight: 500;
+        margin-left: 8px;
+    }
+
+    .ofertas-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--glass-border);
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.95em;
+        }
+    }
+
+    .ofertas-error {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: var(--error-background);
+        border-radius: 8px;
+        color: var(--error-color);
+        margin: 16px 0;
+
+        mat-icon {
+            color: var(--error-color);
+        }
+    }
+
+    .applied-offers-list {
+        .offer-card {
+            position: relative;
+            background: var(--background-soft);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                border-color: var(--secondary-color);
+            }
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            // Publication Badge específico para ofertas publicadas
+            .publication-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75em;
+                font-weight: 500;
+                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+                color: #1565c0;
+                border: 1px solid #90caf9;
+
+                mat-icon {
+                    font-size: 16px;
+                    width: 16px;
+                    height: 16px;
+                }
+            }
+
+            .offer-header {
+                margin-bottom: 20px;
+
+                .offer-title-section {
+                    margin-bottom: 16px;
+
+                    .offer-title {
+                        font-size: 1.3em;
+                        font-weight: 600;
+                        color: var(--text-primary);
+                        margin: 0 0 8px 0;
+                        line-height: 1.3;
+                    }
+
+                    .offer-meta {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        margin-top: 8px;
+                    }
+                }
+
+                .offer-pills {
+                    .info-chips {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+
+                        mat-chip {
+                            font-size: 0.85em;
+                            height: 32px;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 0 12px;
+                            border-radius: 16px;
+
+                            mat-icon {
+                                font-size: 16px;
+                                width: 16px;
+                                height: 16px;
+                            }
+
+                            &.modality-chip {
+                                background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+                                color: #2e7d32;
+                                border: 1px solid #a5d6a7;
+
+                                &.modality-remote {
+                                    background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+                                    color: #01579b;
+                                    border: 1px solid #81d4fa;
+                                }
+
+                                &.modality-hybrid {
+                                    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+                                    color: #e65100;
+                                    border: 1px solid #ffcc80;
+                                }
+                            }
+
+                            &.location-chip {
+                                background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+                                color: #6a1b9a;
+                                border: 1px solid #ce93d8;
+                            }
+
+                            &.payment-chip {
+                                background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+                                color: #1b5e20;
+                                border: 1px solid #a5d6a7;
+                                font-weight: 600;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .offer-content {
+                .offer-description {
+                    margin-bottom: 16px;
+
+                    .description-text {
+                        color: var(--text-secondary);
+                        line-height: 1.6;
+                        margin: 0;
+                        font-size: 0.95em;
+                    }
+                }
+
+                .offer-requirements {
+                    background: var(--background-light);
+                    border-left: 3px solid var(--primary-color);
+                    border-radius: 8px;
+                    padding: 16px;
+                    margin-bottom: 16px;
+
+                    h6 {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        margin: 0 0 8px 0;
+                        font-size: 0.9em;
+                        font-weight: 600;
+                        color: var(--text-primary);
+
+                        mat-icon {
+                            font-size: 18px;
+                            width: 18px;
+                            height: 18px;
+                            color: var(--primary-color);
+                        }
+                    }
+
+                    p {
+                        margin: 0;
+                        color: var(--text-secondary);
+                        font-size: 0.9em;
+                        line-height: 1.5;
+                    }
+                }
+
+                .offer-tags {
+                    margin-bottom: 16px;
+
+                    h6 {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        margin: 0 0 12px 0;
+                        font-size: 0.9em;
+                        font-weight: 600;
+                        color: var(--text-primary);
+
+                        mat-icon {
+                            font-size: 18px;
+                            width: 18px;
+                            height: 18px;
+                            color: var(--secondary-color);
+                        }
+                    }
+
+                    .skills-chips {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+
+                        mat-chip {
+                            background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+                            color: var(--text-primary);
+                            border: 1px solid #e0e0e0;
+                            font-size: 0.8em;
+                            height: 28px;
+                            padding: 0 10px;
+                            border-radius: 14px;
+                            font-weight: 500;
+
+                            &:hover {
+                                background: linear-gradient(135deg, #eeeeee 0%, #e0e0e0 100%);
+                                transform: translateY(-1px);
+                            }
+                        }
+                    }
+                }
+            }
+
+            .offer-actions {
+                display: flex;
+                gap: 12px;
+                margin-top: 20px;
+                padding-top: 16px;
+                border-top: 1px solid var(--glass-border);
+
+                button {
+                    flex: 1;
+                    text-transform: none;
+                    font-weight: 500;
+                    border-radius: 8px;
+                    padding: 10px 16px;
+
+                    mat-icon {
+                        margin-right: 8px;
+                    }
+
+                    &[color="primary"] {
+                        background: var(--secondary-gradient);
+
+                        &:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 16px rgba(103, 58, 183, 0.3);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .offers-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
+
+        mat-icon {
+            font-size: 64px;
+            width: 64px;
+            height: 64px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        p {
+            margin: 0;
+            font-size: 0.95em;
+            line-height: 1.4;
+            max-width: 400px;
+            color: var(--text-muted);
+        }
+    }
+
+    // Mobile Responsive
+    @media (max-width: 768px) {
+        .applied-offers-list .offer-card {
+            padding: 16px;
+
+            .offer-header {
+                .offer-title-section .offer-title {
+                    font-size: 1.1em;
+                }
+
+                .offer-pills .info-chips {
+                    flex-direction: column;
+                    align-items: stretch;
+
+                    mat-chip {
+                        justify-content: center;
+                    }
+                }
+            }
+
+            .offer-actions {
+                flex-direction: column;
+
+                button {
+                    justify-content: center;
+                }
+            }
+        }
+    }
+}
+

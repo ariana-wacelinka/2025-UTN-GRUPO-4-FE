@@ -522,8 +522,8 @@
                 <mat-card class="modern-card published-offers-card" *ngIf="isOwnProfile()">
                     <mat-card-header>
                         <mat-card-title class="section-title">
-                            <mat-icon class="section-icon">work</mat-icon>
-                            Mis Ofertas Publicadas
+                            <mat-icon class="section-icon">post_add</mat-icon>
+                            Mis Publicaciones
                             <span class="applications-count" *ngIf="totalOfertasPublicadas > 0">({{totalOfertasPublicadas}})</span>
                         </mat-card-title>
                     </mat-card-header>
@@ -542,12 +542,18 @@
 
                         <!-- Content -->
                         <ng-container *ngIf="!isOfertasPublicadasLoading && !ofertasPublicadasError">
-                            <div class="published-offers-list" *ngIf="ofertasPublicadas.length; else emptyPublishedOffers">
+                            <div class="applied-offers-list" *ngIf="ofertasPublicadas.length; else emptyPublishedOffers">
                                 <div class="offer-card" *ngFor="let oferta of ofertasPublicadas; trackBy: trackByOfertaPublicada">
                                     <!-- Offer Header -->
                                     <div class="offer-header">
                                         <div class="offer-title-section">
                                             <h4 class="offer-title">{{oferta.title}}</h4>
+                                            <div class="offer-meta">
+                                                <span class="publication-badge">
+                                                    <mat-icon>verified</mat-icon>
+                                                    Publicada
+                                                </span>
+                                            </div>
                                         </div>
 
                                         <!-- Quick Info Pills -->
@@ -569,26 +575,26 @@
                                         </div>
                                     </div>
 
-                                    <!-- Offer Description -->
+                                    <!-- Offer Content -->
                                     <div class="offer-content">
                                         <div class="offer-description">
                                             <p class="description-text">{{oferta.description}}</p>
                                         </div>
 
+                                        <!-- Requirements section -->
+                                        <div class="offer-requirements" *ngIf="oferta.requirements">
+                                            <h6><mat-icon>assignment</mat-icon> Requisitos:</h6>
+                                            <p>{{oferta.requirements}}</p>
+                                        </div>
+
                                         <!-- Skills/Attributes -->
                                         <div class="offer-tags" *ngIf="oferta.attributes && oferta.attributes.length">
-                                            <h6>Tecnologías requeridas:</h6>
+                                            <h6><mat-icon>code</mat-icon> Tecnologías requeridas:</h6>
                                             <mat-chip-set class="skills-chips">
                                                 <mat-chip *ngFor="let attr of oferta.attributes" class="skill-tag">
                                                     {{attr}}
                                                 </mat-chip>
                                             </mat-chip-set>
-                                        </div>
-
-                                        <!-- Aplicantes count -->
-                                        <div class="applicants-count" *ngIf="oferta.applyList && oferta.applyList.length > 0">
-                                            <mat-icon>people</mat-icon>
-                                            <span>{{oferta.applyList.length}} aplicante{{oferta.applyList.length !== 1 ? 's' : ''}}</span>
                                         </div>
                                     </div>
 
@@ -605,9 +611,9 @@
                             <!-- Empty state -->
                             <ng-template #emptyPublishedOffers>
                                 <div class="offers-empty-state">
-                                    <mat-icon>work_outline</mat-icon>
+                                    <mat-icon>post_add</mat-icon>
                                     <h4>No has publicado ofertas aún</h4>
-                                    <p>Cuando publiques una oferta, aparecerá aquí para que puedas gestionarla.</p>
+                                    <p>Cuando publiques una oferta laboral, aparecerá aquí para que puedas gestionarla y editarla.</p>
                                 </div>
                             </ng-template>
                         </ng-container>
