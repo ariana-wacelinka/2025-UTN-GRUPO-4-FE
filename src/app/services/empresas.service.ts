@@ -160,23 +160,26 @@ export class EmpresasService {
   }
 
   actualizarPerfil(datos: Partial<EmpresaDTO>): Observable<EmpresaDTO> {
-    // Simular actualización del perfil
-    const empresaActualizada: EmpresaDTO = {
-      id: datos.id || 1,
-      name: datos.name || 'Mi Empresa',
-      surname: datos.surname || '',
-      imageUrl: datos.imageUrl || 'https://i.pravatar.cc/150?img=default',
-      description: datos.description || '',
-      industry: datos.industry || '',
-      size: datos.size || CompanySize.FROM_1_TO_10,
-      webSiteUrl: datos.webSiteUrl || '',
-      email: datos.email || '',
-      phone: datos.phone || '',
-      location: datos.location || '',
-      linkedinUrl: datos.linkedinUrl || '',
-      role: 'empresa'
+
+    const body = {
+      name: datos.name,
+      surname: datos.surname,
+      email: datos.email,
+      phone: datos.phone,
+      location: datos.location,
+      description: datos.description,
+      linkedinUrl: datos.linkedinUrl,
+      webSiteUrl: datos.webSiteUrl,
+      industry: datos.industry,
+      size: datos.size
     };
 
-    return of(empresaActualizada);
+    return this.authService
+      .getCurrentUserId()
+      .pipe(
+        switchMap((userId) =>
+          this.http.patch<EmpresaDTO>(`${this.apiUrl}/organizations/${userId}`, body)
+        )
+      );
   }
 }
