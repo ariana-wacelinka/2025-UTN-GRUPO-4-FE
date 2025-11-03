@@ -105,6 +105,7 @@ import { tap } from 'rxjs';
                   <mat-icon>edit</mat-icon>
                   Editar Oferta
                 </button>
+                @if (canViewApplicants()) {
                 <button
                   mat-raised-button
                   class="view-applicants-button"
@@ -114,38 +115,50 @@ import { tap } from 'rxjs';
                   <mat-icon>group</mat-icon>
                   Ver Aplicantes
                 </button>
+                }
                 } @else {
-                  @if (loadingApplicationStatus) {
-                  <!-- Botón de carga mientras verifica el estado o aplica -->
-                  <button mat-raised-button class="loading-button" disabled>
-                    @if (isApplying) {
-                      <ng-container>
-                        <mat-icon>send</mat-icon>
-                        Enviando aplicación...
-                      </ng-container>
-                    } @else {
-                      <ng-container>
-                        <mat-icon>hourglass_empty</mat-icon>
-                        Verificando...
-                      </ng-container>
-                    }
-                  </button>
-                  } @else if (oferta.estado === 'APLICADO') {
-                  <button mat-raised-button class="applied-button" disabled>
-                    <mat-icon>check</mat-icon>
-                    Ya Aplicado
-                  </button>
+                  @if (!canApplyToOffer()) {
+                    <!-- Mensaje informativo cuando no se puede aplicar desde la plataforma -->
+                    <div class="external-application-notice">
+                      <mat-icon>info</mat-icon>
+                      <div class="notice-content">
+                        <h4>Aplicación Externa</h4>
+                        <p>Esta oferta fue publicada por otro estudiante. Para aplicar, contacta directamente usando los datos proporcionados en la descripción.</p>
+                      </div>
+                    </div>
                   } @else {
-                  <button
-                    mat-raised-button
-                    class="apply-button"
-                    color="primary"
-                    [disabled]="!dataLoaded"
-                    (click)="abrirDialogoAplicar()"
-                  >
-                    <mat-icon>send</mat-icon>
-                    Aplicar Ahora
-                  </button>
+                    @if (loadingApplicationStatus) {
+                    <!-- Botón de carga mientras verifica el estado o aplica -->
+                    <button mat-raised-button class="loading-button" disabled>
+                      @if (isApplying) {
+                        <ng-container>
+                          <mat-icon>send</mat-icon>
+                          Enviando aplicación...
+                        </ng-container>
+                      } @else {
+                        <ng-container>
+                          <mat-icon>hourglass_empty</mat-icon>
+                          Verificando...
+                        </ng-container>
+                      }
+                    </button>
+                    } @else if (oferta.estado === 'APLICADO') {
+                    <button mat-raised-button class="applied-button" disabled>
+                      <mat-icon>check</mat-icon>
+                      Ya Aplicado
+                    </button>
+                    } @else {
+                    <button
+                      mat-raised-button
+                      class="apply-button"
+                      color="primary"
+                      [disabled]="!dataLoaded"
+                      (click)="abrirDialogoAplicar()"
+                    >
+                      <mat-icon>send</mat-icon>
+                      Aplicar Ahora
+                    </button>
+                    }
                   }
                 }
 
@@ -392,6 +405,38 @@ import { tap } from 'rxjs';
         display: flex;
         flex-direction: column;
         gap: 12px;
+      }
+
+      .external-application-notice {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 4px solid #2196f3;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      .external-application-notice mat-icon {
+        color: #2196f3;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+      }
+
+      .notice-content h4 {
+        margin: 0 0 8px 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1976d2;
+      }
+
+      .notice-content p {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: #424242;
       }
 
       .apply-button {
@@ -709,6 +754,48 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   /**
+   * Verifica si la oferta fue publicada por un alumno
+   */
+  isOfertaDeAlumno(): boolean {
+    return this.oferta?.bidder.role === 'Student';
+  }
+
+  /**
+   * Verifica si el usuario actual es un alumno
+   */
+  isUsuarioAlumno(): boolean {
+    return this.keycloakUser?.role === 'Student';
+  }
+
+  /**
+   * Verifica si el usuario puede aplicar a la oferta
+   * Un alumno NO puede aplicar desde la plataforma si la oferta es de otro alumno
+   */
+  canApplyToOffer(): boolean {
+    // Si es mi propia oferta, no puedo aplicar
+    if (this.isMyOffer()) {
+      return false;
+    }
+
+    // Si soy alumno y la oferta es de otro alumno, no puedo aplicar desde la plataforma
+    if (this.isUsuarioAlumno() && this.isOfertaDeAlumno()) {
+      return false;
+    }
+
+    // En otros casos, sí puedo aplicar
+    return true;
+  }
+
+  /**
+   * Verifica si debe mostrarse el botón "Ver Aplicantes"
+   * NO se muestra si el usuario es alumno (independientemente de si es su oferta)
+   */
+  canViewApplicants(): boolean {
+    // Si es mi oferta Y no soy alumno, puedo ver aplicantes
+    return this.isMyOffer() && !this.isUsuarioAlumno();
+  }
+
+  /**
    * Verifica si todos los datos necesarios están cargados y procede con la verificación
    */
   private checkIfDataLoaded(): void {
@@ -724,6 +811,12 @@ export class OfertaDetalleComponent implements OnInit {
   private verificarEstadoAplicacion(): void {
     // No verificar si es nuestra propia oferta
     if (this.isMyOffer()) {
+      this.loadingApplicationStatus = false;
+      return;
+    }
+
+    // No verificar si no puede aplicar (ej: alumno viendo oferta de otro alumno)
+    if (!this.canApplyToOffer()) {
       this.loadingApplicationStatus = false;
       return;
     }
