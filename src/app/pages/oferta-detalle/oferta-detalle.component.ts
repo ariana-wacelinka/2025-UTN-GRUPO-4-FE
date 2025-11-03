@@ -122,8 +122,16 @@ import { tap } from 'rxjs';
                     <div class="external-application-notice">
                       <mat-icon>info</mat-icon>
                       <div class="notice-content">
-                        <h4>Aplicación Externa</h4>
-                        <p>Esta oferta fue publicada por otro estudiante. Para aplicar, contacta directamente usando los datos proporcionados en la descripción.</p>
+                        @if (isUsuarioAlumno() && isOfertaDeAlumno()) {
+                          <h4>Aplicación Externa</h4>
+                          <p>Esta oferta fue publicada por otro estudiante. Para aplicar, contacta directamente usando los datos proporcionados en la descripción.</p>
+                        } @else if (!isUsuarioAlumno()) {
+                          <h4>Solo para Estudiantes</h4>
+                          <p>Las organizaciones no pueden aplicar a ofertas. Esta funcionalidad está reservada exclusivamente para estudiantes.</p>
+                        } @else {
+                          <h4>No Disponible</h4>
+                          <p>No puedes aplicar a esta oferta.</p>
+                        }
                       </div>
                     </div>
                   } @else {
@@ -769,11 +777,17 @@ export class OfertaDetalleComponent implements OnInit {
 
   /**
    * Verifica si el usuario puede aplicar a la oferta
-   * Un alumno NO puede aplicar desde la plataforma si la oferta es de otro alumno
+   * Solo los alumnos pueden aplicar, y NO pueden aplicar si la oferta es de otro alumno
+   * Las empresas/organizaciones NO pueden aplicar a ofertas
    */
   canApplyToOffer(): boolean {
     // Si es mi propia oferta, no puedo aplicar
     if (this.isMyOffer()) {
+      return false;
+    }
+
+    // Solo los alumnos pueden aplicar a ofertas
+    if (!this.isUsuarioAlumno()) {
       return false;
     }
 
@@ -782,7 +796,7 @@ export class OfertaDetalleComponent implements OnInit {
       return false;
     }
 
-    // En otros casos, sí puedo aplicar
+    // Si llegamos aquí, soy alumno y la oferta NO es de otro alumno, puedo aplicar
     return true;
   }
 
