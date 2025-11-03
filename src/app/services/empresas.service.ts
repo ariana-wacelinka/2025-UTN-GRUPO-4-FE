@@ -1,15 +1,21 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, switchMap } from 'rxjs';
 import { EmpresaDTO } from '../models/empresa.dto';
 import { CompanySize } from '../models/usuario.dto';
 import { AuthService } from './auth.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmpresasService {
+  private apiUrl = environment.apiUrl;
 
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private http: HttpClient
+  ) { }
 
   getEmpresas(): Observable<EmpresaDTO[]> {
     return of(this.getMockEmpresas());
@@ -139,17 +145,18 @@ export class EmpresasService {
 
   /**
    * Obtiene el perfil de una empresa por ID
-   * @param empresaId ID de la empresa (opcional, si no se proporciona usa la empresa actual)
+   * @param empresaId ID de la empresa (opcional, si no se proporciona usa el ID del usuario loggeado)
    */
   getEmpresaPorId(empresaId?: number): Observable<EmpresaDTO | null> {
+    // Si se proporciona un ID, usarlo directamente
     if (empresaId) {
-      // Si se proporciona un ID, buscar en los mocks
-      const empresa = this.getMockEmpresas().find(e => e.id === empresaId);
-      return of(empresa || null);
+      return this.http.get<EmpresaDTO>(`${this.apiUrl}/organizations/${empresaId}`);
     }
 
-    // Si no hay ID, devolver la empresa actual del usuario loggeado
-    return this.getEmpresaActual();
+    // Si no se proporciona ID, esperar a que el usuario esté cargado y usar su ID
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(userId => this.http.get<EmpresaDTO>(`${this.apiUrl}/organizations/${userId}`))
+    );
   }
 
   actualizarPerfil(datos: Partial<EmpresaDTO>): Observable<EmpresaDTO> {
