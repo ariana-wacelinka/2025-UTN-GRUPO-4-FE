@@ -425,7 +425,7 @@ export class HomepageComponent implements OnInit {
   }
 
   verTodasOfertas(): void {
-    this.router.navigate(['/ofertas']);
+    this.router.navigate(['/busqueda']);
   }
 
   getSizeLabel(size: CompanySize): string {

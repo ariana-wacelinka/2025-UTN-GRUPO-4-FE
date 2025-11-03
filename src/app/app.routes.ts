@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { HomepageComponent } from './pages/homepage/homepage.component';
-import { OfertasListaComponent } from './pages/ofertas-lista/ofertas-lista.component';
 import { OfertaDetalleComponent } from './pages/oferta-detalle/oferta-detalle.component';
 import { PerfilAlumnoComponent } from './pages/perfil/perfil-alumno/perfil-alumno.component';
 import { LoginComponent } from './pages/login/login.component';
@@ -19,7 +18,6 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'register-organization', component: RegisterOrganizationComponent },
   { path: 'busqueda', component: BusquedaComponent, canActivate: [authGuard] },
-  { path: 'ofertas', component: OfertasListaComponent, canActivate: [authGuard] },
   { path: 'oferta/:id', component: OfertaDetalleComponent, canActivate: [authGuard] },
   { path: 'oferta/:id/aplicantes', component: AplicantesListaComponent, canActivate: [authGuard, organizationGuard] },
   { path: 'publicar-oferta', component: PublicarOfertaComponent, canActivate: [authGuard] },

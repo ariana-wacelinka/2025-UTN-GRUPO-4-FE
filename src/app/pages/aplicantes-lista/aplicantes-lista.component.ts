@@ -76,6 +76,6 @@ export class AplicantesListaComponent implements OnInit {
   }
 
   volverAOfertas(): void {
-    this.router.navigate(['/ofertas']);
+    this.router.navigate(['/busqueda']);
   }
 }

@@ -683,7 +683,7 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   volver(): void {
-    this.router.navigate(['/ofertas']);
+    this.router.navigate(['/busqueda']);
   }
 
   abrirDialogoAplicar(): void {
@@ -803,7 +803,7 @@ export class OfertaDetalleComponent implements OnInit {
           next: () => {
             this.snackBar.open('Oferta eliminada exitosamente', 'Cerrar', { duration: 3000 });
             // Redirigir a la lista de ofertas o al perfil
-            this.router.navigate(['/ofertas']);
+            this.router.navigate(['/busqueda']);
           },
           error: (error) => {
             console.error('Error al eliminar oferta:', error);

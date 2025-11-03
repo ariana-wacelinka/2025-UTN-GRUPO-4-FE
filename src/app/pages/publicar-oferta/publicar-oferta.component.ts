@@ -288,12 +288,12 @@ export class PublicarOfertaComponent implements OnInit {
         modalidad: this.oferta.modalidad as string
       };
       this.ofertasService.crearOferta(ofertaParaEnviar).subscribe(() => {
-        this.router.navigate(['/ofertas']);
+        this.router.navigate(['/busqueda']);
       });
     }
   }
 
   cancelar(): void {
-    this.router.navigate(['/ofertas']);
+    this.router.navigate(['/busqueda']);
   }
 }

@@ -19,12 +19,9 @@ import { MatIcon, MatIconModule } from '@angular/material/icon';
           <button class="nav-button" (click)="irInicio()">
             <span>Inicio</span>
           </button>
-          <button class="nav-button" (click)="verOfertas()">
-            <span>Ofertas</span>
-          </button>
           <button class="nav-button" (click)="irBusqueda()">
             <mat-icon class="button-icon">search</mat-icon>
-            <span>Búsqueda</span>
+            <span>Buscar</span>
           </button>
           <button class="nav-button" (click)="publicarOferta()">
             <span>Publicar Oferta</span>
@@ -241,7 +238,7 @@ export class NavbarComponent implements OnInit {
   }
 
   verOfertas(): void {
-    this.router.navigate(['/ofertas']);
+    this.router.navigate(['/busqueda']);
   }
 
   irBusqueda(): void {

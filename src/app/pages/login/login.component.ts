@@ -308,7 +308,7 @@ export class LoginComponent {
         this.loading = false;
         if (response.success) {
           if (response.user?.tipo === 'empresa') {
-            this.router.navigate(['/ofertas']);
+            this.router.navigate(['/busqueda']);
           } else {
             this.router.navigate(['/']);
           }
