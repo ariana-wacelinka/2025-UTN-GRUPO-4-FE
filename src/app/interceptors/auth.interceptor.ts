@@ -11,6 +11,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
+  if (req.url.includes('grade-processor')) {
+    console.log('=== GRADE PROCESSOR REQUEST, SENDING ORIGINAL REQ ===');
+    return next(req);
+  }
+
   const idToken = authService.getIdTokenFromCookie();
   console.log('=== ID TOKEN FROM COOKIE ===');
   if (idToken) {
