@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, OnDestroy, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -47,16 +47,16 @@ import { AuthService } from '../../services/auth.service';
         <div class="header-content">
           <h2 class="section-title">
             <mat-icon class="section-icon">work</mat-icon>
-            Mis Ofertas Laborales
+            {{ isOwnProfile ? 'Mis Ofertas Laborales' : 'Publicaciones' }}
           </h2>
           <p class="section-subtitle">
-            Gestiona todas tus publicaciones de trabajo
+            {{ isOwnProfile ? 'Gestiona todas tus publicaciones de trabajo' : 'Ofertas laborales publicadas' }}
           </p>
         </div>
       </div>
 
       <!-- Stats Cards -->
-      <div class="stats-container" *ngIf="ofertas().length > 0">
+      <div class="stats-container" *ngIf="ofertas().length > 0 && isOwnProfile">
         <mat-card class="stat-card">
           <mat-card-content>
             <div class="stat-content">
@@ -114,7 +114,7 @@ import { AuthService } from '../../services/auth.service';
                     </div>
                   </div>
                 </div>
-                <div class="card-actions">
+                <div class="card-actions" *ngIf="isOwnProfile">
                   <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
                     <mat-icon>more_vert</mat-icon>
                   </button>
@@ -160,15 +160,20 @@ import { AuthService } from '../../services/auth.service';
 
               <!-- Footer de la oferta -->
               <div class="card-footer">
-                <div class="footer-stats">
+                <div class="footer-stats" *ngIf="isOwnProfile">
                   <div class="stat-item">
                     <mat-icon class="stat-icon-small">people</mat-icon>
                     <span>{{ getNumeroAplicantes(oferta.id) }} aplicantes</span>
                   </div>
                 </div>
-                <div class="footer-actions">
+                <div class="footer-actions" *ngIf="isOwnProfile">
                   <button mat-button class="primary-btn" (click)="verAplicantes(oferta)">
                     Ver Aplicantes
+                  </button>
+                </div>
+                <div class="footer-actions" *ngIf="!isOwnProfile">
+                  <button mat-button class="primary-btn" (click)="verDetalle(oferta)">
+                    Ver Detalle
                   </button>
                 </div>
               </div>
@@ -184,9 +189,10 @@ import { AuthService } from '../../services/auth.service';
             <mat-card-content>
               <div class="empty-content">
                 <mat-icon class="empty-icon">work_outline</mat-icon>
-                <h3>No tienes ofertas publicadas</h3>
-                <p>Comienza a atraer talento creando tu primera oferta laboral</p>
-                <button mat-raised-button color="primary" class="create-first-offer-btn" (click)="crearNuevaOferta()">
+                <h3>{{ isOwnProfile ? 'No tienes ofertas publicadas' : 'No hay ofertas publicadas' }}</h3>
+                <p *ngIf="isOwnProfile">Comienza a atraer talento creando tu primera oferta laboral</p>
+                <p *ngIf="!isOwnProfile">Esta empresa aún no ha publicado ofertas laborales</p>
+                <button *ngIf="isOwnProfile" mat-raised-button color="primary" class="create-first-offer-btn" (click)="crearNuevaOferta()">
                   <mat-icon>add</mat-icon>
                   Crear Mi Primera Oferta
                 </button>
@@ -209,10 +215,14 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   authService = inject(AuthService);
 
+  // Inputs
+  @Input() isOwnProfile: boolean = true; // Por defecto es true para mantener compatibilidad
+  @Input() empresaId?: number; // ID de la empresa cuyas ofertas se deben cargar
+
   // Signals
   ofertas = signal<OfertaListaDTO[]>([]);
   isLoading = signal(false);
-  empresaId = signal<number | null>(null);
+  empresaIdSignal = signal<number | null>(null);
 
   // Computed properties
   ofertasActivas = computed(() =>
@@ -264,25 +274,40 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
   private cargarOfertas() {
     this.isLoading.set(true);
 
-    // Esperar a que el usuario esté cargado antes de hacer la petición
-    this.authService.getCurrentUserId()
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(userId => this.ofertasService.getoffers({bidderId: userId}))
-      )
-      .subscribe({
-        next: (response: PagedResponseDTO<OfertaListaDTO>) => {
-          // Filtrar solo las ofertas de la empresa actual
-          // Por ahora mostramos todas, en el futuro filtraremos por empresaId
-          this.ofertas.set(response.content);
-          this.isLoading.set(false);
-        },
-        error: (error: any) => {
-          console.error('Error al cargar ofertas:', error);
-          this.isLoading.set(false);
-          this.snackBar.open('Error al cargar las ofertas', 'Cerrar', { duration: 3000 });
-        }
-      });
+    // Si se proporcionó un empresaId, usarlo directamente
+    if (this.empresaId) {
+      this.ofertasService.getoffers({bidderId: this.empresaId})
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response: PagedResponseDTO<OfertaListaDTO>) => {
+            this.ofertas.set(response.content);
+            this.isLoading.set(false);
+          },
+          error: (error: any) => {
+            console.error('Error al cargar ofertas:', error);
+            this.isLoading.set(false);
+            this.snackBar.open('Error al cargar las ofertas', 'Cerrar', { duration: 3000 });
+          }
+        });
+    } else {
+      // Si no se proporciona empresaId, esperar a que el usuario esté cargado
+      this.authService.getCurrentUserId()
+        .pipe(
+          takeUntil(this.destroy$),
+          switchMap(userId => this.ofertasService.getoffers({bidderId: userId}))
+        )
+        .subscribe({
+          next: (response: PagedResponseDTO<OfertaListaDTO>) => {
+            this.ofertas.set(response.content);
+            this.isLoading.set(false);
+          },
+          error: (error: any) => {
+            console.error('Error al cargar ofertas:', error);
+            this.isLoading.set(false);
+            this.snackBar.open('Error al cargar las ofertas', 'Cerrar', { duration: 3000 });
+          }
+        });
+    }
   }
 
   // Métodos de utilidad para el template

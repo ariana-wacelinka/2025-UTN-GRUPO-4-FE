@@ -234,7 +234,11 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
         if (this.editForm.valid) {
             this.isLoading.set(true);
 
-            const datosActualizados: Partial<EmpresaDTO> = this.editForm.value;
+            const empresaActual = this.empresa();
+            const datosActualizados: Partial<EmpresaDTO> = {
+                ...this.editForm.value,
+                id: empresaActual?.id
+            };
 
             this.empresasService.actualizarPerfil(datosActualizados)
                 .pipe(takeUntil(this.destroy$))
