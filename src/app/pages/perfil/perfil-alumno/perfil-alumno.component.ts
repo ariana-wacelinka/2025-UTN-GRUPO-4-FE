@@ -116,14 +116,9 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     const perfil = this.perfilAlumno();
     if (!perfil) return null;
 
-    // Usar información del usuario actual si está disponible
-    const currentUser = this.authService.keycloakUser;
-    const displayName = currentUser ?
-      `${currentUser.name || perfil.name} ${currentUser.surname || perfil.surname}` :
-      `${perfil.name} ${perfil.surname}`;
-
-    // Priorizar imagen del usuario actual si está disponible
-    const imageUrl = currentUser?.imageUrl || perfil.imageUrl;
+    // Siempre usar la información del perfil que se está viendo, no del usuario actual
+    const displayName = `${perfil.name} ${perfil.surname}`;
+    const imageUrl = perfil.imageUrl;
 
     return {
       name: displayName,
