@@ -2134,6 +2134,20 @@
                 border-radius: 12px;
                 margin-bottom: 20px;
                 overflow: hidden;
+                transition: background 0.3s ease;
+
+                &:hover,
+                &:has(.cover-letter-content:hover) {
+                    background: rgba(79, 172, 254, 0.1);
+
+                    .cover-letter-header {
+                        background: transparent;
+                    }
+
+                    .cover-letter-content .cover-letter-text {
+                        color: var(--primary-color);
+                    }
+                }
 
                 .cover-letter-header {
                     display: flex;
@@ -2142,10 +2156,6 @@
                     padding: 16px;
                     cursor: pointer;
                     transition: background 0.2s ease;
-
-                    &:hover {
-                        background: var(--glass-white);
-                    }
 
                     .letter-icon {
                         color: var(--primary-color);
@@ -2162,13 +2172,19 @@
 
                     .toggle-letter {
                         color: var(--text-muted);
+                        transition: all 0.3s ease;
+
+                        &:hover {
+                            background: rgba(79, 172, 254, 0.15);
+                            color: var(--primary-color);
+                        }
                     }
                 }
 
                 .cover-letter-content {
                     max-height: 0;
                     overflow: hidden;
-                    transition: max-height 0.3s ease;
+                    transition: max-height 0.3s ease, color 0.3s ease;
 
                     &.expanded {
                         max-height: 300px;
@@ -2180,6 +2196,7 @@
                         line-height: 1.5;
                         font-style: italic;
                         margin: 0;
+                        transition: color 0.3s ease;
                     }
                 }
             }
