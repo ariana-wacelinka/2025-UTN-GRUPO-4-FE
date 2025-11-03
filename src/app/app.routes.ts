@@ -8,6 +8,7 @@ import { RegisterComponent } from './pages/register/register.component';
 import { RegisterOrganizationComponent } from './pages/register-organization/register-organization.component';
 import { AplicantesListaComponent } from './pages/aplicantes-lista/aplicantes-lista.component';
 import { PublicarOfertaComponent } from './pages/publicar-oferta/publicar-oferta.component';
+import { BusquedaComponent } from './pages/busqueda/busqueda.component';
 import { authGuard } from './guards/auth.guard';
 import { organizationGuard } from './guards/organization.guard';
 import { PerfilEmpresaComponent } from './pages/perfil/perfil-empresa/perfil-empresa.component';
@@ -17,10 +18,12 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'register-organization', component: RegisterOrganizationComponent },
+  { path: 'busqueda', component: BusquedaComponent, canActivate: [authGuard] },
   { path: 'ofertas', component: OfertasListaComponent, canActivate: [authGuard] },
   { path: 'oferta/:id', component: OfertaDetalleComponent, canActivate: [authGuard] },
   { path: 'oferta/:id/aplicantes', component: AplicantesListaComponent, canActivate: [authGuard, organizationGuard] },
   { path: 'publicar-oferta', component: PublicarOfertaComponent, canActivate: [authGuard] },
   { path: 'perfil', component: PerfilAlumnoComponent, canActivate: [authGuard] },
+  { path: 'perfil/:id', component: PerfilAlumnoComponent, canActivate: [authGuard] },
   { path: 'perfil-empresa', component: PerfilEmpresaComponent }
 ];

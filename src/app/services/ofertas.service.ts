@@ -20,7 +20,6 @@ export class offersService {
     title?: string;
     description?: string;
     requirements?: number;
-    tipoContrato?: string;
     modality?: string;
     location?: string;
     estimatedPayment?: number;

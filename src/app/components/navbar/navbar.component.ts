@@ -22,6 +22,10 @@ import { MatIcon, MatIconModule } from '@angular/material/icon';
           <button class="nav-button" (click)="verOfertas()">
             <span>Ofertas</span>
           </button>
+          <button class="nav-button" (click)="irBusqueda()">
+            <mat-icon class="button-icon">search</mat-icon>
+            <span>Búsqueda</span>
+          </button>
           <button class="nav-button" (click)="publicarOferta()">
             <span>Publicar Oferta</span>
           </button>
@@ -120,6 +124,15 @@ import { MatIcon, MatIconModule } from '@angular/material/icon';
         transition: all 0.3s ease;
         color: #4a5568;
         font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .nav-button .button-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
       }
 
       .nav-button:hover {
@@ -229,6 +242,10 @@ export class NavbarComponent implements OnInit {
 
   verOfertas(): void {
     this.router.navigate(['/ofertas']);
+  }
+
+  irBusqueda(): void {
+    this.router.navigate(['/busqueda']);
   }
 
   irPerfil(): void {

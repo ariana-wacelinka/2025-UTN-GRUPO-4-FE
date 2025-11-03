@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OfertaCardComponent } from '../../components/oferta-card/oferta-card.component';
+import { OfertasSearchComponent, OfertaSearchParams } from '../../components/ofertas-search/ofertas-search.component';
 import { OfertaListaDTO } from '../../models/oferta.dto';
 import { offersService } from '../../services/ofertas.service';
 
 @Component({
   selector: 'app-ofertas-lista',
   standalone: true,
-  imports: [MatIconModule, OfertaCardComponent],
+  imports: [MatIconModule, OfertaCardComponent, OfertasSearchComponent],
   template: `
     <div class="ofertas-page">
       <div class="page-header">
@@ -20,6 +21,11 @@ import { offersService } from '../../services/ofertas.service';
       </div>
 
       <div class="ofertas-container">
+        <!-- Buscador de ofertas -->
+        <app-ofertas-search
+          (search)="onSearch($event)"
+        ></app-ofertas-search>
+
         <div class="ofertas-grid">
           @for (oferta of ofertas; track oferta.id) {
           <app-oferta-card [oferta]="oferta"></app-oferta-card>
@@ -162,11 +168,21 @@ import { offersService } from '../../services/ofertas.service';
 })
 export class OfertasListaComponent implements OnInit {
   ofertas: OfertaListaDTO[] = [];
+  currentSearchParams: OfertaSearchParams = {};
 
   constructor(private ofertasService: offersService) {}
 
   ngOnInit(): void {
-    this.ofertasService.getoffers().subscribe((page) => {
+    this.loadOfertas();
+  }
+
+  onSearch(params: OfertaSearchParams): void {
+    this.currentSearchParams = params;
+    this.loadOfertas();
+  }
+
+  private loadOfertas(): void {
+    this.ofertasService.getoffers(this.currentSearchParams).subscribe((page) => {
       this.ofertas = page.content;
     });
   }
