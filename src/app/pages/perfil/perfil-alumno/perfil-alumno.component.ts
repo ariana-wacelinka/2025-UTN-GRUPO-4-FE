@@ -72,11 +72,15 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     return perfil?.cvUrl ? true : false;
   });
 
-  // Materias - Nueva funcionalidad
-  materiasAlumno: any[] = [];
-  promedioMaterias = 0;
-  totalMaterias = 0;
-  isMateriasLoading = false;
+  // Materias - Computed desde el perfil
+  materiasAlumno = computed(() => this.perfilAlumno()?.subjects || []);
+  promedioMaterias = computed(() => {
+    const materias = this.materiasAlumno();
+    if (!materias.length) return 0;
+    const suma = materias.reduce((acc, m) => acc + m.note, 0);
+    return suma / materias.length;
+  });
+  totalMaterias = computed(() => this.materiasAlumno().length);
   isMateriasUploading = false;
   materiasError: string | null = null;
   selectedMateriasFileName: string | null = null;
@@ -229,8 +233,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.cargarPerfil();
-    this.suscribirseAMaterias();
-    this.obtenerMateriasDesdeBackend();
     this.cargarOfertasAplicadas();
   }
 
@@ -243,22 +245,25 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
 
     // Verificar si hay un userId en los query params (viene de ver aplicantes)
-    this.route.queryParams.subscribe(params => {
-      const userId = params['userId'];
-
-        this.perfilService.getPerfil(userId)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (perfil) => {
-              this.perfilAlumno.set(perfil);
-              this.isLoading.set(false);
-            },
-            error: (error) => {
-              console.error('Error al cargar el perfil:', error);
-              this.isLoading.set(false);
-            }
-          });
-    });
+    this.route.queryParams
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(params => {
+          const userId = params['userId'];
+          return this.perfilService.getPerfil(userId);
+        })
+      )
+      .subscribe({
+        next: (perfil) => {
+          this.perfilAlumno.set(perfil);
+          this.materiasAlumno
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error al cargar el perfil:', error);
+          this.isLoading.set(false);
+        }
+      });
   }
 
   /**
@@ -291,7 +296,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         languages: [
           { id: 1, name: 'Español', level: 5 },
           { id: 2, name: 'Inglés', level: 4 }
-        ]
+        ],
+        subjects: []
       }
       // ... otros perfiles mock pueden agregarse aquí
     };
@@ -553,34 +559,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
 
   // ============= MÉTODOS DE MATERIAS =============
 
-  private suscribirseAMaterias() {
-    this.perfilService.obtenerMateriasState()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((state: MateriasState) => {
-        this.materiasAlumno = state.materias;
-        this.promedioMaterias = state.promedioGeneral;
-        this.totalMaterias = state.totalMaterias;
-      });
-  }
-
-  private obtenerMateriasDesdeBackend() {
-    this.isMateriasLoading = true;
-
-    this.perfilService.cargarMateriasDesdeBackend()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.isMateriasLoading = false;
-          this.materiasError = null;
-        },
-        error: (error) => {
-          console.error('Error al cargar materias:', error);
-          this.isMateriasLoading = false;
-          this.materiasError = 'No pudimos cargar tus materias. Intenta nuevamente más tarde.';
-        }
-      });
-  }
-
   onMateriasFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files && input.files.length ? input.files[0] : null;
@@ -631,6 +609,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
           });
           this.selectedMateriasFileName = null;
           this.materiasError = null;
+          // Recargar el perfil para obtener las materias actualizadas
+          this.cargarPerfil();
         },
         error: (error) => {
           console.error('Error al subir materias:', error);
@@ -647,34 +627,40 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   trackByMateria(index: number, materia: any) {
-    return materia.codigo || materia.nombre;
+    return materia.id || index;
   }
 
   // ============= MÉTODOS DE OFERTAS APLICADAS =============
 
   private cargarOfertasAplicadas() {
     // Solo cargar si es el perfil del usuario actual (no de otro aplicante)
-    this.route.queryParams.subscribe(params => {
-      const userId = params['userId'];
-      if (!userId) { // Solo para el perfil propio
-        this.isOfertasLoading = true;
-        this.perfilService.getOfertasAplicadas()
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (response: PagedOfertasAplicadasResponse) => {
-              this.ofertasAplicadas = response.content;
-              this.totalOfertasAplicadas = response.totalElements;
-              this.isOfertasLoading = false;
-              this.ofertasError = null;
-            },
-            error: (error: any) => {
-              console.error('Error al cargar ofertas aplicadas:', error);
-              this.isOfertasLoading = false;
-              this.ofertasError = 'No pudimos cargar tus aplicaciones. Intenta nuevamente más tarde.';
-            }
-          });
-      }
-    });
+    this.route.queryParams
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(params => {
+          const userId = params['userId'];
+          if (!userId) { // Solo para el perfil propio
+            this.isOfertasLoading = true;
+            return this.perfilService.getOfertasAplicadas();
+          }
+          return of(null); // No cargar ofertas si es perfil de otro usuario
+        })
+      )
+      .subscribe({
+        next: (response: PagedOfertasAplicadasResponse | null) => {
+          if (response) {
+            this.ofertasAplicadas = response.content;
+            this.totalOfertasAplicadas = response.totalElements;
+            this.isOfertasLoading = false;
+            this.ofertasError = null;
+          }
+        },
+        error: (error: any) => {
+          console.error('Error al cargar ofertas aplicadas:', error);
+          this.isOfertasLoading = false;
+          this.ofertasError = 'No pudimos cargar tus aplicaciones. Intenta nuevamente más tarde.';
+        }
+      });
   }
 
   trackByOferta(index: number, oferta: OfertaAplicada) {

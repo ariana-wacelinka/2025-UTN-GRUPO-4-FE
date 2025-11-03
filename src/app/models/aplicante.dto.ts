@@ -75,6 +75,14 @@ export interface EstudianteDTO extends UsuarioDTO {
   cvFileName: string;
   coverLetter: string;
   languages: IdiomaDTO[];
+  subjects: SubjectDTO[];
+}
+
+export interface SubjectDTO {
+  id: number;
+  name: string;
+  code: string;
+  note: number;
 }
 
 // DTO para actualizar estudiante

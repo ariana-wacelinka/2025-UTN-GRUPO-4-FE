@@ -527,14 +527,14 @@
                         </mat-card-title>
                     </mat-card-header>
                     <mat-card-content>
-                        <div class="subjects-summary" *ngIf="materiasAlumno.length">
+                        <div class="subjects-summary" *ngIf="materiasAlumno().length">
                             <div class="summary-item">
                                 <span class="summary-label">Materias cargadas</span>
-                                <span class="summary-value">{{totalMaterias}}</span>
+                                <span class="summary-value">{{totalMaterias()}}</span>
                              </div>
                             <div class="summary-item">
                                 <span class="summary-label">Promedio general</span>
-                                <span class="summary-value">{{promedioMaterias | number:'1.2-2'}}</span>
+                                <span class="summary-value">{{promedioMaterias() | number:'1.2-2'}}</span>
                             </div>
                         </div>
 
@@ -567,37 +567,26 @@
                             <span>{{materiasError}}</span>
                         </div>
 
-                        <div class="subjects-loading" *ngIf="isMateriasLoading">
-                            <div class="loading-spinner"></div>
-                            <p>Actualizando materias...</p>
-                        </div>
-
-                        <ng-container *ngIf="!isMateriasLoading">
-                            <div class="subjects-table" *ngIf="materiasAlumno.length; else emptySubjects">
-                                <div class="table-header">
-                                    <span>Materia</span>
-                                    <span>Fecha</span>
-                                    <span>Nota</span>
-                                    <span>Estado</span>
-                                </div>
-                                <div class="table-row" *ngFor="let materia of materiasAlumno; trackBy: trackByMateria">
-                                    <div class="materia-name">
-                                        <span class="materia-title">{{materia.nombre}}</span>
-                                        <span class="materia-code" *ngIf="materia.codigo">Código
-                                            {{materia.codigo}}</span>
-                                    </div>
-                                    <span class="materia-date">{{materia.fechaAprobacion | date:'dd/MM/yyyy'}}</span>
-                                    <span class="materia-grade">{{materia.nota | number:'1.0-1'}}</span>
-                                    <span class="materia-status">{{materia.estado}}</span>
-                                </div>
+                        <div class="subjects-table" *ngIf="materiasAlumno().length; else emptySubjects">
+                            <div class="table-header">
+                                <span>Materia</span>
+                                <span>Código</span>
+                                <span>Nota</span>
                             </div>
-                            <ng-template #emptySubjects>
-                                <div class="subjects-empty">
-                                    <mat-icon>inventory_2</mat-icon>
-                                    <p>Subí tu .xls de Alumnos Web para visualizar tus materias aprobadas.</p>
+                            <div class="table-row" *ngFor="let materia of materiasAlumno(); trackBy: trackByMateria">
+                                <div class="materia-name">
+                                    <span class="materia-title">{{materia.name}}</span>
                                 </div>
-                            </ng-template>
-                        </ng-container>
+                                <span class="materia-code">{{materia.code}}</span>
+                                <span class="materia-grade">{{materia.note | number:'1.0-1'}}</span>
+                            </div>
+                        </div>
+                        <ng-template #emptySubjects>
+                            <div class="subjects-empty">
+                                <mat-icon>inventory_2</mat-icon>
+                                <p>Subí tu .xls de Alumnos Web para visualizar tus materias aprobadas.</p>
+                            </div>
+                        </ng-template>
                     </mat-card-content>
                 </mat-card>
             </div>

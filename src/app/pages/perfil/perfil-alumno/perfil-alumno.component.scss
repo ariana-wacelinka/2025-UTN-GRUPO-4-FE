@@ -1501,7 +1501,7 @@
 
         .table-header {
             display: grid;
-            grid-template-columns: 2fr 1fr 0.8fr 1fr;
+            grid-template-columns: 2.5fr 1fr 0.8fr;
             gap: 16px;
             padding: 20px 24px;
             background: linear-gradient(135deg, var(--primary-color), rgba(79, 172, 254, 0.9));
@@ -1514,7 +1514,7 @@
 
         .table-row {
             display: grid;
-            grid-template-columns: 2fr 1fr 0.8fr 1fr;
+            grid-template-columns: 2.5fr 1fr 0.8fr;
             gap: 16px;
             padding: 20px 24px;
             background: white;
@@ -1533,7 +1533,7 @@
             .materia-name {
                 display: flex;
                 flex-direction: column;
-                gap: 6px;
+                gap: 4px;
 
                 .materia-title {
                     font-weight: 600;
@@ -1541,20 +1541,13 @@
                     font-size: 0.95rem;
                     line-height: 1.4;
                 }
-
-                .materia-code {
-                    font-size: 0.8rem;
-                    color: var(--text-secondary);
-                    background: var(--chip-bg);
-                    padding: 2px 8px;
-                    border-radius: 12px;
-                    align-self: flex-start;
-                }
             }
 
-            .materia-date {
+            .materia-code {
                 color: var(--text-secondary);
                 font-weight: 500;
+                font-family: 'Courier New', monospace;
+                font-size: 0.9rem;
                 align-self: center;
             }
 
@@ -1564,20 +1557,6 @@
                 font-size: 1.1rem;
                 align-self: center;
                 text-align: center;
-            }
-
-            .materia-status {
-                align-self: center;
-                padding: 8px 16px;
-                border-radius: 20px;
-                font-size: 0.8rem;
-                font-weight: 600;
-                text-align: center;
-                background: linear-gradient(135deg, #4caf50, #66bb6a);
-                color: white;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
             }
         }
     }
@@ -1651,23 +1630,22 @@
                     transform: none;
                 }
 
-                .materia-name {
-                    text-align: center;
-
-                    .materia-code {
-                        align-self: center;
-                    }
-                }
-
-                .materia-date,
-                .materia-grade,
-                .materia-status {
+                .materia-name,
+                .materia-code,
+                .materia-grade {
                     text-align: center;
                     justify-self: center;
                 }
 
-                .materia-status {
-                    max-width: 120px;
+                .materia-code {
+                    padding: 6px 12px;
+                    background: var(--chip-bg);
+                    border-radius: 8px;
+                    display: inline-block;
+                }
+
+                .materia-grade {
+                    font-size: 1.5rem;
                 }
             }
         }

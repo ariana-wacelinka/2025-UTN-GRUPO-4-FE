@@ -109,6 +109,7 @@ export class PerfilAlumnoService {
       { id: 1, name: 'Español', level: 5 },
       { id: 2, name: 'Inglés', level: 4 },
     ],
+    subjects: [],
     cvUrl: '/assets/documents/WACELINKA, Ariana.pdf',
     cvFileName: 'WACELINKA_Ariana.pdf',
     githubUrl: 'https://github.com/ariana-wacelinka/',
