@@ -543,17 +543,17 @@
                                 <mat-icon>upload_file</mat-icon>
                                 <div>
                                     <h4>Planilla de materias</h4>
-                                    <p>Formato permitido: .xls (Alumnos Web)</p>
+                                    <p>Formato permitido: .xls o .xlsx (Alumnos Web)</p>
                                 </div>
                             </div>
                             <div class="upload-actions">
-                                <input type="file" #materiasInput accept=".xls"
+                                <input type="file" #materiasInput accept=".xls , .xlsx"
                                     (change)="onMateriasFileSelected($event)" hidden>
                                 <button mat-stroked-button class="upload-btn" (click)="materiasInput.click()"
                                     [disabled]="isMateriasUploading">
                                     <mat-icon *ngIf="!isMateriasUploading">cloud_upload</mat-icon>
                                     <mat-icon *ngIf="isMateriasUploading" class="spin">autorenew</mat-icon>
-                                    {{isMateriasUploading ? 'Subiendo...' : 'Subir .xls'}}
+                                    {{isMateriasUploading ? 'Subiendo...' : 'Subir .xls o .xlsx'}}
                                 </button>
                             </div>
                         </div>
@@ -584,7 +584,7 @@
                         <ng-template #emptySubjects>
                             <div class="subjects-empty">
                                 <mat-icon>inventory_2</mat-icon>
-                                <p>Subí tu .xls de Alumnos Web para visualizar tus materias aprobadas.</p>
+                                <p>Subí tu .xls o .xlsx de Alumnos Web para visualizar tus materias aprobadas.</p>
                             </div>
                         </ng-template>
                     </mat-card-content>

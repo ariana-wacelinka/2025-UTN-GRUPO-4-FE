@@ -244,8 +244,16 @@ export class PerfilAlumnoService {
     const formData = new FormData();
     formData.append('file', archivo);
 
+    const id = this.authService.keycloakUser?.id;
+    if (!id) {
+      return throwError(() => new Error('Usuario no autenticado'));
+    }
+
     return this.http
-      .post<MateriasState>(`${this.materiasEndpoint}/upload`, formData)
+      .post<MateriasState>(
+        `${this.apiUrl}/students/${id}/process-grades`,
+        formData
+      )
       .pipe(
         tap((response) => this.setMateriasState(response)),
         catchError((error) => {

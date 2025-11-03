@@ -568,7 +568,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     }
 
     const extension = file.name.split('.').pop()?.toLowerCase();
-    if (extension !== 'xls') {
+    if (extension !== 'xls' && extension !== 'xlsx') {
       this.selectedMateriasFileName = null;
       this.snackBar.open('El archivo debe estar en formato .xls (Alumnos Web).', 'Cerrar', {
         duration: 4000
@@ -596,8 +596,9 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     if (this.isMateriasUploading) {
       return;
     }
-
     this.isMateriasUploading = true;
+
+    console.log('Subiendo archivo de materias:', archivo.name);
 
     this.perfilService.subirMateriasExcel(archivo)
       .pipe(takeUntil(this.destroy$))
