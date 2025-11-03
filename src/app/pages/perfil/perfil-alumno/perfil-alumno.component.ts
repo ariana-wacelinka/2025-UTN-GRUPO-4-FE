@@ -232,8 +232,13 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.cargarPerfil();
-    this.cargarOfertasAplicadas();
+    // Esperar a que el usuario esté cargado antes de cargar el perfil
+    this.authService.waitForUserLoad()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.cargarPerfil();
+        this.cargarOfertasAplicadas();
+      });
   }
 
   ngOnDestroy() {
