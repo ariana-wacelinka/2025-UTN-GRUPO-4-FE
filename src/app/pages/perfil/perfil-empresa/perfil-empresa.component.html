@@ -12,8 +12,8 @@
 
       <!-- Header del perfil usando componente compartido -->
       <app-profile-header [data]="profileHeaderData()!" [socialLinks]="socialLinksCompact()" [isEditing]="isEditing"
-        [imagePreview]="imagePreview" (editProfile)="onEditProfile()" (saveChanges)="onSaveChanges()"
-        (cancelEdit)="onCancelEdit()" (imageSelected)="onImageSelected($event)">
+        [imagePreview]="imagePreview" [canEdit]="isOwnProfile()" (editProfile)="onEditProfile()"
+        (saveChanges)="onSaveChanges()" (cancelEdit)="onCancelEdit()" (imageSelected)="onImageSelected($event)">
       </app-profile-header>
 
       <!-- Material Tabs para organizar el contenido -->

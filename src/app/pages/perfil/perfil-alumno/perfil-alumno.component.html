@@ -12,9 +12,9 @@
 
             <!-- Header del perfil usando componente compartido -->
             <app-profile-header [data]="profileHeaderData()!" [socialLinks]="socialLinksCompact()"
-                [isEditing]="isEditing" [imagePreview]="imagePreview" (editProfile)="onEditProfile()"
-                (saveChanges)="onSaveChanges()" (cancelEdit)="onCancelEdit()" (downloadCV)="onDownloadCV()"
-                (imageSelected)="onImageSelected($event)">
+                [isEditing]="isEditing" [imagePreview]="imagePreview" [canEdit]="isOwnProfile()"
+                (editProfile)="onEditProfile()" (saveChanges)="onSaveChanges()" (cancelEdit)="onCancelEdit()"
+                (downloadCV)="onDownloadCV()" (imageSelected)="onImageSelected($event)">
             </app-profile-header>
 
             <!-- Formulario de edición -->
@@ -640,7 +640,8 @@
                             </div>
                         </div>
 
-                        <div class="subjects-upload">
+                        <!-- Solo mostrar opción de subir materias si es el perfil propio -->
+                        <div class="subjects-upload" *ngIf="isOwnProfile()">
                             <div class="upload-info">
                                 <mat-icon>upload_file</mat-icon>
                                 <div>

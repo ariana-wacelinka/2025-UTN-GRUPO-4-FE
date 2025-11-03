@@ -137,6 +137,21 @@ export class EmpresasService {
     return of(empresaLoggeada);
   }
 
+  /**
+   * Obtiene el perfil de una empresa por ID
+   * @param empresaId ID de la empresa (opcional, si no se proporciona usa la empresa actual)
+   */
+  getEmpresaPorId(empresaId?: number): Observable<EmpresaDTO | null> {
+    if (empresaId) {
+      // Si se proporciona un ID, buscar en los mocks
+      const empresa = this.getMockEmpresas().find(e => e.id === empresaId);
+      return of(empresa || null);
+    }
+
+    // Si no hay ID, devolver la empresa actual del usuario loggeado
+    return this.getEmpresaActual();
+  }
+
   actualizarPerfil(datos: Partial<EmpresaDTO>): Observable<EmpresaDTO> {
     // Simular actualización del perfil
     const empresaActualizada: EmpresaDTO = {

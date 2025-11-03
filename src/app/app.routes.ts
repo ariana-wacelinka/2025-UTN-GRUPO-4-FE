@@ -25,5 +25,6 @@ export const routes: Routes = [
   { path: 'publicar-oferta', component: PublicarOfertaComponent, canActivate: [authGuard] },
   { path: 'perfil', component: PerfilAlumnoComponent, canActivate: [authGuard] },
   { path: 'perfil/:id', component: PerfilAlumnoComponent, canActivate: [authGuard] },
-  { path: 'perfil-empresa', component: PerfilEmpresaComponent }
+  { path: 'perfil-empresa', component: PerfilEmpresaComponent, canActivate: [authGuard] },
+  { path: 'perfil-empresa/:id', component: PerfilEmpresaComponent, canActivate: [authGuard] }
 ];

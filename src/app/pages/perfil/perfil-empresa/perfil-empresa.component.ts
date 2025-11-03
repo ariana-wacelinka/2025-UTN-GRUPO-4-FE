@@ -9,7 +9,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil, switchMap } from 'rxjs';
 import { EmpresasService } from '../../../services/empresas.service';
 import { EmpresaDTO } from '../../../models/empresa.dto';
 import { CompanySize } from '../../../models/usuario.dto';
@@ -128,7 +129,8 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
     constructor(
         private formBuilder: FormBuilder,
         private empresasService: EmpresasService,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private route: ActivatedRoute
     ) {
         this.initializeForm();
     }
@@ -158,8 +160,16 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
 
     private cargarPerfil() {
         this.isLoading.set(true);
-        this.empresasService.getEmpresaActual()
-            .pipe(takeUntil(this.destroy$))
+
+        // Verificar si hay un empresaId en los params de ruta
+        this.route.params
+            .pipe(
+                takeUntil(this.destroy$),
+                switchMap(params => {
+                    const empresaId = params['id'] ? Number(params['id']) : undefined;
+                    return this.empresasService.getEmpresaPorId(empresaId);
+                })
+            )
             .subscribe({
                 next: (empresa) => {
                     this.empresa.set(empresa);
@@ -282,5 +292,12 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
         if (input.files && input.files[0]) {
             this.onImageSelected(input.files[0]);
         }
+    }
+
+    /**
+     * Verifica si el perfil que se está viendo es el propio
+     */
+    isOwnProfile(): boolean {
+        return !this.route.snapshot.params['id'];
     }
 }

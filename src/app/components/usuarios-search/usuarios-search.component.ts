@@ -95,11 +95,16 @@ import { UsuarioDTO } from '../../models/usuario.dto';
                 @for (usuario of usuarios; track usuario.id) {
                   <mat-list-item
                     class="usuario-item"
-                    (click)="verPerfil(usuario.id)"
+                    (click)="verPerfil(usuario)"
                   >
-                    <mat-icon matListItemIcon class="user-icon">person</mat-icon>
+                    <mat-icon matListItemIcon class="user-icon">
+                      {{ getRoleIcon(usuario.role) }}
+                    </mat-icon>
                     <div matListItemTitle class="user-name">
                       {{ usuario.name }} {{ usuario.surname }}
+                      <span class="role-badge" [class]="getRoleBadgeClass(usuario.role)">
+                        {{ getRoleLabel(usuario.role) }}
+                      </span>
                     </div>
                     <div matListItemLine class="user-email">
                       {{ usuario.email }}
@@ -107,7 +112,7 @@ import { UsuarioDTO } from '../../models/usuario.dto';
                     <button
                       matListItemMeta
                       mat-icon-button
-                      (click)="verPerfil(usuario.id); $event.stopPropagation()"
+                      (click)="verPerfil(usuario); $event.stopPropagation()"
                     >
                       <mat-icon>arrow_forward</mat-icon>
                     </button>
@@ -278,6 +283,33 @@ import { UsuarioDTO } from '../../models/usuario.dto';
         font-weight: 600;
         color: var(--text-primary);
         font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .role-badge {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+
+      .role-badge.estudiante {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+
+      .role-badge.organizacion {
+        background: #f3e5f5;
+        color: #7b1fa2;
+      }
+
+      .role-badge.default {
+        background: #f5f5f5;
+        color: #616161;
       }
 
       .user-email {
@@ -379,7 +411,46 @@ export class UsuariosSearchComponent implements OnInit {
     this.currentPage = 0;
   }
 
-  verPerfil(userId: number): void {
-    this.router.navigate(['/perfil', userId]);
+  verPerfil(usuario: UsuarioDTO): void {
+    // Determinar la ruta según el rol del usuario
+    const role = usuario.role?.toLowerCase();
+
+    if (role === 'organizacion' || role === 'organization' || role === 'empresa') {
+      // Navegar al perfil de empresa
+      this.router.navigate(['/perfil-empresa', usuario.id]);
+    } else {
+      // Por defecto, navegar al perfil de estudiante/alumno
+      this.router.navigate(['/perfil', usuario.id]);
+    }
+  }
+
+  getRoleIcon(role: string): string {
+    const roleLower = role?.toLowerCase();
+    if (roleLower === 'organizacion' || roleLower === 'organization' || roleLower === 'empresa') {
+      return 'business';
+    }
+    return 'person';
+  }
+
+  getRoleLabel(role: string): string {
+    const roleLower = role?.toLowerCase();
+    if (roleLower === 'organizacion' || roleLower === 'organization' || roleLower === 'empresa') {
+      return 'Empresa';
+    }
+    if (roleLower === 'estudiante' || roleLower === 'student') {
+      return 'Estudiante';
+    }
+    return role || 'Usuario';
+  }
+
+  getRoleBadgeClass(role: string): string {
+    const roleLower = role?.toLowerCase();
+    if (roleLower === 'organizacion' || roleLower === 'organization' || roleLower === 'empresa') {
+      return 'organizacion';
+    }
+    if (roleLower === 'estudiante' || roleLower === 'student') {
+      return 'estudiante';
+    }
+    return 'default';
   }
 }

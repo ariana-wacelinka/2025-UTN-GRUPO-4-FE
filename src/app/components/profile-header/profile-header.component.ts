@@ -82,7 +82,7 @@ export interface SocialLink {
               </div>
 
               <div class="contact-buttons">
-                <button *ngIf="!isEditing()"
+                <button *ngIf="!isEditing() && canEdit"
                         mat-raised-button
                         color="primary"
                         class="modern-button"
@@ -131,6 +131,7 @@ export class ProfileHeaderComponent {
   @Input() socialLinks: SocialLink[] = [];
   @Input() isEditing = signal(false);
   @Input() imagePreview = signal<string | null>(null);
+  @Input() canEdit = true; // Nuevo input para controlar si se puede editar
 
   @Output() editProfile = new EventEmitter<void>();
   @Output() saveChanges = new EventEmitter<void>();

@@ -256,12 +256,19 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   private cargarPerfil() {
     this.isLoading.set(true);
 
-    // Verificar si hay un userId en los query params (viene de ver aplicantes)
-    this.route.queryParams
+    // Verificar si hay un userId en los params de ruta o query params
+    this.route.params
       .pipe(
         takeUntil(this.destroy$),
         switchMap(params => {
-          const userId = params['userId'];
+          // Primero intentar obtener de params de ruta (para /perfil/:id)
+          let userId = params['id'];
+
+          // Si no está en params de ruta, intentar query params (para compatibilidad)
+          if (!userId) {
+            userId = this.route.snapshot.queryParams['userId'];
+          }
+
           return this.perfilService.getPerfil(userId);
         })
       )
@@ -646,27 +653,20 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   // ============= MÉTODOS DE OFERTAS APLICADAS =============
 
   private cargarOfertasAplicadas() {
-    // Solo cargar si es el perfil del usuario actual (no de otro aplicante)
-    this.route.queryParams
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(params => {
-          const userId = params['userId'];
-          if (!userId) { // Solo para el perfil propio
-            this.isOfertasLoading = true;
-            return this.perfilService.getOfertasAplicadas();
-          }
-          return of(null); // No cargar ofertas si es perfil de otro usuario
-        })
-      )
+    // Solo cargar si es el perfil del usuario actual (sin ID en params ni query params)
+    if (!this.isOwnProfile()) {
+      return; // No cargar ofertas si es perfil de otro usuario
+    }
+
+    this.isOfertasLoading = true;
+    this.perfilService.getOfertasAplicadas()
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response: PagedOfertasAplicadasResponse | null) => {
-          if (response) {
-            this.ofertasAplicadas = response.content;
-            this.totalOfertasAplicadas = response.totalElements;
-            this.isOfertasLoading = false;
-            this.ofertasError = null;
-          }
+        next: (response: PagedOfertasAplicadasResponse) => {
+          this.ofertasAplicadas = response.content;
+          this.totalOfertasAplicadas = response.totalElements;
+          this.isOfertasLoading = false;
+          this.ofertasError = null;
         },
         error: (error: any) => {
           console.error('Error al cargar ofertas aplicadas:', error);
@@ -686,45 +686,38 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   isOwnProfile(): boolean {
-    // Verificar si estamos viendo el perfil propio (sin userId en query params)
-    return !this.route.snapshot.queryParams['userId'];
+    // Verificar si estamos viendo el perfil propio (sin userId en query params ni en params de ruta)
+    return !this.route.snapshot.queryParams['userId'] && !this.route.snapshot.params['id'];
   }
 
   // ============= MÉTODOS DE OFERTAS PUBLICADAS =============
 
   private cargarOfertasPublicadas() {
-    // Solo cargar si es el perfil del usuario actual
-    this.route.queryParams
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(params => {
-          const userId = params['userId'];
-          if (!userId) { // Solo para el perfil propio
-            this.isOfertasPublicadasLoading = true;
-            return this.authService.getCurrentUserId().pipe(
-              switchMap(currentUserId =>
-                this.ofertasService.getoffers({ bidderId: currentUserId })
-              )
-            );
-          }
-          return of(null); // No cargar ofertas si es perfil de otro usuario
-        })
+    // Solo cargar si es el perfil del usuario actual (sin ID en params ni query params)
+    if (!this.isOwnProfile()) {
+      return; // No cargar ofertas si es perfil de otro usuario
+    }
+
+    this.isOfertasPublicadasLoading = true;
+    this.authService.getCurrentUserId().pipe(
+      takeUntil(this.destroy$),
+      switchMap(currentUserId =>
+        this.ofertasService.getoffers({ bidderId: currentUserId })
       )
-      .subscribe({
-        next: (response: PagedResponseDTO<OfertaListaDTO> | null) => {
-          if (response) {
-            this.ofertasPublicadas = response.content;
-            this.totalOfertasPublicadas = response.totalElements;
-            this.isOfertasPublicadasLoading = false;
-            this.ofertasPublicadasError = null;
-          }
-        },
-        error: (error: any) => {
-          console.error('Error al cargar ofertas publicadas:', error);
-          this.isOfertasPublicadasLoading = false;
-          this.ofertasPublicadasError = 'No pudimos cargar tus publicaciones. Intenta nuevamente más tarde.';
-        }
-      });
+    )
+    .subscribe({
+      next: (response: PagedResponseDTO<OfertaListaDTO>) => {
+        this.ofertasPublicadas = response.content;
+        this.totalOfertasPublicadas = response.totalElements;
+        this.isOfertasPublicadasLoading = false;
+        this.ofertasPublicadasError = null;
+      },
+      error: (error: any) => {
+        console.error('Error al cargar ofertas publicadas:', error);
+        this.isOfertasPublicadasLoading = false;
+        this.ofertasPublicadasError = 'No pudimos cargar tus publicaciones. Intenta nuevamente más tarde.';
+      }
+    });
   }
 
   trackByOfertaPublicada(index: number, oferta: OfertaListaDTO) {
