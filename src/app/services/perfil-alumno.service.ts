@@ -1,7 +1,7 @@
 import { Injectable, Inject, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, switchMap } from 'rxjs/operators';
 import { API_URL } from '../app.config';
 import { EstudianteDTO, ActualizarEstudianteDTO, IdiomaDTO } from '../models/aplicante.dto';
 import { AuthService } from './auth.service';
@@ -128,29 +128,40 @@ export class PerfilAlumnoService {
 
   getPerfil(userId: any): Observable<EstudianteDTO> {
     //return of({ ...this.mockPerfil });
-    const id = userId ? userId : this.authService.keycloakUser?.id;
-    return this.http
-      .get<EstudianteDTO>(`${this.apiUrl}/students/${id}`)
-      .pipe(tap((response) => this.perfilSubject.next(response)));
+
+    // Si se proporciona userId, usarlo directamente
+    if (userId) {
+      return this.http
+        .get<EstudianteDTO>(`${this.apiUrl}/students/${userId}`)
+        .pipe(tap((response) => this.perfilSubject.next(response)));
+    }
+
+    // Si no hay userId, esperar a que el usuario esté cargado
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(id =>
+        this.http
+          .get<EstudianteDTO>(`${this.apiUrl}/students/${id}`)
+          .pipe(tap((response) => this.perfilSubject.next(response)))
+      )
+    );
   }
 
   actualizarPerfil(
     datosActualizados: ActualizarEstudianteDTO
   ): Observable<EstudianteDTO> {
-    const id = this.authService.keycloakUser?.id;
-    if (!id) {
-      return throwError(() => new Error('Usuario no autenticado'));
-    }
-
-    return this.http
-      .patch<EstudianteDTO>(`${this.apiUrl}/students/${id}`, datosActualizados)
-      .pipe(
-        tap((response) => this.perfilSubject.next(response)),
-        catchError((error) => {
-          console.error('Error al actualizar perfil:', error);
-          return throwError(() => error);
-        })
-      );
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(id =>
+        this.http
+          .patch<EstudianteDTO>(`${this.apiUrl}/students/${id}`, datosActualizados)
+          .pipe(
+            tap((response) => this.perfilSubject.next(response)),
+            catchError((error) => {
+              console.error('Error al actualizar perfil:', error);
+              return throwError(() => error);
+            })
+          )
+      )
+    );
   }
 
   subirImagenPerfil(archivo: File): Observable<{ imageUrl: string }> {
@@ -162,27 +173,26 @@ export class PerfilAlumnoService {
   }
 
   subirCV(archivo: File): Observable<EstudianteDTO> {
-    const id = this.authService.keycloakUser?.id;
-    if (!id) {
-      return throwError(() => new Error('Usuario no autenticado'));
-    }
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(id => {
+        const formData = new FormData();
+        formData.append('file', archivo);
 
-    const formData = new FormData();
-    formData.append('file', archivo);
-
-    return this.http
-      .post<EstudianteDTO>(`${this.apiUrl}/students/${id}/upload-cv`, formData)
-      .pipe(
-        tap((response) => {
-          // devolver la URL del CV actualizado
-          console.log('Respuesta del cv:', response);
-          return response;
-        }),
-        catchError((error) => {
-          console.error('Error al subir CV:', error);
-          return throwError(() => error);
-        })
-      );
+        return this.http
+          .post<EstudianteDTO>(`${this.apiUrl}/students/${id}/upload-cv`, formData)
+          .pipe(
+            tap((response) => {
+              // devolver la URL del CV actualizado
+              console.log('Respuesta del cv:', response);
+              return response;
+            }),
+            catchError((error) => {
+              console.error('Error al subir CV:', error);
+              return throwError(() => error);
+            })
+          );
+      })
+    );
   }
 
   descargarCV(): void {
@@ -241,26 +251,25 @@ export class PerfilAlumnoService {
   }
 
   subirMateriasExcel(archivo: File): Observable<MateriasState> {
-    const formData = new FormData();
-    formData.append('file', archivo);
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(id => {
+        const formData = new FormData();
+        formData.append('file', archivo);
 
-    const id = this.authService.keycloakUser?.id;
-    if (!id) {
-      return throwError(() => new Error('Usuario no autenticado'));
-    }
-
-    return this.http
-      .post<MateriasState>(
-        `${this.apiUrl}/students/${id}/process-grades`,
-        formData
-      )
-      .pipe(
-        tap((response) => this.setMateriasState(response)),
-        catchError((error) => {
-          console.error('Error al subir materias:', error);
-          return throwError(() => error);
-        })
-      );
+        return this.http
+          .post<MateriasState>(
+            `${this.apiUrl}/students/${id}/process-grades`,
+            formData
+          )
+          .pipe(
+            tap((response) => this.setMateriasState(response)),
+            catchError((error) => {
+              console.error('Error al subir materias:', error);
+              return throwError(() => error);
+            })
+          );
+      })
+    );
   }
 
   private setMateriasState(state: MateriasState) {
@@ -299,43 +308,41 @@ export class PerfilAlumnoService {
   }
 
   getOfertasAplicadas(): Observable<PagedOfertasAplicadasResponse> {
-    const studentId = this.authService.keycloakUser?.id;
-    if (!studentId) {
-      return throwError(() => new Error('Usuario no autenticado'));
-    }
-
-    return this.http
-      .get<PagedOfertasAplicadasResponse>(
-        `${this.apiUrl}/applies?studentId=${studentId}`
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(studentId =>
+        this.http
+          .get<PagedOfertasAplicadasResponse>(
+            `${this.apiUrl}/applies?studentId=${studentId}`
+          )
+          .pipe(
+            tap((response) => {
+              console.log('Respuesta del backend:', response);
+            }),
+            catchError((error) => {
+              console.error('Error al obtener ofertas aplicadas:', error);
+              return throwError(() => error);
+            })
+          )
       )
-      .pipe(
-        tap((response) => {
-          console.log('Respuesta del backend:', response);
-        }),
-        catchError((error) => {
-          console.error('Error al obtener ofertas aplicadas:', error);
-          return throwError(() => error);
-        })
-      );
+    );
   }
 
   retirarAplicacion(applicationId: number): Observable<void> {
-    const studentId = this.authService.keycloakUser?.id;
-    if (!studentId) {
-      return throwError(() => new Error('Usuario no autenticado'));
-    }
-
-    return this.http
-      .delete<void>(`${this.apiUrl}/applies/${applicationId}`)
-      .pipe(
-        tap(() => {
-          console.log('Aplicación retirada con éxito');
-        }),
-        catchError((error) => {
-          console.error('Error al retirar aplicación:', error);
-          return throwError(() => error);
-        })
-      );
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(() =>
+        this.http
+          .delete<void>(`${this.apiUrl}/applies/${applicationId}`)
+          .pipe(
+            tap(() => {
+              console.log('Aplicación retirada con éxito');
+            }),
+            catchError((error) => {
+              console.error('Error al retirar aplicación:', error);
+              return throwError(() => error);
+            })
+          )
+      )
+    );
   }
 
 }

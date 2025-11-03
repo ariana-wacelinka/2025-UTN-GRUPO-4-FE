@@ -55,9 +55,16 @@ export class AuthService {
   public loggedIn$ = this.loggedInSubject.asObservable();
 
   public idKeycloakUser: string | null = null;
-  public keycloakUser: KeycloakUser | null = null;
+  private keycloakUserSubject = new BehaviorSubject<KeycloakUser | null>(null);
+  public keycloakUser$ = this.keycloakUserSubject.asObservable();
+
   private userLoadedSubject = new BehaviorSubject<boolean>(false);
   public userLoaded$ = this.userLoadedSubject.asObservable();
+
+  // Getter para mantener compatibilidad con código existente
+  public get keycloakUser(): KeycloakUser | null {
+    return this.keycloakUserSubject.value;
+  }
 
   constructor(
     private http: HttpClient,
@@ -131,7 +138,7 @@ export class AuthService {
       .pipe(
         tap((user) => {
           console.log('=== KEYCLOAK USER FETCHED ===');
-          this.keycloakUser = user;
+          this.keycloakUserSubject.next(user);
           this.userLoadedSubject.next(true);
           console.log('=== KEYCLOAK USER ===');
           console.log(JSON.stringify(user, null, 2));
@@ -219,7 +226,8 @@ export class AuthService {
   logout(): void {
     document.cookie = `${this.COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     this.idKeycloakUser = null;
-    this.keycloakUser = null;
+    this.keycloakUserSubject.next(null);
+    this.userLoadedSubject.next(false);
     this.loggedInSubject.next(false);
   }
 
@@ -257,6 +265,30 @@ export class AuthService {
   waitForUserLoad(): Observable<boolean> {
     return this.userLoaded$.pipe(
       filter(loaded => loaded),
+      take(1)
+    );
+  }
+
+  /**
+   * Devuelve un Observable que emite el ID del usuario cuando está disponible.
+   * Útil para servicios que necesitan esperar a que el usuario esté cargado.
+   */
+  getCurrentUserId(): Observable<number> {
+    return this.keycloakUser$.pipe(
+      filter(user => user !== null),
+      map(user => user!.id),
+      take(1)
+    );
+  }
+
+  /**
+   * Devuelve un Observable que emite el usuario completo cuando está disponible.
+   * Se completa después de emitir el primer valor.
+   */
+  getCurrentUser(): Observable<KeycloakUser> {
+    return this.keycloakUser$.pipe(
+      filter(user => user !== null),
+      map(user => user!),
       take(1)
     );
   }

@@ -232,13 +232,9 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Esperar a que el usuario esté cargado antes de cargar el perfil
-    this.authService.waitForUserLoad()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.cargarPerfil();
-        this.cargarOfertasAplicadas();
-      });
+    // Ya no necesitamos esperar explícitamente - el servicio lo maneja
+    this.cargarPerfil();
+    this.cargarOfertasAplicadas();
   }
 
   ngOnDestroy() {

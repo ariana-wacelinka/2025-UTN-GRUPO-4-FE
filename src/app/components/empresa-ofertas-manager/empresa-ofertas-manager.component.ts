@@ -10,6 +10,7 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 // Importar servicios y DTOs existentes
 import { offersService } from '../../services/ofertas.service';
@@ -263,10 +264,12 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
   private cargarOfertas() {
     this.isLoading.set(true);
 
-    // Por ahora usamos el servicio mock existente
-    // TODO: Implementar con API real cuando esté disponible
-    this.ofertasService.getoffers({bidderId: this.authService.keycloakUser?.id})
-      .pipe(takeUntil(this.destroy$))
+    // Esperar a que el usuario esté cargado antes de hacer la petición
+    this.authService.getCurrentUserId()
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(userId => this.ofertasService.getoffers({bidderId: userId}))
+      )
       .subscribe({
         next: (response: PagedResponseDTO<OfertaListaDTO>) => {
           // Filtrar solo las ofertas de la empresa actual
