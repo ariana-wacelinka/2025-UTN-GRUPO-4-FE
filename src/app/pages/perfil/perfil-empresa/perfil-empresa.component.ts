@@ -144,6 +144,7 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
             location: [''],
             phone: [''],
             email: ['', [Validators.email]],
+            imageUrl: [''],
             webSiteUrl: [''],
             linkedinUrl: ['']
         });
@@ -207,6 +208,7 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
             location: empresaActual.location,
             phone: empresaActual.phone,
             email: empresaActual.email,
+            imageUrl: empresaActual.imageUrl || '',
             webSiteUrl: empresaActual.webSiteUrl,
             linkedinUrl: empresaActual.linkedinUrl
         });
@@ -240,31 +242,57 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
                 id: empresaActual?.id
             };
 
-            this.empresasService.actualizarPerfil(datosActualizados)
-                .pipe(takeUntil(this.destroy$))
-                .subscribe({
-                    next: (perfilActualizado) => {
-                        this.empresa.set(perfilActualizado);
-                        this.isEditing.set(false);
-                        this.isLoading.set(false);
-                        this.selectedLogoFile.set(null);
-                        this.imagePreview.set(null);
+            const selectedLogo = this.selectedLogoFile();
+            if (selectedLogo) {
+                // subir logo primero
+                this.empresasService.subirImagenEmpresa(selectedLogo)
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe({
+                        next: (perfilConLogo) => {
+                            this.empresa.set(perfilConLogo);
+                            this.imagePreview.set(perfilConLogo.imageUrl || null);
+                            this.editForm.patchValue({ imageUrl: perfilConLogo.imageUrl || '' });
 
-                        this.snackBar.open('Perfil actualizado exitosamente', 'Cerrar', {
-                            duration: 3000
-                        });
-                    },
-                    error: (error) => {
-                        console.error('Error al actualizar el perfil:', error);
-                        this.isLoading.set(false);
-                        this.snackBar.open('Error al actualizar el perfil', 'Cerrar', {
-                            duration: 3000
-                        });
-                    }
-                });
+                            // luego actualizar el resto del perfil
+                            this.finishUpdateEmpresa(datosActualizados);
+                        },
+                        error: (error) => {
+                            console.error('Error al subir logo:', error);
+                            this.isLoading.set(false);
+                            this.snackBar.open('Error al subir el logo. Intenta nuevamente.', 'Cerrar', { duration: 3000 });
+                        }
+                    });
+            } else {
+                this.finishUpdateEmpresa(datosActualizados);
+            }
         } else {
             this.markFormGroupTouched();
         }
+    }
+
+    private finishUpdateEmpresa(datos: Partial<EmpresaDTO>) {
+        this.empresasService.actualizarPerfil(datos)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (perfilActualizado) => {
+                    this.empresa.set(perfilActualizado);
+                    this.isEditing.set(false);
+                    this.isLoading.set(false);
+                    this.selectedLogoFile.set(null);
+                    this.imagePreview.set(null);
+
+                    this.snackBar.open('Perfil actualizado exitosamente', 'Cerrar', {
+                        duration: 3000
+                    });
+                },
+                error: (error) => {
+                    console.error('Error al actualizar el perfil:', error);
+                    this.isLoading.set(false);
+                    this.snackBar.open('Error al actualizar el perfil', 'Cerrar', {
+                        duration: 3000
+                    });
+                }
+            });
     }
 
     private markFormGroupTouched() {

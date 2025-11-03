@@ -164,12 +164,25 @@ export class PerfilAlumnoService {
     );
   }
 
-  subirImagenPerfil(archivo: File): Observable<{ imageUrl: string }> {
-    const mockImageUrl = 'https://via.placeholder.com/300x300';
-    this.mockPerfil.imageUrl = mockImageUrl;
-    this.perfilSubject.next(this.mockPerfil);
+  subirImagenPerfil(archivo: File): Observable<EstudianteDTO> {
+    // En el backend este endpoint devuelve el usuario actualizado con imageUrl
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(id => {
+        const formData = new FormData();
+        formData.append('file', archivo);
 
-    return of({ imageUrl: mockImageUrl });
+        return this.http.post<EstudianteDTO>(`${this.apiUrl}/users/${id}/upload-image`, formData).pipe(
+          tap(response => {
+            // Actualizar el subject local con la respuesta del backend
+            this.perfilSubject.next(response);
+          }),
+          catchError((error) => {
+            console.error('Error al subir imagen de perfil:', error);
+            return throwError(() => error);
+          })
+        );
+      })
+    );
   }
 
   subirCV(archivo: File): Observable<EstudianteDTO> {

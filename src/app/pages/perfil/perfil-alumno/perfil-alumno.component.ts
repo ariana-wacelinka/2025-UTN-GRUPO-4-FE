@@ -230,6 +230,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       currentYearLevel: ['', [Validators.required]],
       institution: ['', [Validators.required]],
       description: ['', [Validators.required, Validators.maxLength(500)]],
+      imageUrl: [''],
       linkedinUrl: ['', [urlValidator]],
       githubUrl: ['', [urlValidator]],
       languages: this.formBuilder.array([])
@@ -338,6 +339,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       currentYearLevel: perfil.currentYearLevel,
       institution: perfil.institution,
       description: perfil.description,
+      imageUrl: perfil.imageUrl || '',
       linkedinUrl: perfil.linkedinUrl,
       githubUrl: perfil.githubUrl
     });
@@ -383,36 +385,63 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         skills: this.skillsSignal(),
         languages: this.languages.value
       };
+      // Si hay una imagen seleccionada, subirla primero y usar el resultado para setear imageUrl
+      const selectedImage = this.selectedImageFile();
+      if (selectedImage) {
+        this.perfilService.subirImagenPerfil(selectedImage)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (perfilConImagen) => {
+              // Actualizar preview y el campo imageUrl del formulario
+              this.perfilAlumno.set(perfilConImagen);
+              this.imagePreview.set(perfilConImagen.imageUrl || null);
+              this.editForm.patchValue({ imageUrl: perfilConImagen.imageUrl || '' });
 
-      this.perfilService.actualizarPerfil(datosActualizados)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (perfilActualizado) => {
-            this.isEditing.set(false);
-            this.selectedImageFile.set(null);
-            this.selectedCVFile.set(null);
-            this.imagePreview.set(null);
-            this.isCVUploadPending.set(false);
-            this.isUploadingCV.set(false);
-
-            this.snackBar.open('Perfil actualizado exitosamente', 'Cerrar', {
-              duration: 3000
-            });
-
-            // Recargar toda la información del perfil
-            this.cargarPerfil();
-          },
-          error: (error) => {
-            console.error('Error al actualizar el perfil:', error);
-            this.isLoading.set(false);
-            this.snackBar.open('Error al actualizar el perfil', 'Cerrar', {
-              duration: 3000
-            });
-          }
-        });
+              // Ahora proceder a actualizar el resto del perfil
+              this.finishProfileUpdate(datosActualizados);
+            },
+            error: (error) => {
+              console.error('Error al subir la imagen:', error);
+              this.isLoading.set(false);
+              this.snackBar.open('Error al subir la imagen de perfil. Intenta nuevamente.', 'Cerrar', { duration: 3000 });
+            }
+          });
+      } else {
+        // No hay imagen para subir, solo actualizar el perfil
+        this.finishProfileUpdate(datosActualizados);
+      }
     } else {
       this.markFormGroupTouched();
     }
+  }
+
+  private finishProfileUpdate(datosActualizados: ActualizarEstudianteDTO) {
+    this.perfilService.actualizarPerfil(datosActualizados)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (perfilActualizado) => {
+          this.isEditing.set(false);
+          this.selectedImageFile.set(null);
+          this.selectedCVFile.set(null);
+          this.imagePreview.set(null);
+          this.isCVUploadPending.set(false);
+          this.isUploadingCV.set(false);
+
+          this.snackBar.open('Perfil actualizado exitosamente', 'Cerrar', {
+            duration: 3000
+          });
+
+          // Recargar toda la información del perfil
+          this.cargarPerfil();
+        },
+        error: (error) => {
+          console.error('Error al actualizar el perfil:', error);
+          this.isLoading.set(false);
+          this.snackBar.open('Error al actualizar el perfil', 'Cerrar', {
+            duration: 3000
+          });
+        }
+      });
   }
 
   // Métodos auxiliares del formulario

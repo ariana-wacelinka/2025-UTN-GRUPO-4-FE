@@ -182,4 +182,17 @@ export class EmpresasService {
         )
       );
   }
+
+  /**
+   * Sube la imagen/logo de la empresa al endpoint de usuarios y devuelve el perfil actualizado
+   */
+  subirImagenEmpresa(archivo: File): Observable<EmpresaDTO> {
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(userId => {
+        const formData = new FormData();
+        formData.append('file', archivo);
+        return this.http.post<EmpresaDTO>(`${this.apiUrl}/users/${userId}/upload-image`, formData);
+      })
+    );
+  }
 }
