@@ -19,12 +19,11 @@ import { AuthService } from '../../../services/auth.service';
 import { AtributosService } from '../../../services/atributos.service';
 import { offersService } from '../../../services/ofertas.service';
 import { OfertaListaDTO, PagedResponseDTO } from '../../../models/oferta.dto';
-import { EstudianteDTO, ActualizarEstudianteDTO } from '../../../models/aplicante.dto';
+import { EstudianteDTO, ActualizarEstudianteDTO, AssociatedCompanyDTO, WorkExperienceDTO, PersonalProjectDTO } from '../../../models/aplicante.dto';
 import { IdiomaDTO } from '../../../models/usuario.dto';
 import { Subject, takeUntil, Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
-// Importar componentes compartidos
 import { ProfileHeaderComponent, ProfileHeaderData, SocialLink } from '../../../components/profile-header/profile-header.component';
 import { InfoCardComponent, InfoCardData } from '../../../components/info-card/info-card.component';
 import { SkillsCardComponent } from '../../../components/skills-card/skills-card.component';
@@ -68,13 +67,11 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   isCVUploadPending = signal(false);
   isUploadingCV = signal(false);
 
-  // Computed para saber si ya hay un CV cargado
   hasCVUploaded = computed(() => {
     const perfil = this.perfilAlumno();
     return perfil?.cvUrl ? true : false;
   });
 
-  // Materias - Computed desde el perfil
   materiasAlumno = computed(() => this.perfilAlumno()?.subjects || []);
   promedioMaterias = computed(() => {
     const materias = this.materiasAlumno();
@@ -88,7 +85,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   selectedMateriasFileName: string | null = null;
   private readonly MAX_MATERIAS_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-  // Ofertas Aplicadas - Nueva funcionalidad
   ofertasAplicadas: OfertaAplicada[] = [];
   isOfertasLoading = false;
   ofertasError: string | null = null;
@@ -198,6 +194,30 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     return links;
   });
 
+  associatedCompanies = computed(() => {
+    return this.perfilAlumno()?.associatedCompanies || [];
+  });
+
+  hasAssociatedCompanies = computed(() => {
+    return this.associatedCompanies().length > 0;
+  });
+
+  workExperience = computed(() => {
+    return this.perfilAlumno()?.workExperience || [];
+  });
+
+  hasWorkExperience = computed(() => {
+    return this.workExperience().length > 0;
+  });
+
+  personalProjects = computed(() => {
+    return this.perfilAlumno()?.personalProjects || [];
+  });
+
+  hasPersonalProjects = computed(() => {
+    return this.personalProjects().length > 0;
+  });
+
   constructor(
     private formBuilder: FormBuilder,
     private perfilService: PerfilAlumnoService,
@@ -212,9 +232,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   private initializeForm() {
-    // Validador personalizado para URLs opcionales
     const urlValidator = (control: any) => {
-      if (!control.value) return null; // Si está vacío, es válido (opcional)
+      if (!control.value) return null; 
       const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
       return urlPattern.test(control.value) ? null : { invalidUrl: true };
     };
@@ -238,7 +257,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Ya no necesitamos esperar explícitamente - el servicio lo maneja
     this.cargarPerfil();
     this.cargarOfertasAplicadas();
     this.cargarOfertasPublicadas();
@@ -252,15 +270,12 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   private cargarPerfil() {
     this.isLoading.set(true);
 
-    // Verificar si hay un userId en los params de ruta o query params
     this.route.params
       .pipe(
         takeUntil(this.destroy$),
         switchMap(params => {
-          // Primero intentar obtener de params de ruta (para /perfil/:id)
           let userId = params['id'];
 
-          // Si no está en params de ruta, intentar query params (para compatibilidad)
           if (!userId) {
             userId = this.route.snapshot.queryParams['userId'];
           }
@@ -270,6 +285,82 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (perfil) => {
+          console.log('Perfil cargado desde servicio:', perfil);
+          
+          // mockeado temporal. borrar cuando el backend implemente estos campos
+          if (!perfil.associatedCompanies || perfil.associatedCompanies.length === 0) {
+            perfil.associatedCompanies = [
+              {
+                id: 1,
+                companyId: 1,
+                companyName: 'TechCorp Solutions',
+                companyImageUrl: 'https://ui-avatars.com/api/?name=TechCorp&background=667eea&color=fff',
+                companyIndustry: 'Tecnología',
+                associationDate: '2024-06-15',
+                recognitionType: 'Pasantía'
+              },
+              {
+                id: 2,
+                companyId: 2,
+                companyName: 'Innovate Labs',
+                companyImageUrl: 'https://ui-avatars.com/api/?name=Innovate&background=764ba2&color=fff',
+                companyIndustry: 'Desarrollo de Software',
+                associationDate: '2024-03-20',
+                recognitionType: 'Colaboración'
+              }
+            ];
+          }
+          
+          if (!perfil.workExperience || perfil.workExperience.length === 0) {
+            perfil.workExperience = [
+              {
+                id: 1,
+                company: 'TechCorp Solutions',
+                position: 'Desarrollador Frontend Junior',
+                startDate: '2024-06',
+                endDate: undefined,
+                description: 'Desarrollo de interfaces de usuario con Angular y TypeScript. Colaboración en equipo usando metodologías ágiles.',
+                isCurrentJob: true
+              },
+              {
+                id: 2,
+                company: 'Freelance',
+                position: 'Desarrollador Web',
+                startDate: '2023-03',
+                endDate: '2024-05',
+                description: 'Desarrollo de sitios web para pequeñas empresas utilizando tecnologías modernas.',
+                isCurrentJob: false
+              }
+            ];
+          }
+          
+          if (!perfil.personalProjects || perfil.personalProjects.length === 0) {
+            perfil.personalProjects = [
+              {
+                id: 1,
+                title: 'Sistema de Gestión de Empleos',
+                description: 'Plataforma web para conectar estudiantes con oportunidades laborales. Desarrollada con Angular y Spring Boot.',
+                technologies: ['Angular', 'TypeScript', 'Spring Boot', 'PostgreSQL', 'Material Design'],
+                projectUrl: 'https://github.com/usuario/job-platform',
+                startDate: '2024-01',
+                endDate: '2024-11'
+              },
+              {
+                id: 2,
+                title: 'App de Recetas',
+                description: 'Aplicación móvil para descubrir y compartir recetas de cocina. Incluye búsqueda avanzada y favoritos.',
+                technologies: ['React Native', 'Node.js', 'MongoDB', 'Express'],
+                projectUrl: 'https://github.com/usuario/recipe-app',
+                startDate: '2023-08',
+                endDate: '2023-12'
+              }
+            ];
+          }
+          
+          console.log('Empresas asociadas:', perfil.associatedCompanies);
+          console.log('Experiencia laboral:', perfil.workExperience);
+          console.log('Proyectos personales:', perfil.personalProjects);
+          
           this.perfilAlumno.set(perfil);
           this.materiasAlumno
           this.isLoading.set(false);
@@ -312,9 +403,68 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
           { id: 1, name: 'Español', level: 5 },
           { id: 2, name: 'Inglés', level: 4 }
         ],
-        subjects: []
+        subjects: [],
+        associatedCompanies: [
+          {
+            id: 1,
+            companyId: 1,
+            companyName: 'TechCorp Solutions',
+            companyImageUrl: 'https://ui-avatars.com/api/?name=TechCorp&background=667eea&color=fff',
+            companyIndustry: 'Tecnología',
+            associationDate: '2024-06-15',
+            recognitionType: 'Pasantía'
+          },
+          {
+            id: 2,
+            companyId: 2,
+            companyName: 'Innovate Labs',
+            companyImageUrl: 'https://ui-avatars.com/api/?name=Innovate&background=764ba2&color=fff',
+            companyIndustry: 'Desarrollo de Software',
+            associationDate: '2024-03-20',
+            recognitionType: 'Colaboración'
+          }
+        ],
+        workExperience: [
+          {
+            id: 1,
+            company: 'TechCorp Solutions',
+            position: 'Desarrolladora Frontend Junior',
+            startDate: '2024-06',
+            endDate: undefined,
+            description: 'Desarrollo de interfaces de usuario con Angular y TypeScript. Colaboración en equipo usando metodologías ágiles.',
+            isCurrentJob: true
+          },
+          {
+            id: 2,
+            company: 'Freelance',
+            position: 'Desarrolladora Web',
+            startDate: '2023-03',
+            endDate: '2024-05',
+            description: 'Desarrollo de sitios web para pequeñas empresas utilizando tecnologías modernas.',
+            isCurrentJob: false
+          }
+        ],
+        personalProjects: [
+          {
+            id: 1,
+            title: 'Sistema de Gestión de Empleos',
+            description: 'Plataforma web para conectar estudiantes con oportunidades laborales. Desarrollada con Angular y Spring Boot.',
+            technologies: ['Angular', 'TypeScript', 'Spring Boot', 'PostgreSQL', 'Material Design'],
+            projectUrl: 'https://github.com/ariana-wacelinka/job-platform',
+            startDate: '2024-01',
+            endDate: '2024-11'
+          },
+          {
+            id: 2,
+            title: 'App de Recetas',
+            description: 'Aplicación móvil para descubrir y compartir recetas de cocina. Incluye búsqueda avanzada y favoritos.',
+            technologies: ['React Native', 'Node.js', 'MongoDB', 'Express'],
+            projectUrl: 'https://github.com/ariana-wacelinka/recipe-app',
+            startDate: '2023-08',
+            endDate: '2023-12'
+          }
+        ]
       }
-      // ... otros perfiles mock pueden agregarse aquí
     };
 
     return mockPerfiles[userId] || mockPerfiles[101];
@@ -385,19 +535,16 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         skills: this.skillsSignal(),
         languages: this.languages.value
       };
-      // Si hay una imagen seleccionada, subirla primero y usar el resultado para setear imageUrl
       const selectedImage = this.selectedImageFile();
       if (selectedImage) {
         this.perfilService.subirImagenPerfil(selectedImage)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (perfilConImagen) => {
-              // Actualizar preview y el campo imageUrl del formulario
               this.perfilAlumno.set(perfilConImagen);
               this.imagePreview.set(perfilConImagen.imageUrl || null);
               this.editForm.patchValue({ imageUrl: perfilConImagen.imageUrl || '' });
 
-              // Ahora proceder a actualizar el resto del perfil
               this.finishProfileUpdate(datosActualizados);
             },
             error: (error) => {
@@ -407,7 +554,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
             }
           });
       } else {
-        // No hay imagen para subir, solo actualizar el perfil
         this.finishProfileUpdate(datosActualizados);
       }
     } else {
@@ -431,7 +577,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
             duration: 3000
           });
 
-          // Recargar toda la información del perfil
           this.cargarPerfil();
         },
         error: (error) => {
@@ -494,7 +639,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     const habilidadSeleccionada = event.option.value;
 
     if (habilidadSeleccionada.startsWith('"') && habilidadSeleccionada.endsWith('"')) {
-      // Extraer el nombre de la habilidad de 'Crear "NombreHabilidad"'
       const nombreHabilidad = habilidadSeleccionada.match(/"(.+)"/)?.[1] || '';
       this.atributosService.crearAtributo(nombreHabilidad).subscribe(nuevaHabilidad => {
         this.agregarHabilidadALista(nuevaHabilidad);
@@ -592,7 +736,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       this.editForm.get(key)?.markAsTouched();
     });
 
-    // Ya no necesitamos marcar skills como touched porque usamos signals
     this.languages.controls.forEach((group: any) => {
       Object.keys((group as FormGroup).controls).forEach(key => {
         (group as FormGroup).get(key)?.markAsTouched();
@@ -600,7 +743,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ============= MÉTODOS DE MATERIAS =============
 
   onMateriasFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -653,7 +795,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
           });
           this.selectedMateriasFileName = null;
           this.materiasError = null;
-          // Recargar el perfil para obtener las materias actualizadas
           this.cargarPerfil();
         },
         error: (error) => {
@@ -674,12 +815,10 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     return materia.id || index;
   }
 
-  // ============= MÉTODOS DE OFERTAS APLICADAS =============
 
   private cargarOfertasAplicadas() {
-    // Solo cargar si es el perfil del usuario actual (sin ID en params ni query params)
     if (!this.isOwnProfile()) {
-      return; // No cargar ofertas si es perfil de otro usuario
+      return; 
     }
 
     this.isOfertasLoading = true;
@@ -705,21 +844,17 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   }
 
   verDetalleOferta(ofertaId: number) {
-    // Navegar al detalle de la oferta
     this.router.navigate(['/oferta', ofertaId]);
   }
 
   isOwnProfile(): boolean {
-    // Verificar si estamos viendo el perfil propio (sin userId en query params ni en params de ruta)
     return !this.route.snapshot.queryParams['userId'] && !this.route.snapshot.params['id'];
   }
 
-  // ============= MÉTODOS DE OFERTAS PUBLICADAS =============
 
   private cargarOfertasPublicadas() {
-    // Solo cargar si es el perfil del usuario actual (sin ID en params ni query params)
     if (!this.isOwnProfile()) {
-      return; // No cargar ofertas si es perfil de otro usuario
+      return; 
     }
 
     this.isOfertasPublicadasLoading = true;
@@ -748,9 +883,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     return oferta.id;
   }
 
-  // ============= MÉTODOS PARA UI MEJORADA DE OFERTAS =============
 
-  // Estado de expansión de cartas de presentación
   private expandedCoverLetters = new Set<number>();
 
   getStatusClass(status?: string): string {
@@ -860,5 +993,61 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
 
   canWithdrawApplication(status?: string): boolean {
     return status === 'PENDING' || status === 'REVIEWED' || !status;
+  }
+
+
+  formatMonthYear(dateString: string): string {
+    if (!dateString) return '';
+    const [year, month] = dateString.split('-');
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return `${monthNames[parseInt(month) - 1]} ${year}`;
+  }
+
+  calculateDuration(startDate: string, endDate?: string): string {
+    if (!startDate) return '';
+    
+    const start = new Date(startDate + '-01');
+    const end = endDate ? new Date(endDate + '-01') : new Date();
+    
+    const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    
+    if (years > 0 && remainingMonths > 0) {
+      return `${years} año${years > 1 ? 's' : ''} y ${remainingMonths} mes${remainingMonths > 1 ? 'es' : ''}`;
+    } else if (years > 0) {
+      return `${years} año${years > 1 ? 's' : ''}`;
+    } else {
+      return `${remainingMonths} mes${remainingMonths > 1 ? 'es' : ''}`;
+    }
+  }
+
+   navigateToCompanyProfile(companyId: number) {
+    this.router.navigate(['/perfil-empresa', companyId]);
+  }
+
+   openExternalLink(url: string) {
+    if (url) {
+      window.open(url, '_blank');
+    }
+  }
+
+  trackByCompanyId(index: number, company: AssociatedCompanyDTO): number {
+    return company.id;
+  }
+
+  trackByExperienceId(index: number, experience: WorkExperienceDTO): number {
+    return experience.id || index;
+  }
+
+  trackByProjectId(index: number, project: PersonalProjectDTO): number {
+    return project.id || index;
+  }
+
+  onImageError(event: Event, fallbackName: string) {
+    const imgElement = event.target as HTMLImageElement;
+    if (imgElement) {
+      imgElement.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fallbackName)}&background=667eea&color=fff`;
+    }
   }
 }
