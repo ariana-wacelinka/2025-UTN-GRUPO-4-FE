@@ -8,7 +8,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, takeUntil, catchError } from 'rxjs/operators';
+import { EmpresasService } from '../../services/empresas.service';
+import { of } from 'rxjs';
 
 export interface StudentSearchResult {
   id: number;
@@ -394,7 +396,8 @@ export class BuscarAlumnoDialogComponent implements OnInit, OnDestroy {
   searchError = signal<string | null>(null);
 
   constructor(
-    public dialogRef: MatDialogRef<BuscarAlumnoDialogComponent>
+    public dialogRef: MatDialogRef<BuscarAlumnoDialogComponent>,
+    private empresasService: EmpresasService
   ) {}
 
   ngOnInit() {
@@ -423,45 +426,24 @@ export class BuscarAlumnoDialogComponent implements OnInit, OnDestroy {
     this.isSearching.set(true);
     this.searchError.set(null);
 
-    setTimeout(() => {
-      const mockResults: StudentSearchResult[] = [
-        {
-          id: 101,
-          name: 'Carlos',
-          surname: 'Rodríguez',
-          email: 'carlos.rodriguez@example.com',
-          imageUrl: 'https://i.pravatar.cc/150?img=33',
-          career: 'Ingeniería en Sistemas',
-          currentYearLevel: 4,
-          institution: 'UTN FRLP'
-        },
-        {
-          id: 102,
-          name: 'Laura',
-          surname: 'Martínez',
-          email: 'laura.martinez@example.com',
-          imageUrl: 'https://i.pravatar.cc/150?img=47',
-          career: 'Ingeniería en Sistemas',
-          currentYearLevel: 3,
-          institution: 'UTN FRLP'
-        },
-        {
-          id: 103,
-          name: 'Fernando',
-          surname: 'López',
-          email: 'fernando.lopez@example.com',
-          imageUrl: 'https://i.pravatar.cc/150?img=68',
-          career: 'Ingeniería en Sistemas',
-          currentYearLevel: 5,
-          institution: 'UTN FRLP'
-        }
-      ].filter(student => 
-        `${student.name} ${student.surname}`.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-      this.searchResults.set(mockResults);
-      this.isSearching.set(false);
-    }, 800);
+    this.empresasService.buscarEstudiantes(searchTerm)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          console.error('Error al buscar estudiantes:', error);
+          this.searchError.set('Error al buscar estudiantes. Intenta nuevamente.');
+          this.isSearching.set(false);
+          return of({ content: [] });
+        })
+      )
+      .subscribe(response => {
+        const students = response.content || [];
+        const studentsFiltered = students.filter((user: any) => 
+          user.role && user.role.toLowerCase() === 'student'
+        );
+        this.searchResults.set(studentsFiltered);
+        this.isSearching.set(false);
+      });
   }
 
   clearSearch() {
