@@ -357,43 +357,7 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
     }
 
     private cargarAlumnosVinculados() {
-        const empresaId = this.empresa()?.id;
-        if (!empresaId) return;
-
-        this.isLoadingStudents.set(true);
-        this.studentsError.set(null);
-
-        setTimeout(() => {
-            const mockStudents: LinkedStudentDTO[] = [
-                {
-                    id: 1,
-                    studentId: 101,
-                    name: 'Juan',
-                    surname: 'Pérez',
-                    imageUrl: 'https://i.pravatar.cc/150?img=12',
-                    career: 'Ingeniería en Sistemas',
-                    currentYearLevel: 4,
-                    institution: 'UTN FRLP',
-                    recognitionType: 'Pasantía',
-                    associationDate: '2024-03-15'
-                },
-                {
-                    id: 2,
-                    studentId: 102,
-                    name: 'María',
-                    surname: 'González',
-                    imageUrl: 'https://i.pravatar.cc/150?img=45',
-                    career: 'Ingeniería en Sistemas',
-                    currentYearLevel: 3,
-                    institution: 'UTN FRLP',
-                    recognitionType: 'Colaboración',
-                    associationDate: '2024-06-20'
-                }
-            ];
-
-            this.linkedStudents.set(mockStudents);
-            this.isLoadingStudents.set(false);
-        }, 1000);
+        this.isLoadingStudents.set(false);
     }
 
     verPerfilAlumno(studentId: number) {
@@ -401,42 +365,19 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
     }
 
     vincularAlumno(student: StudentSearchResult) {
-        const empresaId = this.empresa()?.id;
-        if (!empresaId) return;
-
-        this.isLoadingStudents.set(true);
-
-        const newLinkedStudent: LinkedStudentDTO = {
-            id: Date.now(),
-            studentId: student.id,
-            name: student.name,
-            surname: student.surname,
-            imageUrl: student.imageUrl,
-            career: student.career,
-            currentYearLevel: student.currentYearLevel,
-            institution: student.institution,
-            recognitionType: 'Colaboración',
-            associationDate: new Date().toISOString()
-        };
-
-        setTimeout(() => {
-            const currentStudents = this.linkedStudents();
-            this.linkedStudents.set([...currentStudents, newLinkedStudent]);
-            this.isLoadingStudents.set(false);
-            
-            this.snackBar.open(
-                `${student.name} ${student.surname} ha sido reconocido exitosamente`, 
-                'Cerrar', 
-                { duration: 3000 }
-            );
-        }, 800);
+        this.snackBar.open(
+            'Funcionalidad pendiente: El backend aún no implementa la vinculación de estudiantes', 
+            'Cerrar', 
+            { duration: 3000 }
+        );
     }
 
     desvincularAlumno(relationId: number) {
-        console.log('Desvincular alumno con ID de relación:', relationId);
-        this.snackBar.open('Funcionalidad en desarrollo: Desvincular alumno', 'Cerrar', {
-            duration: 3000
-        });
+        this.snackBar.open(
+            'Funcionalidad pendiente: El backend aún no implementa la desvinculación de estudiantes', 
+            'Cerrar', 
+            { duration: 3000 }
+        );
     }
 
     getDefaultAvatar(name: string, surname: string): string {
