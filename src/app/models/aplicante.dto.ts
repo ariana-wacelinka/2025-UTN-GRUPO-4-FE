@@ -1,6 +1,5 @@
 import { UsuarioDTO, IdiomaDTO } from './usuario.dto';
 
-// Exportar IdiomaDTO para uso en otros archivos
 export type { IdiomaDTO } from './usuario.dto';
 
 export interface StudentDTO {
@@ -53,7 +52,6 @@ export interface AplicantesPagedResponse {
   empty: boolean;
 }
 
-// Mantenemos la interfaz anterior por compatibilidad, pero marcada como deprecated
 /** @deprecated Use AplicantesPagedResponse instead */
 export interface AplicanteListaDTO {
   ofertaId: number;
@@ -62,7 +60,6 @@ export interface AplicanteListaDTO {
   totalAplicantes: number;
 }
 
-// DTO del estudiante actualizado según el backend
 export interface EstudianteDTO extends UsuarioDTO {
   githubUrl: string;
   career: string;
@@ -76,6 +73,9 @@ export interface EstudianteDTO extends UsuarioDTO {
   coverLetter: string;
   languages: IdiomaDTO[];
   subjects: SubjectDTO[];
+  associatedCompanies?: AssociatedCompanyDTO[]; 
+  workExperience?: WorkExperienceDTO[]; 
+  personalProjects?: PersonalProjectDTO[]; 
 }
 
 export interface SubjectDTO {
@@ -85,7 +85,37 @@ export interface SubjectDTO {
   note: number;
 }
 
-// DTO para actualizar estudiante
+export interface AssociatedCompanyDTO {
+  id: number;
+  companyId: number;
+  companyName: string;
+  companyImageUrl?: string;
+  companyIndustry?: string;
+  associationDate: string; 
+  recognitionType?: string;
+}
+
+export interface WorkExperienceDTO {
+  id?: number;
+  company: string;
+  position: string;
+  startDate: string; 
+  endDate?: string; 
+  description: string;
+  isCurrentJob?: boolean;
+}
+
+export interface PersonalProjectDTO {
+  id?: number;
+  title: string;
+  description: string;
+  technologies: string[]; 
+  projectUrl?: string;
+  imageUrl?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 export interface ActualizarEstudianteDTO {
   description?: string;
   phone?: string;
@@ -106,4 +136,6 @@ export interface ActualizarEstudianteDTO {
   cvFileName?: string;
   coverLetter?: string;
   languages?: IdiomaDTO[];
+  workExperience?: WorkExperienceDTO[];
+  personalProjects?: PersonalProjectDTO[];
 }
