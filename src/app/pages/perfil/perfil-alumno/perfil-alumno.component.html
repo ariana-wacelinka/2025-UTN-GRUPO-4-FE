@@ -340,7 +340,134 @@
                     </mat-card-content>
                 </mat-card>
 
-                <!-- 5. Ofertas Aplicadas (solo para perfil propio) -->
+                <!-- 5. Empresas Asociadas / Reconocimientos (grid-area: empresas) -->
+                <mat-card class="modern-card associated-companies-card" *ngIf="hasAssociatedCompanies()">
+                    <mat-card-header>
+                        <mat-card-title class="section-title">
+                            <mat-icon class="section-icon">verified</mat-icon>
+                            Reconocimientos Empresariales
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="companies-grid">
+                            <div class="company-badge" 
+                                 *ngFor="let company of associatedCompanies(); trackBy: trackByCompanyId"
+                                 (click)="navigateToCompanyProfile(company.companyId)"
+                                 [matTooltip]="'Reconocido por ' + company.companyName">
+                                <div class="badge-header">
+                                    <div class="company-logo">
+                                        <img [src]="company.companyImageUrl || 'https://ui-avatars.com/api/?name=' + company.companyName + '&background=667eea&color=fff'" 
+                                             [alt]="company.companyName"
+                                             (error)="onImageError($event, company.companyName)">
+                                    </div>
+                                    <div class="company-info">
+                                        <h4 class="company-name">{{company.companyName}}</h4>
+                                        <p class="company-industry" *ngIf="company.companyIndustry">
+                                            {{company.companyIndustry}}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="badge-details">
+                                    <div class="recognition-type" *ngIf="company.recognitionType">
+                                        <mat-icon>workspace_premium</mat-icon>
+                                        <span>{{company.recognitionType}}</span>
+                                    </div>
+                                    <div class="association-date">
+                                        <mat-icon>event</mat-icon>
+                                        <span>Desde {{company.associationDate | date:'MMM yyyy'}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- 6. Experiencia Laboral (grid-area: experiencia) -->
+                <mat-card class="modern-card work-experience-card" *ngIf="hasWorkExperience()">
+                    <mat-card-header>
+                        <mat-card-title class="section-title">
+                            <mat-icon class="section-icon">work</mat-icon>
+                            Experiencia Laboral
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="experience-timeline">
+                            <div class="experience-item" 
+                                 *ngFor="let exp of workExperience(); trackBy: trackByExperienceId">
+                                <div class="timeline-marker">
+                                    <div class="marker-dot"></div>
+                                    <div class="marker-line" *ngIf="!exp.isCurrentJob"></div>
+                                </div>
+                                <div class="experience-content">
+                                    <div class="experience-header">
+                                        <div class="title-section">
+                                            <h4 class="position-title">{{exp.position}}</h4>
+                                            <h5 class="company-name">{{exp.company}}</h5>
+                                        </div>
+                                        <div class="current-badge" *ngIf="exp.isCurrentJob">
+                                            <mat-chip class="current-chip">
+                                                <mat-icon>schedule</mat-icon>
+                                                Actual
+                                            </mat-chip>
+                                        </div>
+                                    </div>
+                                    <div class="experience-period">
+                                        <mat-icon>calendar_today</mat-icon>
+                                        <span>
+                                            {{formatMonthYear(exp.startDate)}} - 
+                                            {{exp.isCurrentJob ? 'Presente' : formatMonthYear(exp.endDate!)}}
+                                        </span>
+                                        <span class="duration">({{calculateDuration(exp.startDate, exp.endDate)}})</span>
+                                    </div>
+                                    <p class="experience-description">{{exp.description}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- 7. Proyectos Personales (grid-area: proyectos) -->
+                <mat-card class="modern-card personal-projects-card" *ngIf="hasPersonalProjects()">
+                    <mat-card-header>
+                        <mat-card-title class="section-title">
+                            <mat-icon class="section-icon">code</mat-icon>
+                            Proyectos Personales
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="projects-grid">
+                            <div class="project-card" 
+                                 *ngFor="let project of personalProjects(); trackBy: trackByProjectId">
+                                <div class="project-header">
+                                    <h4 class="project-title">{{project.title}}</h4>
+                                    <button mat-icon-button 
+                                            *ngIf="project.projectUrl"
+                                            (click)="openExternalLink(project.projectUrl)"
+                                            [matTooltip]="'Ver proyecto'">
+                                        <mat-icon>open_in_new</mat-icon>
+                                    </button>
+                                </div>
+                                <p class="project-description">{{project.description}}</p>
+                                <div class="project-period" *ngIf="project.startDate">
+                                    <mat-icon>schedule</mat-icon>
+                                    <span>
+                                        {{formatMonthYear(project.startDate)}}
+                                        <ng-container *ngIf="project.endDate"> - {{formatMonthYear(project.endDate)}}</ng-container>
+                                    </span>
+                                </div>
+                                <div class="project-technologies">
+                                    <mat-chip-set class="tech-chips">
+                                        <mat-chip *ngFor="let tech of project.technologies" class="tech-chip">
+                                            {{tech}}
+                                        </mat-chip>
+                                    </mat-chip-set>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- 8. Ofertas Aplicadas - solo para perfil propio (grid-area: applied-offers) -->
                 <mat-card class="modern-card applied-offers-card" *ngIf="isOwnProfile()">
                     <mat-card-header>
                         <mat-card-title class="section-title">
@@ -518,7 +645,7 @@
                     </mat-card-content>
                 </mat-card>
 
-                <!-- 6. Ofertas Publicadas (solo para perfil propio) -->
+                <!-- 9. Ofertas Publicadas - solo para perfil propio (grid-area: my-offers) -->
                 <mat-card class="modern-card published-offers-card" *ngIf="isOwnProfile()">
                     <mat-card-header>
                         <mat-card-title class="section-title">
@@ -620,7 +747,7 @@
                     </mat-card-content>
                 </mat-card>
 
-                <!-- 7. Materias Aprobadas (grid-area: materias) -->
+                <!-- 10. Materias Aprobadas - Al final ocupando todo el ancho (grid-area: materias) -->
                 <mat-card class="modern-card subjects-card">
                     <mat-card-header>
                         <mat-card-title class="section-title">
