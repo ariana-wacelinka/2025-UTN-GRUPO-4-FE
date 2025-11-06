@@ -137,7 +137,6 @@
     }
 }
 
-// Layout principal con grid específico
 .profile-content {
     max-width: 1400px;
     margin: 0 auto;
@@ -145,47 +144,49 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: auto 1fr auto;
-    /* Segunda fila toma el espacio disponible */
     gap: 24px;
     min-height: 70vh;
-    /* Altura mínima para que el grid tenga espacio para expandirse */
     grid-template-areas:
         "info-personal sobre-mi sobre-mi"
         "info-personal skills idiomas"
-        "materias materias materias"
+        "empresas experiencia proyectos"
         "applied-offers applied-offers applied-offers"
-        "my-offers my-offers my-offers";
+        "my-offers my-offers my-offers"
+        "materias materias materias";
 
     @media (max-width: 1200px) {
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto 1fr auto;
-        /* Skills tendrá más espacio */
         grid-template-areas:
             "info-personal sobre-mi"
             "skills skills"
             "idiomas idiomas"
-            "materias materias"
+            "empresas empresas"
+            "experiencia experiencia"
+            "proyectos proyectos"
             "applied-offers applied-offers"
-            "my-offers my-offers";
+            "my-offers my-offers"
+            "materias materias";
     }
 
     @media (max-width: 768px) {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto 1fr auto auto;
-        /* Skills sigue teniendo espacio expandible */
         gap: 16px;
         grid-template-areas:
             "info-personal"
             "sobre-mi"
             "skills"
             "idiomas"
-            "materias"
+            "empresas"
+            "experiencia"
+            "proyectos"
             "applied-offers"
-            "my-offers";
+            "my-offers"
+            "materias";
     }
 }
 
-// Asignación de grid areas a cada elemento
 .profile-content>*:nth-child(1) {
     grid-area: info-personal;
 }
@@ -196,11 +197,9 @@
 
 .profile-content>*:nth-child(3) {
     grid-area: skills;
-    /* Hacer que ocupe toda la altura disponible */
     display: flex;
     flex-direction: column;
 
-    /* Asegurar que la card interna también se expanda */
     app-skills-card {
         height: 100%;
         display: flex;
@@ -224,21 +223,31 @@
     grid-area: idiomas;
 }
 
-.profile-content>*:nth-child(7) {
-    grid-area: materias;
-}
-
 .profile-content>*:nth-child(5) {
-    grid-area: applied-offers;
+    grid-area: empresas;
 }
 
 .profile-content>*:nth-child(6) {
-  grid-area: my-offers;
+    grid-area: experiencia;
 }
 
-/* Removed layout específico para pantallas grandes - now using flexbox above */
+.profile-content>*:nth-child(7) {
+    grid-area: proyectos;
+}
 
-// Estilos específicos para las cards del perfil
+.profile-content>*:nth-child(8) {
+    grid-area: applied-offers;
+}
+
+.profile-content>*:nth-child(9) {
+    grid-area: my-offers;
+}
+
+.profile-content>*:nth-child(10) {
+    grid-area: materias;
+}
+
+
 .about-card {
     .about-text {
         line-height: 1.6;
@@ -1359,7 +1368,6 @@
     }
 }
 
-// ============= ESTILOS MEJORADOS PARA MATERIAS =============
 
 .subjects-card {
     .subjects-summary {
@@ -1659,7 +1667,6 @@
     }
 }
 
-// ============= OFERTAS APLICADAS STYLES =============
 
 .applied-offers-card {
     .applications-count {
@@ -1889,7 +1896,6 @@
     }
 }
 
-// ============= MEJORAS UI OFERTAS APLICADAS =============
 
 .applied-offers-card {
     .applied-offers-list {
@@ -2336,10 +2342,8 @@
     }
 }
 
-// ============= ESTILOS PARA OFERTAS PUBLICADAS =============
 
 .published-offers-card {
-    // Reutilizar estilos de ofertas aplicadas para consistencia
     .applications-count {
         font-size: 0.9em;
         color: var(--secondary-color);
@@ -2684,6 +2688,476 @@
                 }
             }
         }
+    }
+}
+
+
+.associated-companies-card {
+    .companies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+
+        .company-badge {
+            background: var(--glass-white);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background: var(--primary-gradient);
+                transform: scaleX(0);
+                transition: transform 0.3s ease;
+            }
+
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+                border-color: var(--primary-color);
+
+                &::before {
+                    transform: scaleX(1);
+                }
+            }
+
+            .badge-header {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                margin-bottom: 16px;
+
+                .company-logo {
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    flex-shrink: 0;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                }
+
+                .company-info {
+                    flex: 1;
+                    min-width: 0;
+
+                    .company-name {
+                        margin: 0 0 4px 0;
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        color: var(--text-primary);
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+
+                    .company-industry {
+                        margin: 0;
+                        font-size: 0.875rem;
+                        color: var(--text-muted);
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+            }
+
+            .badge-details {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding-top: 12px;
+                border-top: 1px solid var(--glass-border);
+
+                .recognition-type,
+                .association-date {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 0.875rem;
+                    color: var(--text-secondary);
+
+                    mat-icon {
+                        font-size: 18px;
+                        width: 18px;
+                        height: 18px;
+                        color: var(--primary-color);
+                    }
+                }
+
+                .recognition-type {
+                    font-weight: 600;
+                    color: var(--primary-color);
+                }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .companies-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+.work-experience-card {
+    .experience-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        padding-left: 12px;
+
+        .experience-item {
+            display: flex;
+            gap: 24px;
+            position: relative;
+
+            .timeline-marker {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                flex-shrink: 0;
+                width: 24px;
+
+                .marker-dot {
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 50%;
+                    background: var(--primary-gradient);
+                    border: 3px solid var(--glass-white);
+                    box-shadow: 0 0 0 3px var(--primary-color);
+                    flex-shrink: 0;
+                    z-index: 1;
+                }
+
+                .marker-line {
+                    flex: 1;
+                    width: 2px;
+                    background: linear-gradient(to bottom, var(--primary-color), transparent);
+                    margin-top: 8px;
+                    min-height: 40px;
+                }
+            }
+
+            .experience-content {
+                flex: 1;
+                background: var(--glass-white);
+                border: 1px solid var(--glass-border);
+                border-radius: 16px;
+                padding: 20px;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    transform: translateX(4px);
+                    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+                    border-color: var(--primary-color);
+                }
+
+                .experience-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 12px;
+                    gap: 16px;
+
+                    .title-section {
+                        flex: 1;
+                        min-width: 0;
+
+                        .position-title {
+                            margin: 0 0 6px 0;
+                            font-size: 1.2rem;
+                            font-weight: 600;
+                            color: var(--text-primary);
+                            line-height: 1.3;
+                        }
+
+                        .company-name {
+                            margin: 0;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            color: var(--primary-color);
+                        }
+                    }
+
+                    .current-badge {
+                        flex-shrink: 0;
+
+                        .current-chip {
+                            background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%) !important;
+                            color: white !important;
+                            font-weight: 600 !important;
+                            padding: 8px 16px !important;
+                            border-radius: 20px !important;
+                            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+
+                            mat-icon {
+                                font-size: 16px;
+                                margin-right: 4px;
+                            }
+                        }
+                    }
+                }
+
+                .experience-period {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 16px;
+                    color: var(--text-secondary);
+                    font-size: 0.95rem;
+                    font-weight: 500;
+
+                    mat-icon {
+                        font-size: 18px;
+                        width: 18px;
+                        height: 18px;
+                        color: var(--primary-color);
+                    }
+
+                    .duration {
+                        margin-left: 8px;
+                        color: var(--text-muted);
+                        font-weight: 400;
+                        font-style: italic;
+                    }
+                }
+
+                .experience-description {
+                    margin: 0;
+                    line-height: 1.6;
+                    color: var(--text-secondary);
+                    font-size: 0.95rem;
+                }
+            }
+
+            &:last-child {
+                .timeline-marker .marker-line {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .experience-timeline {
+            padding-left: 8px;
+
+            .experience-item {
+                gap: 16px;
+
+                .experience-content {
+                    padding: 16px;
+
+                    .experience-header {
+                        flex-direction: column;
+                        gap: 12px;
+
+                        .current-badge {
+                            align-self: flex-start;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.personal-projects-card {
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+
+        .project-card {
+            background: var(--glass-white);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background: var(--accent-gradient);
+                transform: scaleX(0);
+                transition: transform 0.3s ease;
+            }
+
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 25px rgba(79, 172, 254, 0.15);
+                border-color: var(--info-color);
+
+                &::before {
+                    transform: scaleX(1);
+                }
+            }
+
+            .project-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 16px;
+                gap: 12px;
+
+                .project-title {
+                    margin: 0;
+                    font-size: 1.2rem;
+                    font-weight: 600;
+                    color: var(--text-primary);
+                    line-height: 1.3;
+                    flex: 1;
+                }
+
+                button {
+                    flex-shrink: 0;
+                    color: var(--info-color) !important;
+                    transition: all 0.3s ease;
+
+                    &:hover {
+                        background: rgba(79, 172, 254, 0.1) !important;
+                        transform: scale(1.1);
+                    }
+
+                    mat-icon {
+                        font-size: 20px;
+                        width: 20px;
+                        height: 20px;
+                    }
+                }
+            }
+
+            .project-description {
+                margin: 0 0 16px 0;
+                line-height: 1.6;
+                color: var(--text-secondary);
+                font-size: 0.95rem;
+            }
+
+            .project-period {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 16px;
+                padding: 10px;
+                background: var(--muted-bg);
+                border-radius: 8px;
+                color: var(--text-secondary);
+                font-size: 0.875rem;
+                font-weight: 500;
+
+                mat-icon {
+                    font-size: 16px;
+                    width: 16px;
+                    height: 16px;
+                    color: var(--info-color);
+                }
+            }
+
+            .project-technologies {
+                .tech-chips {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+
+                    .tech-chip {
+                        background: var(--chip-bg) !important;
+                        color: var(--info-color) !important;
+                        border: 1px solid var(--info-color) !important;
+                        font-weight: 600 !important;
+                        font-size: 0.8rem !important;
+                        padding: 6px 14px !important;
+                        border-radius: 16px !important;
+                        transition: all 0.3s ease !important;
+
+                        &:hover {
+                            background: var(--info-color) !important;
+                            color: white !important;
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+.profile-content {
+    grid-template-areas:
+        "info-personal sobre-mi sobre-mi"
+        "info-personal skills idiomas"
+        "associated associated associated"
+        "work-exp work-exp work-exp"
+        "projects projects projects"
+        "materias materias materias"
+        "applied-offers applied-offers applied-offers"
+        "my-offers my-offers my-offers";
+
+    @media (max-width: 1200px) {
+        grid-template-areas:
+            "info-personal sobre-mi"
+            "skills skills"
+            "idiomas idiomas"
+            "associated associated"
+            "work-exp work-exp"
+            "projects projects"
+            "materias materias"
+            "applied-offers applied-offers"
+            "my-offers my-offers";
+    }
+
+    @media (max-width: 768px) {
+        grid-template-areas:
+            "info-personal"
+            "sobre-mi"
+            "skills"
+            "idiomas"
+            "associated"
+            "work-exp"
+            "projects"
+            "materias"
+            "applied-offers"
+            "my-offers";
+    }
+
+    .associated-companies-card {
+        grid-area: associated;
+    }
+
+    .work-experience-card {
+        grid-area: work-exp;
+    }
+
+    .personal-projects-card {
+        grid-area: projects;
     }
 }
 
