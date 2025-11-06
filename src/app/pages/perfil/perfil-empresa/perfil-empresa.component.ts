@@ -8,17 +8,32 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, switchMap } from 'rxjs';
 import { EmpresasService } from '../../../services/empresas.service';
 import { EmpresaDTO } from '../../../models/empresa.dto';
 import { CompanySize } from '../../../models/usuario.dto';
 
-// Importar componentes compartidos
+export interface LinkedStudentDTO {
+  id: number;
+  studentId: number;
+  name: string;
+  surname: string;
+  imageUrl?: string;
+  career?: string;
+  currentYearLevel?: number;
+  institution?: string;
+  recognitionType?: string;
+  associationDate: string;
+}
+
 import { ProfileHeaderComponent, ProfileHeaderData, SocialLink } from '../../../components/profile-header/profile-header.component';
 import { InfoCardComponent, InfoCardData } from '../../../components/info-card/info-card.component';
 import { EmpresaOfertasManagerComponent } from '../../../components/empresa-ofertas-manager/empresa-ofertas-manager.component';
+import { BuscarAlumnoDialogComponent, StudentSearchResult } from '../../../components/buscar-alumno-dialog/buscar-alumno-dialog.component';
 
 @Component({
     selector: 'app-perfil-empresa',
@@ -33,6 +48,8 @@ import { EmpresaOfertasManagerComponent } from '../../../components/empresa-ofer
         MatSelectModule,
         MatSnackBarModule,
         MatTabsModule,
+        MatChipsModule,
+        MatDialogModule,
         FormsModule,
         ReactiveFormsModule,
         ProfileHeaderComponent,
@@ -45,24 +62,24 @@ import { EmpresaOfertasManagerComponent } from '../../../components/empresa-ofer
 export class PerfilEmpresaComponent implements OnInit, OnDestroy {
     private destroy$ = new Subject<void>();
 
-    // Signals
     empresa = signal<EmpresaDTO | null>(null);
     isEditing = signal(false);
     isLoading = signal(false);
     selectedLogoFile = signal<File | null>(null);
     imagePreview = signal<string | null>(null);
 
-    // Form
+    linkedStudents = signal<LinkedStudentDTO[]>([]);
+    isLoadingStudents = signal(false);
+    studentsError = signal<string | null>(null);
+
     editForm!: FormGroup;
 
-    // Sectores disponibles (actualizado para industrias)
     sectoresDisponibles = [
         'Tecnología', 'Finanzas', 'Salud', 'Educación',
         'E-commerce', 'Consultoría', 'Marketing', 'Manufactura',
         'Servicios', 'Retail', 'Otro'
     ];
 
-    // Tamaños disponibles (usando enum del backend)
     tamaniosDisponibles = [
         { value: CompanySize.FROM_1_TO_10, label: '1-10 empleados' },
         { value: 'FROM_11_TO_50', label: '11-50 empleados' },
@@ -71,7 +88,6 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
         { value: 'MORE_THAN_500', label: 'Más de 500 empleados' }
     ];
 
-    // Computed properties para componentes compartidos
     profileHeaderData = computed((): ProfileHeaderData | null => {
         const emp = this.empresa();
         if (!emp) return null;
@@ -130,7 +146,9 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
         private formBuilder: FormBuilder,
         private empresasService: EmpresasService,
         private snackBar: MatSnackBar,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private dialog: MatDialog,
+        private router: Router
     ) {
         this.initializeForm();
     }
@@ -152,6 +170,7 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.cargarPerfil();
+        this.cargarAlumnosVinculados();
     }
 
     ngOnDestroy() {
@@ -162,7 +181,6 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
     private cargarPerfil() {
         this.isLoading.set(true);
 
-        // Verificar si hay un empresaId en los params de ruta
         this.route.params
             .pipe(
                 takeUntil(this.destroy$),
@@ -222,13 +240,9 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
 
     onImageSelected(file: File) {
         this.selectedLogoFile.set(file);
-
         const reader = new FileReader();
-        reader.onload = (e) => {
-            this.imagePreview.set(e.target?.result as string);
-        };
+        reader.onload = (e) => this.imagePreview.set(e.target?.result as string);
         reader.readAsDataURL(file);
-
         this.snackBar.open('Logo seleccionado', 'Cerrar', { duration: 2000 });
     }
 
@@ -244,7 +258,6 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
 
             const selectedLogo = this.selectedLogoFile();
             if (selectedLogo) {
-                // subir logo primero
                 this.empresasService.subirImagenEmpresa(selectedLogo)
                     .pipe(takeUntil(this.destroy$))
                     .subscribe({
@@ -252,8 +265,6 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
                             this.empresa.set(perfilConLogo);
                             this.imagePreview.set(perfilConLogo.imageUrl || null);
                             this.editForm.patchValue({ imageUrl: perfilConLogo.imageUrl || '' });
-
-                            // luego actualizar el resto del perfil
                             this.finishUpdateEmpresa(datosActualizados);
                         },
                         error: (error) => {
@@ -301,12 +312,10 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
         });
     }
 
-    // Getters para formularios
     get f() {
         return this.editForm.controls;
     }
 
-    // Métodos de compatibilidad con el template existente
     editarPerfil() {
         this.onEditProfile();
     }
@@ -326,10 +335,121 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
         }
     }
 
-    /**
-     * Verifica si el perfil que se está viendo es el propio
-     */
     isOwnProfile(): boolean {
         return !this.route.snapshot.params['id'];
+    }
+
+    abrirDialogoVincularAlumno() {
+        const dialogRef = this.dialog.open(BuscarAlumnoDialogComponent, {
+            width: '600px',
+            maxWidth: '95vw',
+            maxHeight: '90vh',
+            panelClass: 'buscar-alumno-dialog-container'
+        });
+
+        dialogRef.afterClosed()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((studentSelected: StudentSearchResult | undefined) => {
+                if (studentSelected) {
+                    this.vincularAlumno(studentSelected);
+                }
+            });
+    }
+
+    private cargarAlumnosVinculados() {
+        const empresaId = this.empresa()?.id;
+        if (!empresaId) return;
+
+        this.isLoadingStudents.set(true);
+        this.studentsError.set(null);
+
+        setTimeout(() => {
+            const mockStudents: LinkedStudentDTO[] = [
+                {
+                    id: 1,
+                    studentId: 101,
+                    name: 'Juan',
+                    surname: 'Pérez',
+                    imageUrl: 'https://i.pravatar.cc/150?img=12',
+                    career: 'Ingeniería en Sistemas',
+                    currentYearLevel: 4,
+                    institution: 'UTN FRLP',
+                    recognitionType: 'Pasantía',
+                    associationDate: '2024-03-15'
+                },
+                {
+                    id: 2,
+                    studentId: 102,
+                    name: 'María',
+                    surname: 'González',
+                    imageUrl: 'https://i.pravatar.cc/150?img=45',
+                    career: 'Ingeniería en Sistemas',
+                    currentYearLevel: 3,
+                    institution: 'UTN FRLP',
+                    recognitionType: 'Colaboración',
+                    associationDate: '2024-06-20'
+                }
+            ];
+
+            this.linkedStudents.set(mockStudents);
+            this.isLoadingStudents.set(false);
+        }, 1000);
+    }
+
+    verPerfilAlumno(studentId: number) {
+        this.router.navigate(['/perfil-alumno', studentId]);
+    }
+
+    vincularAlumno(student: StudentSearchResult) {
+        const empresaId = this.empresa()?.id;
+        if (!empresaId) return;
+
+        this.isLoadingStudents.set(true);
+
+        const newLinkedStudent: LinkedStudentDTO = {
+            id: Date.now(),
+            studentId: student.id,
+            name: student.name,
+            surname: student.surname,
+            imageUrl: student.imageUrl,
+            career: student.career,
+            currentYearLevel: student.currentYearLevel,
+            institution: student.institution,
+            recognitionType: 'Colaboración',
+            associationDate: new Date().toISOString()
+        };
+
+        setTimeout(() => {
+            const currentStudents = this.linkedStudents();
+            this.linkedStudents.set([...currentStudents, newLinkedStudent]);
+            this.isLoadingStudents.set(false);
+            
+            this.snackBar.open(
+                `${student.name} ${student.surname} ha sido reconocido exitosamente`, 
+                'Cerrar', 
+                { duration: 3000 }
+            );
+        }, 800);
+    }
+
+    desvincularAlumno(relationId: number) {
+        console.log('Desvincular alumno con ID de relación:', relationId);
+        this.snackBar.open('Funcionalidad en desarrollo: Desvincular alumno', 'Cerrar', {
+            duration: 3000
+        });
+    }
+
+    getDefaultAvatar(name: string, surname: string): string {
+        const fullName = `${name} ${surname}`;
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=667eea&color=fff&size=150`;
+    }
+
+    onStudentImageError(event: Event, name: string, surname: string) {
+        const img = event.target as HTMLImageElement;
+        img.src = this.getDefaultAvatar(name, surname);
+    }
+
+    trackByStudentId(index: number, student: LinkedStudentDTO): number {
+        return student.id;
     }
 }
