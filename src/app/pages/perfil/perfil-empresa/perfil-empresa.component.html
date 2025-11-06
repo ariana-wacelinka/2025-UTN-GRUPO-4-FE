@@ -1,32 +1,26 @@
 <div class="perfil-container">
   <div class="container-modern animate-fade-in">
 
-    <!-- Loading indicator -->
     <div *ngIf="isLoading()" class="loading-container">
       <div class="loading-spinner"></div>
       <p>Cargando perfil de empresa...</p>
     </div>
 
-    <!-- Contenido del perfil -->
     <div *ngIf="!isLoading() && empresa()">
 
-      <!-- Header del perfil usando componente compartido -->
       <app-profile-header [data]="profileHeaderData()!" [socialLinks]="socialLinksCompact()" [isEditing]="isEditing"
         [imagePreview]="imagePreview" [canEdit]="isOwnProfile()" (editProfile)="onEditProfile()"
         (saveChanges)="onSaveChanges()" (cancelEdit)="onCancelEdit()" (imageSelected)="onImageSelected($event)">
       </app-profile-header>
 
-      <!-- Material Tabs para organizar el contenido -->
       <mat-tab-group class="profile-tabs" animationDuration="300ms">
 
-        <!-- Pestaña: Perfil de la Empresa -->
         <mat-tab>
           <ng-template mat-tab-label>
             <mat-icon class="tab-icon">business</mat-icon>
             <span class="tab-label">Perfil</span>
           </ng-template>
 
-          <!-- Formulario de edición -->
           <div *ngIf="isEditing()" class="edit-form-container">
             <mat-card class="modern-card edit-form">
               <mat-card-header>
@@ -129,9 +123,7 @@
             </mat-card>
           </div>
 
-          <!-- Vista normal (no edición) usando componentes compartidos -->
           <div *ngIf="!isEditing()" class="profile-content">
-            <!-- Descripción -->
             <mat-card class="modern-card about-card" *ngIf="empresa()?.description">
               <mat-card-header>
                 <mat-card-title class="section-title">
@@ -144,25 +136,125 @@
               </mat-card-content>
             </mat-card>
 
-            <!-- Información de Contacto usando info-card compartido -->
             <app-info-card *ngIf="contactInfo()" [data]="contactInfo()!">
             </app-info-card>
           </div>
 
         </mat-tab>
 
-        <!-- Pestaña: Mis Publicaciones -->
         <mat-tab>
           <ng-template mat-tab-label>
             <mat-icon class="tab-icon">work</mat-icon>
             <span class="tab-label">{{ isOwnProfile() ? 'Mis Publicaciones' : 'Publicaciones' }}</span>
           </ng-template>
 
-          <!-- Contenido de ofertas laborales -->
           <app-empresa-ofertas-manager
             [isOwnProfile]="isOwnProfile()"
             [empresaId]="empresa()?.id">
           </app-empresa-ofertas-manager>
+
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">people</mat-icon>
+            <span class="tab-label">{{ isOwnProfile() ? 'Alumnos Reconocidos' : 'Alumnos' }}</span>
+          </ng-template>
+
+          <div class="linked-students-container">
+            
+            <div class="header-section" *ngIf="isOwnProfile()">
+              <div class="header-content">
+                <h3 class="section-heading">
+                  <mat-icon>verified</mat-icon>
+                  Gestionar Reconocimientos
+                </h3>
+                <p class="section-description">
+                  Reconoce el talento de los estudiantes que han colaborado con tu organización
+                </p>
+              </div>
+              <button mat-raised-button color="primary" 
+                      class="link-student-btn"
+                      (click)="abrirDialogoVincularAlumno()">
+                <mat-icon>person_add</mat-icon>
+                Reconocer Alumno
+              </button>
+            </div>
+
+            <div class="students-list">
+              <div *ngIf="isLoadingStudents()" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Cargando alumnos...</p>
+              </div>
+
+              <div *ngIf="studentsError() && !isLoadingStudents()" class="error-container">
+                <mat-icon>error_outline</mat-icon>
+                <span>{{studentsError()}}</span>
+              </div>
+
+              <div *ngIf="!isLoadingStudents() && !studentsError() && linkedStudents().length === 0" 
+                   class="empty-state">
+                <mat-icon>people_outline</mat-icon>
+                <h4>{{ isOwnProfile() ? 'Aún no has reconocido a ningún alumno' : 'No hay alumnos reconocidos' }}</h4>
+                <p *ngIf="isOwnProfile()">
+                  Comienza a reconocer el talento estudiantil haciendo clic en "Reconocer Alumno"
+                </p>
+              </div>
+
+              <div *ngIf="!isLoadingStudents() && linkedStudents().length > 0" 
+                   class="students-grid">
+                <mat-card *ngFor="let student of linkedStudents(); trackBy: trackByStudentId" 
+                          class="modern-card student-card">
+                  <mat-card-content class="student-card-content">
+                    <div class="student-header">
+                      <div class="student-avatar">
+                        <img [src]="student.imageUrl || getDefaultAvatar(student.name, student.surname)" 
+                             [alt]="student.name + ' ' + student.surname"
+                             (error)="onStudentImageError($event, student.name, student.surname)">
+                      </div>
+                      <div class="student-info">
+                        <h4 class="student-name">{{student.name}} {{student.surname}}</h4>
+                        <p class="student-career" *ngIf="student.career">
+                          {{student.career}}
+                          <span *ngIf="student.currentYearLevel"> - {{student.currentYearLevel}}º año</span>
+                        </p>
+                        <p class="student-institution" *ngIf="student.institution">
+                          <mat-icon>school</mat-icon>
+                          {{student.institution}}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="recognition-info" *ngIf="student.recognitionType || student.associationDate">
+                      <mat-chip-set class="recognition-chips">
+                        <mat-chip *ngIf="student.recognitionType" class="recognition-chip">
+                          <mat-icon>workspace_premium</mat-icon>
+                          {{student.recognitionType}}
+                        </mat-chip>
+                        <mat-chip *ngIf="student.associationDate" class="date-chip">
+                          <mat-icon>event</mat-icon>
+                          Desde {{student.associationDate | date:'MMM yyyy'}}
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+
+                    <div class="student-actions">
+                      <button mat-button color="primary" (click)="verPerfilAlumno(student.studentId)">
+                        <mat-icon>visibility</mat-icon>
+                        Ver Perfil
+                      </button>
+                      <button mat-button color="warn" 
+                              *ngIf="isOwnProfile()"
+                              (click)="desvincularAlumno(student.id)">
+                        <mat-icon>link_off</mat-icon>
+                        Desvincular
+                      </button>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </div>
+          </div>
 
         </mat-tab>
       </mat-tab-group>

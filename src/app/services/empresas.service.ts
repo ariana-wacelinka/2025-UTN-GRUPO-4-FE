@@ -195,4 +195,14 @@ export class EmpresasService {
       })
     );
   }
+
+  buscarEstudiantes(searchTerm: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/users/search`, {
+      params: { 
+        search: searchTerm,
+        page: '0',
+        size: '20'
+      }
+    });
+  }
 }
