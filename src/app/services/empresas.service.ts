@@ -18,129 +18,17 @@ export class EmpresasService {
   ) { }
 
   getEmpresas(): Observable<EmpresaDTO[]> {
-    return of(this.getMockEmpresas());
-  }
-
-  private getMockEmpresas(): EmpresaDTO[] {
-    return [
-      {
-        id: 1,
-        name: 'TechCorp',
-        surname: '',
-        imageUrl: 'https://i.pravatar.cc/150?img=1',
-        description: 'Líder en soluciones tecnológicas innovadoras',
-        industry: 'Tecnología',
-        size: CompanySize.FROM_201_TO_500,
-        webSiteUrl: 'https://techcorp.com',
-        email: 'info@techcorp.com',
-        phone: '+54 11 1234-5678',
-        location: 'Buenos Aires, Argentina',
-        linkedinUrl: 'https://linkedin.com/company/techcorp',
-        role: 'empresa'
-      },
-      {
-        id: 2,
-        name: 'InnovateLab',
-        surname: '',
-        imageUrl: 'https://i.pravatar.cc/150?img=2',
-        description: 'Startup enfocada en IA y Machine Learning',
-        industry: 'Inteligencia Artificial',
-        size: CompanySize.FROM_1_TO_10,
-        webSiteUrl: 'https://innovatelab.com',
-        email: 'contact@innovatelab.com',
-        phone: '+54 11 2345-6789',
-        location: 'Córdoba, Argentina',
-        linkedinUrl: 'https://linkedin.com/company/innovatelab',
-        role: 'empresa'
-      },
-      {
-        id: 3,
-        name: 'DataSolutions',
-        surname: '',
-        imageUrl: 'https://i.pravatar.cc/150?img=3',
-        description: 'Especialistas en análisis de datos y Big Data',
-        industry: 'Data Science',
-        size: CompanySize.FROM_51_TO_200,
-        webSiteUrl: 'https://datasolutions.com',
-        email: 'hello@datasolutions.com',
-        phone: '+54 11 3456-7890',
-        location: 'Rosario, Argentina',
-        linkedinUrl: 'https://linkedin.com/company/datasolutions',
-        role: 'empresa'
-      },
-      {
-        id: 4,
-        name: 'CloudFirst',
-        surname: '',
-        imageUrl: 'https://i.pravatar.cc/150?img=4',
-        description: 'Servicios de cloud computing y DevOps',
-        industry: 'Cloud Computing',
-        size: CompanySize.FROM_51_TO_200,
-        webSiteUrl: 'https://cloudfirst.com',
-        email: 'info@cloudfirst.com',
-        phone: '+54 11 4567-8901',
-        location: 'La Plata, Argentina',
-        linkedinUrl: 'https://linkedin.com/company/cloudfirst',
-        role: 'empresa'
-      },
-      {
-        id: 5,
-        name: 'MobileTech',
-        surname: '',
-        imageUrl: 'https://i.pravatar.cc/150?img=5',
-        description: 'Desarrollo de aplicaciones móviles nativas',
-        industry: 'Desarrollo Móvil',
-        size: CompanySize.FROM_11_TO_50,
-        webSiteUrl: 'https://mobiletech.com',
-        email: 'team@mobiletech.com',
-        phone: '+54 11 5678-9012',
-        location: 'Mendoza, Argentina',
-        linkedinUrl: 'https://linkedin.com/company/mobiletech',
-        role: 'empresa'
-      },
-      {
-        id: 6,
-        name: 'CyberSecure',
-        surname: '',
-        imageUrl: 'https://i.pravatar.cc/150?img=6',
-        description: 'Soluciones de ciberseguridad empresarial',
-        industry: 'Ciberseguridad',
-        size: CompanySize.FROM_201_TO_500,
-        webSiteUrl: 'https://cybersecure.com',
-        email: 'security@cybersecure.com',
-        phone: '+54 11 6789-0123',
-        location: 'San Miguel de Tucumán, Argentina',
-        linkedinUrl: 'https://linkedin.com/company/cybersecure',
-        role: 'empresa'
-      }
-    ];
+    return this.http.get<EmpresaDTO[]>(`${this.apiUrl}/organizations`);
   }
 
   getEmpresaActual(): Observable<EmpresaDTO | null> {
-    // Check if user is logged in and is a company (organization)
     if (!this.authService.isLoggedIn() || !this.authService.isEmpresa()) {
       return of(null);
     }
 
-    // Simular datos de la empresa loggeada
-    const keycloakUser = this.authService.keycloakUser;
-    const empresaLoggeada: EmpresaDTO = {
-      id: keycloakUser?.id || 1,
-      name: keycloakUser?.name || 'Mi Empresa',
-      surname: keycloakUser?.surname || '',
-      imageUrl: keycloakUser?.imageUrl || 'https://i.pravatar.cc/150?img=default',
-      description: keycloakUser?.description || 'Descripción de mi empresa...',
-      industry: 'Tecnología',
-      size: CompanySize.FROM_51_TO_200,
-      webSiteUrl: 'https://miempresa.com',
-      email: keycloakUser?.email || 'empresa@example.com',
-      phone: keycloakUser?.phone || '+54 11 1234-5678',
-      location: keycloakUser?.location || 'Buenos Aires, Argentina',
-      linkedinUrl: keycloakUser?.linkedinUrl || 'https://linkedin.com/company/miempresa',
-      role: 'empresa'
-    };
-
-    return of(empresaLoggeada);
+    return this.authService.getCurrentUserId().pipe(
+      switchMap(userId => this.http.get<EmpresaDTO>(`${this.apiUrl}/organizations/${userId}`))
+    );
   }
 
   /**
@@ -204,5 +92,24 @@ export class EmpresasService {
         size: '20'
       }
     });
+  }
+
+
+  vincularEstudiante(organizationId: number, studentId: number, recognitionType?: string): Observable<any> {
+    const body = {
+      studentId: studentId,
+      recognitionType: recognitionType
+    };
+    return this.http.post(`${this.apiUrl}/organizations/${organizationId}/linked-students`, body);
+  }
+
+
+  obtenerEstudiantesVinculados(organizationId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/organizations/${organizationId}/linked-students`);
+  }
+
+
+  desvincularEstudiante(associationId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/organizations/associations/${associationId}`);
   }
 }

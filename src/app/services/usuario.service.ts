@@ -51,12 +51,7 @@ export class UsuarioService {
   ) {}
 
   getCurrentUser(): Observable<Usuario> {
-    // TODO: Reemplazar con: return this.http.get<Usuario>(`${this.apiUrl}/me`);
-    return of({
-      id: 1,
-      nombre: 'Juan Pérez',
-      email: 'juan.perez@email.com'
-    });
+    return this.http.get<Usuario>(`${this.apiUrl}/me`);
   }
 
   /**

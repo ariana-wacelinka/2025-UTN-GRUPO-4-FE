@@ -47,8 +47,13 @@ export class AtributosService {
   }
 
   crearAtributo(nombre: string): Observable<string> {
-    // Por ahora retornamos directamente el nombre capitalizado
-    // TODO: Implementar endpoint de creación cuando esté disponible en el backend
+    // NOTA: Este método requiere endpoint del backend POST /api/attributes
+    // Cuando el backend esté disponible, reemplazar con:
+    // return this.http.post<AtributoDto>(`${this.apiUrl}/attributes`, { name: nombre }).pipe(
+    //   map(attr => attr.name)
+    // );
+    
+    // Implementación temporal hasta que el backend esté disponible
     const nombreCapitalizado = this.capitalizarPrimeraLetra(nombre);
     return of(nombreCapitalizado);
   }

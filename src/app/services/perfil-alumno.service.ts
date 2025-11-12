@@ -85,54 +85,10 @@ export class PerfilAlumnoService {
 
   private readonly materiasEndpoint: string;
 
-  private mockPerfil: EstudianteDTO = {
-    id: 1,
-    name: 'Ariana',
-    surname: 'Wacelinka',
-    imageUrl:
-      'https://tse2.mm.bing.net/th/id/OIP.5CC9Agv_WNLAAwLXTaSzGAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3',
-    email: 'arianawacelinka@alu.frlp.utn.edu.ar',
-    phone: '+54 9 221 3199796',
-    location: 'La Plata, Buenos Aires',
-    linkedinUrl: 'https://www.linkedin.com/in/ariana-wacelinka-652a70208/',
-    description:
-      'Estudiante apasionada por el desarrollo de software con experiencia en proyectos académicos y personales. Me especializo en desarrollo web full-stack y tengo particular interés en UX/UI y tecnologías emergentes.',
-    role: 'estudiante',
-    career: 'Ingenieria en sistemas de informacion',
-    currentYearLevel: 4,
-    institution:
-      'Universidad Tecnologica Nacional - Facultad Regional La Plata',
-    skills: [
-      'JavaScript',
-      'TypeScript',
-      'Angular',
-      'React',
-      'Node.js',
-      'Python',
-      'Java',
-      'MySQL',
-      'MongoDB',
-      'Git',
-      'Docker',
-    ],
-    languages: [
-      { id: 1, name: 'Español', level: 5 },
-      { id: 2, name: 'Inglés', level: 4 },
-    ],
-    subjects: [],
-    cvUrl: '/assets/documents/WACELINKA, Ariana.pdf',
-    cvFileName: 'WACELINKA_Ariana.pdf',
-    githubUrl: 'https://github.com/ariana-wacelinka/',
-    incomeDate: '2022-03-01',
-    dateOfBirth: '2002-03-15',
-    coverLetter: 'Estudiante apasionada por el desarrollo full-stack.',
-  };
-
   constructor(
     private http: HttpClient,
     @Inject(API_URL) private apiUrl: string
   ) {
-    this.perfilSubject.next(this.mockPerfil);
     this.materiasEndpoint = `${this.apiUrl}/students/profile/subjects`;
   }
 
@@ -240,17 +196,17 @@ export class PerfilAlumnoService {
   }
 
   actualizarHabilidades(habilidades: string[]): Observable<EstudianteDTO> {
-    this.mockPerfil.skills = [...habilidades];
-    this.perfilSubject.next(this.mockPerfil);
-
-    return of(this.mockPerfil);
+    // NOTA: Este método requiere endpoint del backend PUT /api/students/profile/skills
+    // Cuando esté disponible, implementar la llamada HTTP correspondiente
+    console.warn('actualizarHabilidades: Endpoint no implementado en el backend');
+    return throwError(() => new Error('Endpoint no implementado'));
   }
 
   actualizarIdiomas(idiomas: IdiomaDTO[]): Observable<EstudianteDTO> {
-    this.mockPerfil.languages = [...idiomas];
-    this.perfilSubject.next(this.mockPerfil);
-
-    return of(this.mockPerfil);
+    // NOTA: Este método requiere endpoint del backend PUT /api/students/profile/languages
+    // Cuando esté disponible, implementar la llamada HTTP correspondiente
+    console.warn('actualizarIdiomas: Endpoint no implementado en el backend');
+    return throwError(() => new Error('Endpoint no implementado'));
   }
 
   eliminarPerfil(): Observable<{ success: boolean }> {

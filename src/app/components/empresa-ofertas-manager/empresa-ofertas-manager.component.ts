@@ -438,7 +438,6 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
       bidder: {
         id: oferta.bidder.id,
         name: oferta.bidder.name,
-        industry: 'Tecnología', // Mock
         imageUrl: oferta.bidder.imageUrl || undefined
       },
       attributes: oferta.attributes || []
@@ -486,25 +485,18 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
     confirmDialogRef.afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.isLoading.set(true);
-
-        // Por ahora solo mostrar mensaje, en el futuro usar la API
-        setTimeout(() => {
-          this.isLoading.set(false);
-          this.snackBar.open('Oferta desactivada exitosamente', 'Cerrar', { duration: 3000 });
-          // Aquí se refrescaría la lista cuando esté conectado a la API
-        }, 1000);
-
-        // TODO: Implementar con API real
-        // this.ofertasLaboralesService.desactivarOferta(oferta.id).subscribe({
-        //   next: () => {
-        //     this.cargarOfertas();
-        //     this.snackBar.open('Oferta desactivada exitosamente', 'Cerrar', { duration: 3000 });
-        //   },
-        //   error: (error) => {
-        //     console.error('Error al desactivar oferta:', error);
-        //     this.snackBar.open('Error al desactivar la oferta', 'Cerrar', { duration: 3000 });
-        //   }
-        // });
+        this.ofertasLaboralesService.desactivarOferta(oferta.id).subscribe({
+          next: () => {
+            this.isLoading.set(false);
+            this.cargarOfertas();
+            this.snackBar.open('Oferta desactivada exitosamente', 'Cerrar', { duration: 3000 });
+          },
+          error: (error) => {
+            this.isLoading.set(false);
+            console.error('Error al desactivar oferta:', error);
+            this.snackBar.open('Error al desactivar la oferta', 'Cerrar', { duration: 3000 });
+          }
+        });
       }
     });
   }
