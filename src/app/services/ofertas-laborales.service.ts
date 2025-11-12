@@ -19,7 +19,7 @@ import {
     providedIn: 'root'
 })
 export class OfertasLaboralesService {
-    private readonly apiUrl = `${environment.apiUrl}/api/ofertas`;
+    private readonly baseApi = environment.apiUrl;
 
     constructor(private http: HttpClient) { }
 
@@ -54,7 +54,7 @@ export class OfertasLaboralesService {
             }
         }
 
-        return this.http.get<OfertasListResponse>(this.apiUrl, { params })
+        return this.http.get<OfertasListResponse>(`${this.baseApi}/offers`, { params })
             .pipe(
                 map(response => ({
                     ...response,
@@ -69,7 +69,7 @@ export class OfertasLaboralesService {
      * GET /api/ofertas/{id}
      */
     getOfertaById(id: number): Observable<OfertaLaboralDTO> {
-        return this.http.get<OfertaLaboralDTO>(`${this.apiUrl}/${id}`)
+        return this.http.get<OfertaLaboralDTO>(`${this.baseApi}/offers/${id}`)
             .pipe(
                 map(oferta => this.transformOfertaFromAPI(oferta)),
                 catchError(this.handleError)
@@ -81,7 +81,8 @@ export class OfertasLaboralesService {
      * GET /api/aplicantes/oferta/{id}
      */
     getAplicantesByOferta(ofertaId: number): Observable<AplicantesResponse> {
-        return this.http.get<AplicantesResponse>(`${environment.apiUrl}/api/aplicantes/oferta/${ofertaId}`)
+        // Usar el endpoint /applies?offerId=... expuesto por el backend
+        return this.http.get<AplicantesResponse>(`${this.baseApi}/applies?offerId=${ofertaId}`)
             .pipe(
                 map(response => ({
                     ...response,
@@ -98,7 +99,7 @@ export class OfertasLaboralesService {
     createOferta(oferta: CreateOfertaDTO): Observable<OfertaLaboralDTO> {
         const ofertaForAPI = this.transformOfertaToAPI(oferta);
 
-        return this.http.post<OfertaLaboralDTO>(this.apiUrl, ofertaForAPI)
+        return this.http.post<OfertaLaboralDTO>(`${this.baseApi}/offers`, ofertaForAPI)
             .pipe(
                 map(response => this.transformOfertaFromAPI(response)),
                 catchError(this.handleError)
@@ -130,7 +131,8 @@ export class OfertasLaboralesService {
             attributes: (oferta as any).attributes || []
         };
 
-        return this.http.put<OfertaLaboralDTO>(`${environment.apiUrl}/offers/${id}`, ofertaForAPI)
+        // Usar la ruta completa basada en baseApi para mantener consistencia
+        return this.http.put<OfertaLaboralDTO>(`${this.baseApi}/offers/${id}`, ofertaForAPI)
             .pipe(
                 map(response => this.transformOfertaFromAPI(response)),
                 catchError(this.handleError)
@@ -142,7 +144,7 @@ export class OfertasLaboralesService {
      * PATCH /api/ofertas/desactivar/{id}
      */
     desactivarOferta(id: number): Observable<OfertaLaboralDTO> {
-        return this.http.patch<OfertaLaboralDTO>(`${this.apiUrl}/desactivar/${id}`, {})
+        return this.http.patch<OfertaLaboralDTO>(`${this.baseApi}/offers/desactivar/${id}`, {})
             .pipe(
                 map(response => this.transformOfertaFromAPI(response)),
                 catchError(this.handleError)
@@ -154,7 +156,7 @@ export class OfertasLaboralesService {
      * PATCH /api/ofertas/activar/{id}
      */
     activarOferta(id: number): Observable<OfertaLaboralDTO> {
-        return this.http.patch<OfertaLaboralDTO>(`${this.apiUrl}/activar/${id}`, {})
+        return this.http.patch<OfertaLaboralDTO>(`${this.baseApi}/offers/activar/${id}`, {})
             .pipe(
                 map(response => this.transformOfertaFromAPI(response)),
                 catchError(this.handleError)
@@ -168,7 +170,8 @@ export class OfertasLaboralesService {
     actualizarEstadoAplicacion(aplicanteId: number, nuevoEstado: EstadoAplicacion, mensaje?: string): Observable<AplicanteOfertaDTO> {
         const body = { estado: nuevoEstado, mensaje };
 
-        return this.http.patch<AplicanteOfertaDTO>(`${environment.apiUrl}/api/aplicantes/${aplicanteId}/estado`, body)
+        // Actualizar estado de aplicación: backend expone /applies/{id}
+        return this.http.patch<AplicanteOfertaDTO>(`${this.baseApi}/applies/${aplicanteId}`, body)
             .pipe(
                 map(response => this.transformAplicanteFromAPI(response)),
                 catchError(this.handleError)
@@ -182,7 +185,7 @@ export class OfertasLaboralesService {
     getEstadisticasOfertas(empresaId: number): Observable<any> {
         const params = new HttpParams().set('empresaId', empresaId.toString());
 
-        return this.http.get(`${this.apiUrl}/stats`, { params })
+    return this.http.get(`${this.baseApi}/offers/stats`, { params })
             .pipe(catchError(this.handleError));
     }
 
