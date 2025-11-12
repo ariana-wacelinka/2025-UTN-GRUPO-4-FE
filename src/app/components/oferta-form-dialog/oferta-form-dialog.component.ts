@@ -66,9 +66,8 @@ export interface OfertaFormDialogData {
       <mat-dialog-content class="dialog-content">
         <form [formGroup]="ofertaForm" class="oferta-form">
           
-          <!-- Información Básica -->
+          <!-- Información básica (sin secciones adicionales como en la página publicar) -->
           <div class="form-section">
-            <h3 class="section-title">Información Básica</h3>
             
             <div class="form-row">
               <mat-form-field appearance="outline" class="form-field">
@@ -76,7 +75,6 @@ export interface OfertaFormDialogData {
                 <input matInput formControlName="title" placeholder="ej. Desarrollador Full Stack Senior">
                 <mat-error *ngIf="f['title'].invalid && f['title'].touched">
                   <span *ngIf="f['title'].errors?.['required']">El título es requerido</span>
-                  <span *ngIf="f['title'].errors?.['minlength']">Mínimo 5 caracteres</span>
                 </mat-error>
               </mat-form-field>
             </div>
@@ -105,20 +103,16 @@ export interface OfertaFormDialogData {
 
             <div class="form-row">
               <mat-form-field appearance="outline" class="form-field">
-                <mat-label>Pago Estimado (USD) </mat-label>
-                <input matInput type="number" formControlName="estimatedPayment" placeholder="2000">
-                <mat-hint>Ingrese el monto mensual en dólares</mat-hint>
-                <mat-error *ngIf="f['estimatedPayment'].invalid && f['estimatedPayment'].touched">
-                  <span *ngIf="f['estimatedPayment'].errors?.['required']">El salario es requerido</span>
-                  <span *ngIf="f['estimatedPayment'].errors?.['min']">El salario debe ser mayor a 0</span>
-                </mat-error>
+                <mat-label>Pago Aproximado (opcional)</mat-label>
+                <input matInput type="text" formControlName="estimatedPayment" placeholder="Ej: USD 2000-3000">
+                <mat-hint>Opcional</mat-hint>
               </mat-form-field>
             </div>
           </div>
 
           <!-- Descripción -->
           <div class="form-section">
-            <h3 class="section-title">Descripción del Puesto</h3>
+            <h3 class="section-title">Descripción</h3>
             
             <mat-form-field appearance="outline" class="form-field full-width">
               <mat-label>Descripción </mat-label>
@@ -126,20 +120,19 @@ export interface OfertaFormDialogData {
                 matInput 
                 formControlName="description" 
                 rows="4" 
-                placeholder="Describe las responsabilidades, el ambiente de trabajo, y lo que hace único a este puesto..."
+                placeholder="Describe las responsabilidades, el ambiente de trabajo y lo que hace único a este puesto..."
                 maxlength="1000">
               </textarea>
-              <mat-hint>{{ f['description'].value?.length || 0 }}/1000 - Mínimo 50 caracteres</mat-hint>
+              <mat-hint>{{ f['description'].value?.length || 0 }}/1000</mat-hint>
               <mat-error *ngIf="f['description'].invalid && f['description'].touched">
                 <span *ngIf="f['description'].errors?.['required']">La descripción es requerida</span>
-                <span *ngIf="f['description'].errors?.['minlength']">Mínimo 50 caracteres</span>
               </mat-error>
             </mat-form-field>
           </div>
 
           <!-- Requisitos -->
           <div class="form-section">
-            <h3 class="section-title">Requisitos y Habilidades</h3>
+            <h3 class="section-title">Requisitos</h3>
             
             <mat-form-field appearance="outline" class="form-field full-width">
               <mat-label>Requisitos </mat-label>
@@ -150,16 +143,15 @@ export interface OfertaFormDialogData {
                 placeholder="Experiencia requerida, tecnologías, habilidades blandas, educación..."
                 maxlength="800">
               </textarea>
-              <mat-hint>{{ f['requirements'].value?.length || 0 }}/800 - Mínimo 20 caracteres</mat-hint>
+              <mat-hint>{{ f['requirements'].value?.length || 0 }}/800</mat-hint>
               <mat-error *ngIf="f['requirements'].invalid && f['requirements'].touched">
                 <span *ngIf="f['requirements'].errors?.['required']">Los requisitos son requeridos</span>
-                <span *ngIf="f['requirements'].errors?.['minlength']">Mínimo 20 caracteres</span>
               </mat-error>
             </mat-form-field>
 
             <!-- Atributos con autocomplete -->
             <div class="skills-section">
-              <label class="skills-label">Tecnologías y Habilidades Clave</label>
+              <label class="skills-label">Atributos</label>
               <mat-form-field appearance="outline" class="skills-input">
                 <mat-label>Atributos</mat-label>
                 <input
@@ -268,12 +260,14 @@ export class OfertaFormDialogComponent implements OnInit {
 
   private initializeForm() {
     this.ofertaForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(5)]],
-      description: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(1000)]],
-      requirements: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(800)]],
+      title: ['', [Validators.required]],
+      // Descripción y requisitos: solo required (sin minLength)
+      description: ['', [Validators.required, Validators.maxLength(1000)]],
+      requirements: ['', [Validators.required, Validators.maxLength(800)]],
       modality: ['', [Validators.required]],
       location: ['', [Validators.required]],
-      estimatedPayment: ['', [Validators.required, Validators.min(1)]],
+      // Pago estimado es opcional (como en la página de publicar)
+      estimatedPayment: ['', []],
       fechaVencimiento: ['', [this.futureDateValidator]]
     });
   }
