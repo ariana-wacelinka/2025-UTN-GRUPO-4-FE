@@ -297,6 +297,9 @@
 
     mat-card-header {
         padding-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
 
         .section-title {
             display: flex;
@@ -310,6 +313,33 @@
             .section-icon {
                 color: var(--primary-color);
                 font-size: 1.5rem;
+            }
+        }
+
+        button[mat-icon-button] {
+            width: 52px;
+            height: 52px;
+            line-height: 52px;
+
+            mat-icon {
+                font-size: 36px;
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                color: var(--primary-color);
+            }
+
+            &:hover {
+                background-color: rgba(102, 126, 234, 0.1);
+                
+                mat-icon {
+                    color: var(--primary-dark);
+                    transform: scale(1.1);
+                }
+            }
+
+            &:active {
+                transform: scale(0.95);
             }
         }
     }
@@ -2904,10 +2934,16 @@
                             padding: 8px 16px !important;
                             border-radius: 20px !important;
                             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+                            display: inline-flex !important;
+                            align-items: center !important;
+                            gap: 6px !important;
 
                             mat-icon {
-                                font-size: 16px;
-                                margin-right: 4px;
+                                font-size: 18px !important;
+                                width: 18px !important;
+                                height: 18px !important;
+                                line-height: 18px !important;
+                                margin: 0 !important;
                             }
                         }
                     }
@@ -3068,9 +3104,10 @@
                 font-weight: 500;
 
                 mat-icon {
-                    font-size: 16px;
-                    width: 16px;
-                    height: 16px;
+                    font-size: 18px;
+                    width: 18px;
+                    height: 18px;
+                    line-height: 18px;
                     color: var(--info-color);
                 }
             }

@@ -19,7 +19,7 @@ import { AuthService } from '../../../services/auth.service';
 import { AtributosService } from '../../../services/atributos.service';
 import { offersService } from '../../../services/ofertas.service';
 import { OfertaListaDTO, PagedResponseDTO } from '../../../models/oferta.dto';
-import { EstudianteDTO, ActualizarEstudianteDTO, AssociatedCompanyDTO, WorkExperienceDTO, PersonalProjectDTO } from '../../../models/aplicante.dto';
+import { EstudianteDTO, ActualizarEstudianteDTO, AssociatedCompanyDTO, WorkExperienceDTO, PersonalProjectDTO, CreateWorkExperienceDTO, UpdateWorkExperienceDTO, CreatePersonalProjectDTO, UpdatePersonalProjectDTO } from '../../../models/aplicante.dto';
 import { IdiomaDTO } from '../../../models/usuario.dto';
 import { Subject, takeUntil, Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -27,6 +27,8 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ProfileHeaderComponent, ProfileHeaderData, SocialLink } from '../../../components/profile-header/profile-header.component';
 import { InfoCardComponent, InfoCardData } from '../../../components/info-card/info-card.component';
 import { SkillsCardComponent } from '../../../components/skills-card/skills-card.component';
+import { WorkExperienceDialogComponent, WorkExperienceDialogData } from '../../../components/work-experience-dialog/work-experience-dialog.component';
+import { PersonalProjectDialogComponent, PersonalProjectDialogData } from '../../../components/personal-project-dialog/personal-project-dialog.component';
 
 @Component({
   selector: 'app-perfil-alumno',
@@ -226,7 +228,8 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private route: ActivatedRoute,
     private router: Router,
-    private ofertasService: offersService
+    private ofertasService: offersService,
+    private dialog: MatDialog
   ) {
     this.initializeForm();
   }
@@ -259,7 +262,7 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.cargarPerfil();
     this.cargarOfertasAplicadas();
-    this.cargarOfertasPublicadas();
+    // cargarOfertasPublicadas() se llamará después de cargar el perfil
   }
 
   ngOnDestroy() {
@@ -364,6 +367,9 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
           this.perfilAlumno.set(perfil);
           this.materiasAlumno
           this.isLoading.set(false);
+          
+          // Cargar ofertas publicadas después de tener el perfil cargado
+          this.cargarOfertasPublicadas();
         },
         error: (error) => {
           console.error('Error al cargar el perfil:', error);
@@ -857,26 +863,37 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
       return; 
     }
 
+    // Asegurar que usamos el ID de usuario (UserEntity.id), no el del estudiante
+    const perfilActual = this.perfilAlumno();
+    if (!perfilActual) {
+      console.warn('⚠️ No se puede cargar ofertas publicadas: perfil no disponible');
+      this.ofertasPublicadas = [];
+      this.totalOfertasPublicadas = 0;
+      this.isOfertasPublicadasLoading = false;
+      return;
+    }
+
     this.isOfertasPublicadasLoading = true;
-    this.authService.getCurrentUserId().pipe(
-      takeUntil(this.destroy$),
-      switchMap(currentUserId =>
-        this.ofertasService.getoffers({ bidderId: currentUserId })
+
+    // Versión original: solo filtra por bidderId usando el id del usuario autenticado
+    this.authService.getCurrentUserId()
+      .pipe(
+        switchMap(userId => this.ofertasService.getoffers({ bidderId: userId })),
+        takeUntil(this.destroy$)
       )
-    )
-    .subscribe({
-      next: (response: PagedResponseDTO<OfertaListaDTO>) => {
-        this.ofertasPublicadas = response.content;
-        this.totalOfertasPublicadas = response.totalElements;
-        this.isOfertasPublicadasLoading = false;
-        this.ofertasPublicadasError = null;
-      },
-      error: (error: any) => {
-        console.error('Error al cargar ofertas publicadas:', error);
-        this.isOfertasPublicadasLoading = false;
-        this.ofertasPublicadasError = 'No pudimos cargar tus publicaciones. Intenta nuevamente más tarde.';
-      }
-    });
+      .subscribe({
+        next: (response: PagedResponseDTO<OfertaListaDTO>) => {
+          this.ofertasPublicadas = response.content;
+          this.totalOfertasPublicadas = response.totalElements;
+          this.isOfertasPublicadasLoading = false;
+          this.ofertasPublicadasError = null;
+        },
+        error: (error: any) => {
+          console.error('Error al cargar ofertas publicadas:', error);
+          this.isOfertasPublicadasLoading = false;
+          this.ofertasPublicadasError = 'No pudimos cargar tus publicaciones. Intenta nuevamente más tarde.';
+        }
+      });
   }
 
   trackByOfertaPublicada(index: number, oferta: OfertaListaDTO) {
@@ -1048,6 +1065,249 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
     const imgElement = event.target as HTMLImageElement;
     if (imgElement) {
       imgElement.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fallbackName)}&background=667eea&color=fff`;
+    }
+  }
+
+  agregarExperienciaLaboral() {
+    const dialogData: WorkExperienceDialogData = {
+      isEditing: false
+    };
+
+    const dialogRef = this.dialog.open(WorkExperienceDialogComponent, {
+      width: '700px',
+      maxWidth: '90vw',
+      disableClose: true,
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: CreateWorkExperienceDTO) => {
+      if (result) {
+        // Obtener el studentId del perfil actual
+        const studentId = this.perfilAlumno()?.id;
+        if (!studentId) {
+          this.snackBar.open('Error: No se pudo identificar el estudiante', 'Cerrar', {
+            duration: 3000
+          });
+          return;
+        }
+
+        // Agregar el studentId al DTO
+        const experienciaConStudentId: CreateWorkExperienceDTO = {
+          ...result,
+          studentId: studentId
+        };
+
+        this.perfilService.crearExperienciaLaboral(experienciaConStudentId).subscribe({
+          next: () => {
+            this.snackBar.open('Experiencia laboral agregada exitosamente', 'Cerrar', {
+              duration: 3000
+            });
+            this.cargarPerfil();
+          },
+          error: (error) => {
+            console.error('Error al agregar experiencia laboral:', error);
+            this.snackBar.open('Error al agregar la experiencia laboral', 'Cerrar', {
+              duration: 3000
+            });
+          }
+        });
+      }
+    });
+  }
+
+  editarExperienciaLaboral(experiencia: WorkExperienceDTO) {
+    const dialogData: WorkExperienceDialogData = {
+      experience: experiencia,
+      isEditing: true
+    };
+
+    const dialogRef = this.dialog.open(WorkExperienceDialogComponent, {
+      width: '700px',
+      maxWidth: '90vw',
+      disableClose: true,
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: UpdateWorkExperienceDTO) => {
+      if (result && experiencia.id) {
+        // Obtener el studentId del perfil actual
+        const studentId = this.perfilAlumno()?.id;
+        if (!studentId) {
+          this.snackBar.open('Error: No se pudo identificar el estudiante', 'Cerrar', {
+            duration: 3000
+          });
+          return;
+        }
+
+        // Agregar el studentId al DTO
+        const experienciaConStudentId: UpdateWorkExperienceDTO = {
+          ...result,
+          studentId: studentId
+        };
+
+        this.perfilService.actualizarExperienciaLaboral(experiencia.id, experienciaConStudentId).subscribe({
+          next: () => {
+            this.snackBar.open('Experiencia laboral actualizada exitosamente', 'Cerrar', {
+              duration: 3000
+            });
+            this.cargarPerfil();
+          },
+          error: (error) => {
+            console.error('Error al actualizar experiencia laboral:', error);
+            this.snackBar.open('Error al actualizar la experiencia laboral', 'Cerrar', {
+              duration: 3000
+            });
+          }
+        });
+      }
+    });
+  }
+
+  eliminarExperienciaLaboral(experienciaId: number) {
+    if (!experienciaId) {
+      this.snackBar.open('No se puede eliminar esta experiencia', 'Cerrar', {
+        duration: 3000
+      });
+      return;
+    }
+
+    if (confirm('¿Estás seguro de que deseas eliminar esta experiencia laboral?')) {
+      this.perfilService.eliminarExperienciaLaboral(experienciaId).subscribe({
+        next: () => {
+          this.snackBar.open('Experiencia laboral eliminada exitosamente', 'Cerrar', {
+            duration: 3000
+          });
+          // Recargar el perfil
+          this.cargarPerfil();
+        },
+        error: (error) => {
+          console.error('Error al eliminar experiencia laboral:', error);
+          this.snackBar.open('Error al eliminar la experiencia laboral', 'Cerrar', {
+            duration: 3000
+          });
+        }
+      });
+    }
+  }
+
+  agregarProyectoPersonal() {
+    const dialogData: PersonalProjectDialogData = {
+      isEditing: false
+    };
+
+    const dialogRef = this.dialog.open(PersonalProjectDialogComponent, {
+      width: '700px',
+      maxWidth: '90vw',
+      disableClose: true,
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: Omit<CreatePersonalProjectDTO, 'studentId'>) => {
+      if (result) {
+        // Obtener el studentId del perfil actual
+        const studentId = this.perfilAlumno()?.id;
+        if (!studentId) {
+          this.snackBar.open('Error: No se pudo identificar el estudiante', 'Cerrar', {
+            duration: 3000
+          });
+          return;
+        }
+
+        // Agregar el studentId al DTO
+        const proyectoConStudentId: CreatePersonalProjectDTO = {
+          ...result,
+          studentId: studentId
+        };
+
+        this.perfilService.crearProyectoPersonal(proyectoConStudentId).subscribe({
+          next: () => {
+            this.snackBar.open('Proyecto personal agregado exitosamente', 'Cerrar', {
+              duration: 3000
+            });
+            this.cargarPerfil();
+          },
+          error: (error) => {
+            console.error('Error al agregar proyecto personal:', error);
+            this.snackBar.open('Error al agregar el proyecto personal', 'Cerrar', {
+              duration: 3000
+            });
+          }
+        });
+      }
+    });
+  }
+
+  editarProyectoPersonal(proyecto: PersonalProjectDTO) {
+    const dialogData: PersonalProjectDialogData = {
+      project: proyecto,
+      isEditing: true
+    };
+
+    const dialogRef = this.dialog.open(PersonalProjectDialogComponent, {
+      width: '700px',
+      maxWidth: '90vw',
+      disableClose: true,
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: Partial<UpdatePersonalProjectDTO>) => {
+      if (result && proyecto.id) {
+        // Obtener el studentId del perfil actual
+        const studentId = this.perfilAlumno()?.id;
+        if (!studentId) {
+          this.snackBar.open('Error: No se pudo identificar el estudiante', 'Cerrar', {
+            duration: 3000
+          });
+          return;
+        }
+
+        // Agregar el studentId al DTO
+        const proyectoConStudentId: UpdatePersonalProjectDTO = {
+          ...result,
+          studentId: studentId
+        };
+
+        this.perfilService.actualizarProyectoPersonal(proyecto.id, proyectoConStudentId).subscribe({
+          next: () => {
+            this.snackBar.open('Proyecto personal actualizado exitosamente', 'Cerrar', {
+              duration: 3000
+            });
+            this.cargarPerfil();
+          },
+          error: (error) => {
+            console.error('Error al actualizar proyecto personal:', error);
+            this.snackBar.open('Error al actualizar el proyecto personal', 'Cerrar', {
+              duration: 3000
+            });
+          }
+        });
+      }
+    });
+  }
+
+  eliminarProyectoPersonal(proyectoId: number) {
+    if (!proyectoId) {
+      this.snackBar.open('No se puede eliminar este proyecto', 'Cerrar', {
+        duration: 3000
+      });
+      return;
+    }
+
+    if (confirm('¿Estás seguro de que deseas eliminar este proyecto personal?')) {
+      this.perfilService.eliminarProyectoPersonal(proyectoId).subscribe({
+        next: () => {
+          this.snackBar.open('Proyecto personal eliminado exitosamente', 'Cerrar', {
+            duration: 3000
+          });
+          this.cargarPerfil();
+        },
+        error: (error) => {
+          console.error('Error al eliminar proyecto personal:', error);
+          this.snackBar.open('Error al eliminar el proyecto personal', 'Cerrar', {
+            duration: 3000
+          });
+        }
+      });
     }
   }
 }
