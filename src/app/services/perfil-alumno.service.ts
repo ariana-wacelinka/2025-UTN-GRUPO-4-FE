@@ -3,7 +3,17 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap, switchMap } from 'rxjs/operators';
 import { API_URL } from '../app.config';
-import { EstudianteDTO, ActualizarEstudianteDTO, IdiomaDTO } from '../models/aplicante.dto';
+import { 
+  EstudianteDTO, 
+  ActualizarEstudianteDTO, 
+  IdiomaDTO,
+  WorkExperienceDTO,
+  CreateWorkExperienceDTO,
+  UpdateWorkExperienceDTO,
+  PersonalProjectDTO,
+  CreatePersonalProjectDTO,
+  UpdatePersonalProjectDTO
+} from '../models/aplicante.dto';
 import { AuthService } from './auth.service';
 import { P } from '@angular/cdk/keycodes';
 
@@ -361,6 +371,115 @@ export class PerfilAlumnoService {
           )
       )
     );
+  }
+
+
+  crearExperienciaLaboral(experiencia: CreateWorkExperienceDTO): Observable<WorkExperienceDTO> {
+    return this.http
+      .post<WorkExperienceDTO>(`${this.apiUrl}/work-experiences`, experiencia)
+      .pipe(
+        tap((response) => {
+          console.log('Experiencia laboral creada:', response);
+          // Recargar el perfil para actualizar la lista
+          this.authService.getCurrentUserId().pipe(
+            switchMap(id => this.getPerfil(id))
+          ).subscribe();
+        }),
+        catchError((error) => {
+          console.error('Error al crear experiencia laboral:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+
+  actualizarExperienciaLaboral(id: number, experiencia: UpdateWorkExperienceDTO): Observable<WorkExperienceDTO> {
+    return this.http
+      .put<WorkExperienceDTO>(`${this.apiUrl}/work-experiences/${id}`, experiencia)
+      .pipe(
+        tap((response) => {
+          console.log('Experiencia laboral actualizada:', response);
+          // Recargar el perfil para actualizar la lista
+          this.authService.getCurrentUserId().pipe(
+            switchMap(userId => this.getPerfil(userId))
+          ).subscribe();
+        }),
+        catchError((error) => {
+          console.error('Error al actualizar experiencia laboral:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+
+  eliminarExperienciaLaboral(id: number): Observable<void> {
+    return this.http
+      .delete<void>(`${this.apiUrl}/work-experiences/${id}`)
+      .pipe(
+        tap(() => {
+          console.log('Experiencia laboral eliminada');
+          // Recargar el perfil para actualizar la lista
+          this.authService.getCurrentUserId().pipe(
+            switchMap(userId => this.getPerfil(userId))
+          ).subscribe();
+        }),
+        catchError((error) => {
+          console.error('Error al eliminar experiencia laboral:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // === Personal Projects ===
+  crearProyectoPersonal(proyecto: CreatePersonalProjectDTO): Observable<PersonalProjectDTO> {
+    return this.http
+      .post<PersonalProjectDTO>(`${this.apiUrl}/personal-projects`, proyecto)
+      .pipe(
+        tap(response => {
+          console.log('Proyecto personal creado:', response);
+          this.authService.getCurrentUserId().pipe(
+            switchMap(id => this.getPerfil(id))
+          ).subscribe();
+        }),
+        catchError(error => {
+          console.error('Error al crear proyecto personal:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  actualizarProyectoPersonal(id: number, proyecto: UpdatePersonalProjectDTO): Observable<PersonalProjectDTO> {
+    return this.http
+      .put<PersonalProjectDTO>(`${this.apiUrl}/personal-projects/${id}`, proyecto)
+      .pipe(
+        tap(response => {
+          console.log('Proyecto personal actualizado:', response);
+          this.authService.getCurrentUserId().pipe(
+            switchMap(uid => this.getPerfil(uid))
+          ).subscribe();
+        }),
+        catchError(error => {
+          console.error('Error al actualizar proyecto personal:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  eliminarProyectoPersonal(id: number): Observable<void> {
+    return this.http
+      .delete<void>(`${this.apiUrl}/personal-projects/${id}`)
+      .pipe(
+        tap(() => {
+          console.log('Proyecto personal eliminado');
+          this.authService.getCurrentUserId().pipe(
+            switchMap(uid => this.getPerfil(uid))
+          ).subscribe();
+        }),
+        catchError(error => {
+          console.error('Error al eliminar proyecto personal:', error);
+          return throwError(() => error);
+        })
+      );
   }
 
 }

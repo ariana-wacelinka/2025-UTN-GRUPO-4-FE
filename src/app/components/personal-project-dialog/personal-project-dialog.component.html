@@ -1,0 +1,145 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>{{ isEditing() ? 'edit' : 'add' }}</mat-icon>
+      {{ isEditing() ? 'Editar Proyecto Personal' : 'Agregar Proyecto Personal' }}
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="projectForm" class="project-form">
+      <!-- Título -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Título del Proyecto</mat-label>
+        <input matInput formControlName="title" placeholder="ej. Sistema de Gestión de Empleos">
+        <mat-icon matPrefix>work_outline</mat-icon>
+        <mat-error *ngIf="f['title'].hasError('required')">
+          El título es requerido
+        </mat-error>
+        <mat-error *ngIf="f['title'].hasError('minlength')">
+          El título debe tener al menos 3 caracteres
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Descripción -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descripción</mat-label>
+        <textarea 
+          matInput 
+          formControlName="description" 
+          rows="4"
+          placeholder="Describe el proyecto, sus características principales y tu contribución"></textarea>
+        <mat-icon matPrefix>description</mat-icon>
+        <mat-error *ngIf="f['description'].hasError('required')">
+          La descripción es requerida
+        </mat-error>
+        <mat-error *ngIf="f['description'].hasError('minlength')">
+          La descripción debe tener al menos 10 caracteres
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Tecnologías -->
+      <div class="full-width">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tecnologías Utilizadas</mat-label>
+          <mat-chip-grid #chipGrid>
+            @for (tech of technologies(); track tech) {
+              <mat-chip-row (removed)="removeTechnology(tech)">
+                {{ tech }}
+                <button matChipRemove>
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip-row>
+            }
+            <input
+              placeholder="Agregar tecnología..."
+              [matChipInputFor]="chipGrid"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              (matChipInputTokenEnd)="addTechnology($event)"
+            />
+          </mat-chip-grid>
+          <mat-icon matPrefix>code</mat-icon>
+          <mat-hint>Presiona Enter o coma para agregar</mat-hint>
+        </mat-form-field>
+        @if (technologies().length === 0) {
+          <div class="error-message">
+            <mat-icon>error_outline</mat-icon>
+            Debes agregar al menos una tecnología
+          </div>
+        }
+      </div>
+
+      <!-- URLs -->
+      <div class="url-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>URL del Proyecto (opcional)</mat-label>
+          <input matInput formControlName="projectUrl" placeholder="https://github.com/usuario/proyecto">
+          <mat-icon matPrefix>link</mat-icon>
+          <mat-error *ngIf="f['projectUrl'].hasError('invalidUrl')">
+            URL inválida
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>URL de Imagen (opcional)</mat-label>
+          <input matInput formControlName="imageUrl" placeholder="https://example.com/image.png">
+          <mat-icon matPrefix>image</mat-icon>
+          <mat-error *ngIf="f['imageUrl'].hasError('invalidUrl')">
+            URL inválida
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Fechas -->
+      <div class="date-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Fecha de Inicio</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="startDate" type="date" placeholder="YYYY-MM-DD">
+          <mat-icon matPrefix>event</mat-icon>
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+          <mat-hint>Formato: Año-Mes-Día (ej. 2024-01-15)</mat-hint>
+          <mat-error *ngIf="f['startDate'].hasError('required')">
+            La fecha de inicio es requerida
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Fecha de Fin</mat-label>
+          <input matInput [matDatepicker]="endPicker" formControlName="endDate" type="date" placeholder="YYYY-MM-DD">
+          <mat-icon matPrefix>event</mat-icon>
+          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+          <mat-hint>Formato: Año-Mes-Día (ej. 2024-12-31)</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Checkbox Proyecto Actual -->
+      <div class="checkbox-container">
+        <mat-checkbox formControlName="isCurrentProject">
+          <mat-icon>schedule</mat-icon>
+          Actualmente trabajando en este proyecto
+        </mat-checkbox>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" class="cancel-button">
+      <mat-icon>cancel</mat-icon>
+      Cancelar
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSave()"
+      [disabled]="projectForm.invalid || technologies().length === 0"
+      class="save-button">
+      <mat-icon>{{ isEditing() ? 'save' : 'add' }}</mat-icon>
+      {{ isEditing() ? 'Guardar Cambios' : 'Agregar Proyecto' }}
+    </button>
+  </mat-dialog-actions>
+</div>

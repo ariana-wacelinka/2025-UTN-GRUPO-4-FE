@@ -389,6 +389,12 @@
                             <mat-icon class="section-icon">work</mat-icon>
                             Experiencia Laboral
                         </mat-card-title>
+                        <button mat-icon-button 
+                                *ngIf="isOwnProfile()"
+                                (click)="agregarExperienciaLaboral()"
+                                matTooltip="Agregar experiencia laboral">
+                            <mat-icon>add_circle</mat-icon>
+                        </button>
                     </mat-card-header>
                     <mat-card-content>
                         <div class="experience-timeline">
@@ -404,11 +410,26 @@
                                             <h4 class="position-title">{{exp.position}}</h4>
                                             <h5 class="company-name">{{exp.company}}</h5>
                                         </div>
-                                        <div class="current-badge" *ngIf="exp.isCurrentJob">
-                                            <mat-chip class="current-chip">
-                                                <mat-icon>schedule</mat-icon>
-                                                Actual
-                                            </mat-chip>
+                                        <div class="header-actions">
+                                            <div class="current-badge" *ngIf="exp.isCurrentJob">
+                                                <mat-chip class="current-chip">
+                                                    <mat-icon>schedule</mat-icon>
+                                                    Actual
+                                                </mat-chip>
+                                            </div>
+                                            <div class="action-buttons" *ngIf="isOwnProfile()">
+                                                <button mat-icon-button 
+                                                        (click)="editarExperienciaLaboral(exp)"
+                                                        matTooltip="Editar">
+                                                    <mat-icon>edit</mat-icon>
+                                                </button>
+                                                <button mat-icon-button 
+                                                        color="warn"
+                                                        (click)="eliminarExperienciaLaboral(exp.id!)"
+                                                        matTooltip="Eliminar">
+                                                    <mat-icon>delete</mat-icon>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="experience-period">
@@ -433,6 +454,12 @@
                             <mat-icon class="section-icon">code</mat-icon>
                             Proyectos Personales
                         </mat-card-title>
+                        <button mat-icon-button 
+                                *ngIf="isOwnProfile()"
+                                (click)="agregarProyectoPersonal()"
+                                matTooltip="Agregar proyecto personal">
+                            <mat-icon>add_circle</mat-icon>
+                        </button>
                     </mat-card-header>
                     <mat-card-content>
                         <div class="projects-grid">
