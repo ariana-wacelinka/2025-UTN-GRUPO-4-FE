@@ -94,95 +94,98 @@ import { AuthService } from '../../services/auth.service';
         </mat-card>
       </div>
 
-      <!-- Lista de Ofertas -->
-      <div class="ofertas-list" *ngIf="ofertas().length > 0; else emptyState">
-        <div class="ofertas-grid">
-          @for (oferta of ofertas(); track oferta.id) {
-            <mat-card class="oferta-empresa-card modern-card">
-              <!-- Header de la oferta -->
-              <div class="card-header">
-                <div class="title-section">
-                  <h3 class="job-title">{{ oferta.title }}</h3>
-                  <div class="job-meta">
-                    <div class="meta-item">
-                      <mat-icon class="meta-icon">location_on</mat-icon>
-                      <span>{{ oferta.location }}</span>
-                    </div>
-                    <div class="meta-item">
-                      <mat-icon class="meta-icon">work</mat-icon>
-                      <span>{{ oferta.modality }}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-actions" *ngIf="isOwnProfile">
-                  <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menu="matMenu">
-                    <button mat-menu-item (click)="verDetalle(oferta)">
-                      <mat-icon>visibility</mat-icon>
-                      <span>Ver Detalle</span>
-                    </button>
-                    <button mat-menu-item (click)="editarOferta(oferta)" [disabled]="!canEditOferta(oferta)">
-                      <mat-icon>edit</mat-icon>
-                      <span>Editar</span>
-                    </button>
-                    <button mat-menu-item (click)="verAplicantes(oferta)">
-                      <mat-icon>people</mat-icon>
-                      <span>Ver Aplicantes</span>
-                    </button>
-                    <button mat-menu-item (click)="desactivarOferta(oferta)" class="danger-action">
-                      <mat-icon>block</mat-icon>
-                      <span>Desactivar</span>
-                    </button>
-                  </mat-menu>
-                </div>
-              </div>
-
-              <!-- Contenido de la oferta -->
-              <mat-card-content class="card-content">
-                <div class="salary-info">
-                  <span class="salary-badge">{{ oferta.estimatedPayment }}</span>
-                </div>
-
-                <p class="job-description">{{ getDescripcionCorta(oferta.description) }}</p>
-
-                <!-- Atributos/Skills -->
-                <div class="tech-stack" *ngIf="oferta.attributes && oferta.attributes.length > 0">
-                  @for (atributo of getAtributosLimitados(oferta.attributes); track atributo) {
-                    <mat-chip class="tech-chip" selected>{{ atributo }}</mat-chip>
-                  }
-                  @if (oferta.attributes.length > 4) {
-                    <span class="more-tech">+{{ oferta.attributes.length - 4 }} más</span>
-                  }
-                </div>
-              </mat-card-content>
-
-              <!-- Footer de la oferta -->
-              <div class="card-footer">
-                <div class="footer-stats" *ngIf="isOwnProfile">
-                  <div class="stat-item">
-                    <mat-icon class="stat-icon-small">people</mat-icon>
-                    <span>{{ getNumeroAplicantes(oferta.id) }} aplicantes</span>
-                  </div>
-                </div>
-                <div class="footer-actions" *ngIf="isOwnProfile">
-                  <button mat-button class="primary-btn" (click)="verAplicantes(oferta)">
-                    Ver Aplicantes
-                  </button>
-                </div>
-                <div class="footer-actions" *ngIf="!isOwnProfile">
-                  <button mat-button class="primary-btn" (click)="verDetalle(oferta)">
-                    Ver Detalle
-                  </button>
-                </div>
-              </div>
-            </mat-card>
-          }
+      <!-- Lista de Ofertas / Loading -->
+      <ng-container *ngIf="isLoading(); else loaded">
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Cargando ofertas...</p>
         </div>
-      </div>
+      </ng-container>
 
-      <!-- Estado vacío -->
+      <ng-template #loaded>
+        <div class="ofertas-list" *ngIf="ofertas().length > 0; else emptyState">
+          <div class="ofertas-grid">
+            @for (oferta of ofertas(); track oferta.id) {
+              <mat-card class="oferta-empresa-card modern-card">
+                <!-- Header de la oferta -->
+                <div class="card-header">
+                  <div class="title-section">
+                    <h3 class="job-title">{{ oferta.title }}</h3>
+                    <div class="job-meta">
+                      <div class="meta-item">
+                        <mat-icon class="meta-icon">location_on</mat-icon>
+                        <span>{{ oferta.location }}</span>
+                      </div>
+                      <div class="meta-item">
+                        <mat-icon class="meta-icon">work</mat-icon>
+                        <span>{{ oferta.modality }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-actions" *ngIf="isOwnProfile">
+                    <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                      <button mat-menu-item (click)="editarOferta(oferta)" [disabled]="!canEditOferta(oferta)">
+                        <mat-icon>edit</mat-icon>
+                        <span>Editar Oferta</span>
+                      </button>
+                      <button mat-menu-item (click)="verAplicantes(oferta)">
+                        <mat-icon>people</mat-icon>
+                        <span>Ver Aplicantes</span>
+                      </button>
+                      <button mat-menu-item (click)="desactivarOferta(oferta)" class="danger-action">
+                        <mat-icon>block</mat-icon>
+                        <span>Desactivar</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                </div>
+
+                <!-- Contenido de la oferta -->
+                <mat-card-content class="card-content">
+                  <div class="salary-info">
+                    <span class="salary-badge">{{ oferta.estimatedPayment }}</span>
+                  </div>
+
+                  <p class="job-description">{{ getDescripcionCorta(oferta.description) }}</p>
+
+                  <!-- Atributos/Skills -->
+                  <div class="tech-stack" *ngIf="oferta.attributes && oferta.attributes.length > 0">
+                    @for (atributo of getAtributosLimitados(oferta.attributes); track atributo) {
+                      <mat-chip class="tech-chip" selected>{{ atributo }}</mat-chip>
+                    }
+                    @if (oferta.attributes.length > 4) {
+                      <span class="more-tech">+{{ oferta.attributes.length - 4 }} más</span>
+                    }
+                  </div>
+                </mat-card-content>
+
+                <!-- Footer de la oferta -->
+                <div class="card-footer">
+                  <div class="footer-stats" *ngIf="isOwnProfile">
+                    <div class="stat-item">
+                      <mat-icon class="stat-icon-small">people</mat-icon>
+                      <span>{{ getNumeroAplicantes(oferta.id) }} aplicantes</span>
+                    </div>
+                  </div>
+                  <div class="footer-actions" *ngIf="isOwnProfile">
+                    <button mat-button class="primary-btn" (click)="verDetalle(oferta)">
+                      Ver Publicación
+                    </button>
+                  </div>
+                  <div class="footer-actions" *ngIf="!isOwnProfile">
+                    <button mat-button class="primary-btn" (click)="verDetalle(oferta)">
+                      Ver Detalle
+                    </button>
+                  </div>
+                </div>
+              </mat-card>
+            }
+          </div>
+        </div>
+      </ng-template>
       <ng-template #emptyState>
         <div class="empty-state">
           <mat-card class="empty-card">
@@ -201,12 +204,6 @@ import { AuthService } from '../../services/auth.service';
           </mat-card>
         </div>
       </ng-template>
-
-      <!-- Loading state -->
-      <div *ngIf="isLoading()" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Cargando ofertas...</p>
-      </div>
     </div>
   `,
   styleUrls: ['./empresa-ofertas-manager.component.scss']
@@ -440,7 +437,8 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
         name: oferta.bidder.name,
         imageUrl: oferta.bidder.imageUrl || undefined
       },
-      attributes: oferta.attributes || []
+      attributes: oferta.attributes || [],
+  fechaVencimiento: (oferta as any).fechaVencimiento
     } as any;
 
     const dialogRef = this.dialog.open(OfertaFormDialogComponent, {

@@ -858,12 +858,12 @@
                             <div class="upload-actions">
                                 <input type="file" #materiasInput accept=".xls , .xlsx"
                                     (change)="onMateriasFileSelected($event)" hidden>
-                                <button mat-stroked-button class="upload-btn" (click)="materiasInput.click()"
-                                    [disabled]="isMateriasUploading">
-                                    <mat-icon *ngIf="!isMateriasUploading">cloud_upload</mat-icon>
-                                    <mat-icon *ngIf="isMateriasUploading" class="spin">autorenew</mat-icon>
-                                    {{isMateriasUploading ? 'Subiendo...' : 'Subir .xls o .xlsx'}}
-                                </button>
+                                                                    <button mat-stroked-button class="upload-btn" (click)="materiasInput.click()"
+                                                                            [disabled]="isMateriasUploading">
+                                                                            <mat-icon *ngIf="!isMateriasUploading">cloud_upload</mat-icon>
+                                                                            <mat-icon *ngIf="isMateriasUploading" class="spin">autorenew</mat-icon>
+                                                                            {{isMateriasUploading ? 'Subiendo...' : 'Subir .xls o .xlsx'}}
+                                                                    </button>
                             </div>
                         </div>
 
@@ -882,12 +882,18 @@
                                 <span>Código</span>
                                 <span>Nota</span>
                             </div>
-                            <div class="table-row" *ngFor="let materia of materiasAlumno(); trackBy: trackByMateria">
+                            <div class="table-row" *ngFor="let materia of displayedMaterias(); trackBy: trackByMateria">
                                 <div class="materia-name">
                                     <span class="materia-title">{{materia.name}}</span>
                                 </div>
                                 <span class="materia-code">{{materia.code}}</span>
                                 <span class="materia-grade">{{materia.note | number:'1.0-1'}}</span>
+                            </div>
+                            <div class="show-more" *ngIf="materiasAlumno().length > 5">
+                                <button mat-button (click)="toggleShowAllMaterias()">
+                                    <mat-icon>{{ showAllMaterias() ? 'expand_less' : 'expand_more' }}</mat-icon>
+                                    {{ showAllMaterias() ? 'Mostrar menos' : 'Mostrar todas' }}
+                                </button>
                             </div>
                         </div>
                         <ng-template #emptySubjects>
@@ -895,6 +901,9 @@
                                 <mat-icon>inventory_2</mat-icon>
                                 <p *ngIf="isOwnProfile()">
                                     Subí tu .xls o .xlsx de Alumnos Web para visualizar tus materias aprobadas.
+                                </p>
+                                <p *ngIf="isOwnProfile()" class="hint">
+                                    El archivo Excel (planilla) lo encontrás en la sección "Finales / Exámenes".
                                 </p>
                                 <p *ngIf="!isOwnProfile()">
                                     Este usuario no tiene materias cargadas actualmente.

@@ -75,6 +75,12 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
   });
 
   materiasAlumno = computed(() => this.perfilAlumno()?.subjects || []);
+  // Control para mostrar solo las primeras 5 materias y permitir expandir
+  showAllMaterias = signal(false);
+  displayedMaterias = computed(() => {
+    const all = this.materiasAlumno();
+    return this.showAllMaterias() ? all : all.slice(0, 5);
+  });
   promedioMaterias = computed(() => {
     const materias = this.materiasAlumno();
     if (!materias.length) return 0;
@@ -741,6 +747,11 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         }
       });
   }
+
+  toggleShowAllMaterias() {
+    this.showAllMaterias.set(!this.showAllMaterias());
+  }
+
 
   trackByOfertaPublicada(index: number, oferta: OfertaListaDTO) {
     return oferta.id;
