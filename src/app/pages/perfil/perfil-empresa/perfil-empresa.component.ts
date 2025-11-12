@@ -170,7 +170,6 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.cargarPerfil();
-        this.cargarAlumnosVinculados();
     }
 
     ngOnDestroy() {
@@ -193,6 +192,8 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
                 next: (empresa) => {
                     this.empresa.set(empresa);
                     this.isLoading.set(false);
+                    // Cargar estudiantes vinculados después de cargar el perfil
+                    this.cargarAlumnosVinculados();
                 },
                 error: (error) => {
                     console.error('Error al cargar el perfil:', error);
@@ -357,27 +358,69 @@ export class PerfilEmpresaComponent implements OnInit, OnDestroy {
     }
 
     private cargarAlumnosVinculados() {
-        this.isLoadingStudents.set(false);
+        const organizationId = this.empresa()?.id;
+        if (!organizationId) {
+            console.log('No se puede cargar alumnos vinculados: organizationId no disponible');
+            this.isLoadingStudents.set(false);
+            return;
+        }
+
+        console.log('Cargando alumnos vinculados para organizationId:', organizationId);
+        this.isLoadingStudents.set(true);
+        this.studentsError.set(null);
+        
+        this.empresasService.obtenerEstudiantesVinculados(organizationId).subscribe({
+            next: (estudiantes) => {
+                console.log('Estudiantes vinculados recibidos:', estudiantes);
+                this.linkedStudents.set(estudiantes);
+                this.isLoadingStudents.set(false);
+            },
+            error: (error) => {
+                console.error('Error al cargar estudiantes vinculados:', error);
+                this.studentsError.set('Error al cargar los estudiantes vinculados');
+                this.isLoadingStudents.set(false);
+            }
+        });
     }
 
     verPerfilAlumno(studentId: number) {
-        this.router.navigate(['/perfil-alumno', studentId]);
+        this.router.navigate(['/perfil', studentId]);
     }
 
-    vincularAlumno(student: StudentSearchResult) {
-        this.snackBar.open(
-            'Funcionalidad pendiente: El backend aún no implementa la vinculación de estudiantes', 
-            'Cerrar', 
-            { duration: 3000 }
-        );
+    vincularAlumno(student: any) {
+        const organizationId = this.empresa()?.id;
+        if (!organizationId) {
+            this.snackBar.open('No se pudo obtener el ID de la organización', 'Cerrar', { duration: 3000 });
+            return;
+        }
+
+        this.empresasService.vincularEstudiante(organizationId, student.id, student.recognitionType).subscribe({
+            next: () => {
+                this.snackBar.open('Estudiante vinculado exitosamente', 'Cerrar', { duration: 3000 });
+                // Recargar la lista de estudiantes vinculados
+                this.cargarAlumnosVinculados();
+            },
+            error: (error) => {
+                console.error('Error al vincular estudiante:', error);
+                this.snackBar.open('Error al vincular estudiante', 'Cerrar', { duration: 3000 });
+            }
+        });
     }
 
     desvincularAlumno(relationId: number) {
-        this.snackBar.open(
-            'Funcionalidad pendiente: El backend aún no implementa la desvinculación de estudiantes', 
-            'Cerrar', 
-            { duration: 3000 }
-        );
+        if (confirm('¿Estás seguro de que deseas desvincular este estudiante?')) {
+            this.empresasService.desvincularEstudiante(relationId).subscribe({
+                next: () => {
+                    this.snackBar.open('Estudiante desvinculado exitosamente', 'Cerrar', { duration: 3000 });
+                    // Recargar la lista de estudiantes vinculados
+                    this.cargarAlumnosVinculados();
+                },
+                error: (error) => {
+                    console.error('Error al desvincular estudiante:', error);
+                    this.snackBar.open('Error al desvincular el estudiante', 'Cerrar', { duration: 3000 });
+                }
+            });
+        }
     }
 
     getDefaultAvatar(name: string, surname: string): string {
