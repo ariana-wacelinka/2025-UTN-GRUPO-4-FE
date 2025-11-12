@@ -290,74 +290,18 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
         next: (perfil) => {
           console.log('Perfil cargado desde servicio:', perfil);
           
-          // mockeado temporal. borrar cuando el backend implemente estos campos
-          if (!perfil.associatedCompanies || perfil.associatedCompanies.length === 0) {
-            perfil.associatedCompanies = [
-              {
-                id: 1,
-                companyId: 1,
-                companyName: 'TechCorp Solutions',
-                companyImageUrl: 'https://ui-avatars.com/api/?name=TechCorp&background=667eea&color=fff',
-                companyIndustry: 'Tecnología',
-                associationDate: '2024-06-15',
-                recognitionType: 'Pasantía'
-              },
-              {
-                id: 2,
-                companyId: 2,
-                companyName: 'Innovate Labs',
-                companyImageUrl: 'https://ui-avatars.com/api/?name=Innovate&background=764ba2&color=fff',
-                companyIndustry: 'Desarrollo de Software',
-                associationDate: '2024-03-20',
-                recognitionType: 'Colaboración'
-              }
-            ];
+          // NOTA: Datos de fallback para desarrollo - El backend debe devolver estos arrays
+          // Si están vacíos, inicializarlos para evitar errores en la UI
+          if (!perfil.associatedCompanies) {
+            perfil.associatedCompanies = [];
           }
           
-          if (!perfil.workExperience || perfil.workExperience.length === 0) {
-            perfil.workExperience = [
-              {
-                id: 1,
-                company: 'TechCorp Solutions',
-                position: 'Desarrollador Frontend Junior',
-                startDate: '2024-06',
-                endDate: undefined,
-                description: 'Desarrollo de interfaces de usuario con Angular y TypeScript. Colaboración en equipo usando metodologías ágiles.',
-                isCurrentJob: true
-              },
-              {
-                id: 2,
-                company: 'Freelance',
-                position: 'Desarrollador Web',
-                startDate: '2023-03',
-                endDate: '2024-05',
-                description: 'Desarrollo de sitios web para pequeñas empresas utilizando tecnologías modernas.',
-                isCurrentJob: false
-              }
-            ];
+          if (!perfil.workExperience) {
+            perfil.workExperience = [];
           }
           
-          if (!perfil.personalProjects || perfil.personalProjects.length === 0) {
-            perfil.personalProjects = [
-              {
-                id: 1,
-                title: 'Sistema de Gestión de Empleos',
-                description: 'Plataforma web para conectar estudiantes con oportunidades laborales. Desarrollada con Angular y Spring Boot.',
-                technologies: ['Angular', 'TypeScript', 'Spring Boot', 'PostgreSQL', 'Material Design'],
-                projectUrl: 'https://github.com/usuario/job-platform',
-                startDate: '2024-01',
-                endDate: '2024-11'
-              },
-              {
-                id: 2,
-                title: 'App de Recetas',
-                description: 'Aplicación móvil para descubrir y compartir recetas de cocina. Incluye búsqueda avanzada y favoritos.',
-                technologies: ['React Native', 'Node.js', 'MongoDB', 'Express'],
-                projectUrl: 'https://github.com/usuario/recipe-app',
-                startDate: '2023-08',
-                endDate: '2023-12'
-              }
-            ];
+          if (!perfil.personalProjects) {
+            perfil.personalProjects = [];
           }
           
           console.log('Empresas asociadas:', perfil.associatedCompanies);
@@ -376,104 +320,6 @@ export class PerfilAlumnoComponent implements OnInit, OnDestroy {
           this.isLoading.set(false);
         }
       });
-  }
-
-  /**
-   * Mock de perfiles de aplicantes - actualizado con nuevos DTOs
-   * TODO Sprint 2: Eliminar y usar servicio real con backend
-   */
-  private getMockPerfilByUserId(userId: number): EstudianteDTO {
-    const mockPerfiles: { [key: number]: EstudianteDTO } = {
-      101: {
-        id: 1,
-        description: 'Estudiante apasionada por el desarrollo full-stack y las metodologías ágiles.',
-        phone: '+54 9 11 2345-6789',
-        email: 'wacelinka@example.com',
-        location: 'La Plata, Buenos Aires',
-        name: 'Ariana',
-        surname: 'Wacelinka',
-        imageUrl: 'https://i.pravatar.cc/300?img=47',
-        linkedinUrl: 'https://linkedin.com/in/ariana-wacelinka',
-        role: 'estudiante',
-        githubUrl: 'https://github.com/ariana-wacelinka',
-        career: 'Ingeniería en Sistemas de Información',
-        currentYearLevel: 3,
-        institution: 'UTN FRLP',
-        skills: ['Angular', 'TypeScript', 'Node.js', 'MongoDB', 'Git', 'Scrum'],
-        cvUrl: '/assets/documents/WACELINKA, Ariana.pdf',
-        cvFileName: 'WACELINKA_Ariana.pdf',
-        incomeDate: '2022-03-01',
-        dateOfBirth: '2002-03-15',
-        coverLetter: 'Estudiante apasionada por el desarrollo full-stack.',
-        languages: [
-          { id: 1, name: 'Español', level: 5 },
-          { id: 2, name: 'Inglés', level: 4 }
-        ],
-        subjects: [],
-        associatedCompanies: [
-          {
-            id: 1,
-            companyId: 1,
-            companyName: 'TechCorp Solutions',
-            companyImageUrl: 'https://ui-avatars.com/api/?name=TechCorp&background=667eea&color=fff',
-            companyIndustry: 'Tecnología',
-            associationDate: '2024-06-15',
-            recognitionType: 'Pasantía'
-          },
-          {
-            id: 2,
-            companyId: 2,
-            companyName: 'Innovate Labs',
-            companyImageUrl: 'https://ui-avatars.com/api/?name=Innovate&background=764ba2&color=fff',
-            companyIndustry: 'Desarrollo de Software',
-            associationDate: '2024-03-20',
-            recognitionType: 'Colaboración'
-          }
-        ],
-        workExperience: [
-          {
-            id: 1,
-            company: 'TechCorp Solutions',
-            position: 'Desarrolladora Frontend Junior',
-            startDate: '2024-06',
-            endDate: undefined,
-            description: 'Desarrollo de interfaces de usuario con Angular y TypeScript. Colaboración en equipo usando metodologías ágiles.',
-            isCurrentJob: true
-          },
-          {
-            id: 2,
-            company: 'Freelance',
-            position: 'Desarrolladora Web',
-            startDate: '2023-03',
-            endDate: '2024-05',
-            description: 'Desarrollo de sitios web para pequeñas empresas utilizando tecnologías modernas.',
-            isCurrentJob: false
-          }
-        ],
-        personalProjects: [
-          {
-            id: 1,
-            title: 'Sistema de Gestión de Empleos',
-            description: 'Plataforma web para conectar estudiantes con oportunidades laborales. Desarrollada con Angular y Spring Boot.',
-            technologies: ['Angular', 'TypeScript', 'Spring Boot', 'PostgreSQL', 'Material Design'],
-            projectUrl: 'https://github.com/ariana-wacelinka/job-platform',
-            startDate: '2024-01',
-            endDate: '2024-11'
-          },
-          {
-            id: 2,
-            title: 'App de Recetas',
-            description: 'Aplicación móvil para descubrir y compartir recetas de cocina. Incluye búsqueda avanzada y favoritos.',
-            technologies: ['React Native', 'Node.js', 'MongoDB', 'Express'],
-            projectUrl: 'https://github.com/ariana-wacelinka/recipe-app',
-            startDate: '2023-08',
-            endDate: '2023-12'
-          }
-        ]
-      }
-    };
-
-    return mockPerfiles[userId] || mockPerfiles[101];
   }
 
   // Métodos de eventos de componentes compartidos

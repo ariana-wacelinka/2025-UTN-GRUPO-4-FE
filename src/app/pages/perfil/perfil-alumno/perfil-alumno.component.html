@@ -341,7 +341,7 @@
                 </mat-card>
 
                 <!-- 5. Empresas Asociadas / Reconocimientos (grid-area: empresas) -->
-                <mat-card class="modern-card associated-companies-card" *ngIf="hasAssociatedCompanies()">
+                <mat-card class="modern-card associated-companies-card">
                     <mat-card-header>
                         <mat-card-title class="section-title">
                             <mat-icon class="section-icon">verified</mat-icon>
@@ -349,7 +349,7 @@
                         </mat-card-title>
                     </mat-card-header>
                     <mat-card-content>
-                        <div class="companies-grid">
+                        <div class="companies-grid" *ngIf="hasAssociatedCompanies(); else noCompanies">
                             <div class="company-badge" 
                                  *ngFor="let company of associatedCompanies(); trackBy: trackByCompanyId"
                                  (click)="navigateToCompanyProfile(company.companyId)"
@@ -379,11 +379,18 @@
                                 </div>
                             </div>
                         </div>
+                        <ng-template #noCompanies>
+                            <div class="empty-state">
+                                <mat-icon class="empty-icon">business</mat-icon>
+                                <p class="empty-message">Aún no hay reconocimientos empresariales</p>
+                                <p class="empty-hint" *ngIf="!isOwnProfile()">Este perfil no ha sido reconocido por ninguna empresa</p>
+                            </div>
+                        </ng-template>
                     </mat-card-content>
                 </mat-card>
 
                 <!-- 6. Experiencia Laboral (grid-area: experiencia) -->
-                <mat-card class="modern-card work-experience-card" *ngIf="hasWorkExperience()">
+                <mat-card class="modern-card work-experience-card">
                     <mat-card-header>
                         <mat-card-title class="section-title">
                             <mat-icon class="section-icon">work</mat-icon>
@@ -397,7 +404,7 @@
                         </button>
                     </mat-card-header>
                     <mat-card-content>
-                        <div class="experience-timeline">
+                        <div class="experience-timeline" *ngIf="hasWorkExperience(); else noExperience">
                             <div class="experience-item" 
                                  *ngFor="let exp of workExperience(); trackBy: trackByExperienceId">
                                 <div class="timeline-marker">
@@ -444,11 +451,26 @@
                                 </div>
                             </div>
                         </div>
+                        <ng-template #noExperience>
+                            <div class="empty-state">
+                                <mat-icon class="empty-icon">work_outline</mat-icon>
+                                <p class="empty-message">Aún no hay experiencia laboral registrada</p>
+                                <p class="empty-hint" *ngIf="isOwnProfile()">Agrega tu experiencia laboral para destacar tu trayectoria profesional</p>
+                                <button mat-raised-button 
+                                        color="primary" 
+                                        *ngIf="isOwnProfile()"
+                                        (click)="agregarExperienciaLaboral()"
+                                        class="add-first-button">
+                                    <mat-icon>add</mat-icon>
+                                    Agregar experiencia laboral
+                                </button>
+                            </div>
+                        </ng-template>
                     </mat-card-content>
                 </mat-card>
 
                 <!-- 7. Proyectos Personales (grid-area: proyectos) -->
-                <mat-card class="modern-card personal-projects-card" *ngIf="hasPersonalProjects()">
+                <mat-card class="modern-card personal-projects-card">
                     <mat-card-header>
                         <mat-card-title class="section-title">
                             <mat-icon class="section-icon">code</mat-icon>
@@ -462,17 +484,32 @@
                         </button>
                     </mat-card-header>
                     <mat-card-content>
-                        <div class="projects-grid">
+                        <div class="projects-grid" *ngIf="hasPersonalProjects(); else noProjects">
                             <div class="project-card" 
                                  *ngFor="let project of personalProjects(); trackBy: trackByProjectId">
                                 <div class="project-header">
                                     <h4 class="project-title">{{project.title}}</h4>
-                                    <button mat-icon-button 
-                                            *ngIf="project.projectUrl"
-                                            (click)="openExternalLink(project.projectUrl)"
-                                            [matTooltip]="'Ver proyecto'">
-                                        <mat-icon>open_in_new</mat-icon>
-                                    </button>
+                                    <div class="project-actions">
+                                        <button mat-icon-button 
+                                                *ngIf="project.projectUrl"
+                                                (click)="openExternalLink(project.projectUrl)"
+                                                [matTooltip]="'Ver proyecto'">
+                                            <mat-icon>open_in_new</mat-icon>
+                                        </button>
+                                        <button mat-icon-button 
+                                                *ngIf="isOwnProfile()"
+                                                (click)="editarProyectoPersonal(project)"
+                                                matTooltip="Editar">
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                        <button mat-icon-button 
+                                                color="warn"
+                                                *ngIf="isOwnProfile()"
+                                                (click)="eliminarProyectoPersonal(project.id!)"
+                                                matTooltip="Eliminar">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
                                 </div>
                                 <p class="project-description">{{project.description}}</p>
                                 <div class="project-period" *ngIf="project.startDate">
@@ -491,6 +528,21 @@
                                 </div>
                             </div>
                         </div>
+                        <ng-template #noProjects>
+                            <div class="empty-state">
+                                <mat-icon class="empty-icon">code_off</mat-icon>
+                                <p class="empty-message">Aún no hay proyectos personales registrados</p>
+                                <p class="empty-hint" *ngIf="isOwnProfile()">Muestra tus proyectos personales para destacar tus habilidades</p>
+                                <button mat-raised-button 
+                                        color="primary" 
+                                        *ngIf="isOwnProfile()"
+                                        (click)="agregarProyectoPersonal()"
+                                        class="add-first-button">
+                                    <mat-icon>add</mat-icon>
+                                    Agregar proyecto personal
+                                </button>
+                            </div>
+                        </ng-template>
                     </mat-card-content>
                 </mat-card>
 
