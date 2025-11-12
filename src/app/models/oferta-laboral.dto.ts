@@ -7,7 +7,7 @@ export interface OfertaLaboralDTO {
     location: string;
     estimatedPayment: number;
     applyList: AplicanteOfertaDTO[];
-    bidder: EmpresaBasicDTO;
+    bidder: EmpresaBasicDTO | null;
     fechaCreacion?: Date;
     fechaVencimiento?: Date;
     activa?: boolean;

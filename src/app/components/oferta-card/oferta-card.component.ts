@@ -91,12 +91,14 @@ import { KeycloakUser } from '../../models/keycloak-user.model';
       background: linear-gradient(135deg, var(--white) 0%, var(--background-light) 100%);
       border: 1px solid var(--shadow-black);
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .card-header,
     .card-content {
       cursor: pointer;
+      position: relative;
+      z-index: 2;
     }
 
     .oferta-card::before {
@@ -107,6 +109,7 @@ import { KeycloakUser } from '../../models/keycloak-user.model';
       right: 0;
       height: 4px;
       background: var(--primary-gradient);
+      z-index: 1;
     }
 
     .card-header {
@@ -205,9 +208,14 @@ import { KeycloakUser } from '../../models/keycloak-user.model';
     }
 
     .card-footer {
-      padding: 16px 24px 24px;
+      padding: 20px 24px 24px;
       border-top: 1px solid var(--shadow-black);
       background: rgba(248, 250, 252, 0.5);
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      z-index: 2;
     }
 
     .footer-actions {
@@ -215,22 +223,39 @@ import { KeycloakUser } from '../../models/keycloak-user.model';
       justify-content: space-between;
       align-items: center;
       gap: 16px;
+      width: 100%;
+      min-height: 48px;
     }
 
     .vote-buttons {
       display: flex;
-      gap: 8px;
+      gap: 12px;
+      align-items: center;
+      flex-shrink: 0;
+      min-height: 48px;
     }
 
     .vote-button {
       display: flex !important;
       align-items: center !important;
-      gap: 4px !important;
-      padding: 8px !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      padding: 12px 16px !important;
       border-radius: 8px !important;
       transition: all 0.3s ease !important;
       color: var(--text-muted) !important;
       position: relative;
+      min-width: 64px !important;
+      min-height: 48px !important;
+      white-space: nowrap !important;
+      box-sizing: border-box !important;
+      line-height: 1 !important;
+    }
+
+    .vote-button.mat-mdc-icon-button {
+      width: auto !important;
+      height: 48px !important;
+      padding: 12px 16px !important;
     }
 
     .vote-button:hover {
@@ -256,6 +281,22 @@ import { KeycloakUser } from '../../models/keycloak-user.model';
       color: #f44336 !important;
     }
 
+    .vote-button mat-icon {
+      font-size: 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1 !important;
+    }
+
+    .vote-button .mat-icon {
+      font-size: 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+    }
+
     .vote-count {
       font-size: 0.75rem;
       font-weight: 600;
@@ -277,12 +318,14 @@ import { KeycloakUser } from '../../models/keycloak-user.model';
       color: var(--primary-color) !important;
       font-weight: 500 !important;
       text-transform: none !important;
-      padding: 8px 16px !important;
+      padding: 12px 16px !important;
       border-radius: 8px !important;
+      transition: all 0.3s ease !important;
       display: flex !important;
       align-items: center !important;
-      gap: 4px !important;
-      transition: all 0.3s ease !important;
+      gap: 8px !important;
+      flex-shrink: 0;
+      min-height: 48px !important;
     }
 
     .view-details-btn:hover {
@@ -363,7 +406,10 @@ export class OfertaCardComponent implements OnInit {
   canVote(): boolean {
     // Solo los usuarios logueados pueden votar
     // Las organizaciones no pueden votar, solo estudiantes
-    return !!this.keycloakUser && this.keycloakUser.role === 'Student' && this.oferta.bidder.id !== this.keycloakUser.id;
+    return !!this.keycloakUser &&
+      this.keycloakUser.role === 'Student' &&
+      !!this.oferta.bidder &&
+      this.oferta.bidder.id !== this.keycloakUser.id;
   }
 
   loadVotes(): void {

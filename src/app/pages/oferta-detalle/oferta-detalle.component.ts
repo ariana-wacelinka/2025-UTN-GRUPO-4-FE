@@ -31,7 +31,7 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../compo
           </button>
           <div class="header-info">
             <h1 class="job-title">{{ oferta.title }}</h1>
-            <div class="company-name">{{ oferta.bidder.name }} {{ oferta.bidder.surname }}</div>
+            <div class="company-name">{{ oferta.bidder?.name }} {{ oferta.bidder?.surname }}</div>
             <div class="job-meta">
               <div class="meta-item">
                 <mat-icon>location_on</mat-icon>
@@ -659,7 +659,7 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../compo
       }
 
       .vote-description {
-        margin: 0 0 24px 0;
+        margin: 10px 0 24px 0;
         color: var(--text-secondary);
         font-size: 1rem;
         line-height: 1.6;
@@ -879,7 +879,7 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   editarOferta(): void {
-    if (!this.oferta || !this.isMyOffer()) {
+    if (!this.oferta || !this.oferta.bidder || !this.isMyOffer()) {
       this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 3000 });
       return;
     }
@@ -964,14 +964,14 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   isMyOffer(): boolean {
-    return this.oferta?.bidder.id === this.keycloakUser?.id;
+    return !!this.oferta?.bidder && this.oferta.bidder.id === this.keycloakUser?.id;
   }
 
   /**
    * Verifica si la oferta fue publicada por un alumno
    */
   isOfertaDeAlumno(): boolean {
-    return this.oferta?.bidder.role === 'Student';
+    return !!this.oferta?.bidder && this.oferta.bidder.role === 'Student';
   }
 
   /**
@@ -1079,7 +1079,8 @@ export class OfertaDetalleComponent implements OnInit {
     // No pueden votar en sus propias ofertas
     return !!this.keycloakUser &&
       this.keycloakUser.role === 'Student' &&
-      this.oferta?.bidder.id !== this.keycloakUser.id;
+      !!this.oferta?.bidder &&
+      this.oferta.bidder.id !== this.keycloakUser.id;
   }
 
   /**

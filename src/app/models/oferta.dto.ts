@@ -37,7 +37,7 @@ export interface OfertaListaDTO {
   location: string;
   estimatedPayment: string;
   applyList: any[];
-  bidder: Bidder;
+  bidder: Bidder | null;
   estado?: EstadoAplicacion;
   attributes?: string[];
   userVote?: boolean | null;

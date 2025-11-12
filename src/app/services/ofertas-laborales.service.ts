@@ -112,7 +112,7 @@ export class OfertasLaboralesService {
      * @returns true si puede editar, false si no
      */
     canEditOferta(oferta: OfertaLaboralDTO, currentUserId: number): boolean {
-        return oferta.bidder.id === currentUserId;
+        return !!oferta.bidder && oferta.bidder.id === currentUserId;
     }
 
     /**

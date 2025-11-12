@@ -256,6 +256,7 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
   constructor(
     private ofertasService: offersService,
     private empresasService: EmpresasService,
+    private ofertasLaboralesService: OfertasLaboralesService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private router: Router
@@ -415,11 +416,11 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
 
   canEditOferta(oferta: OfertaListaDTO): boolean {
     const currentUserId = this.authService.keycloakUser?.id;
-    return currentUserId !== undefined && oferta.bidder.id === currentUserId;
+    return currentUserId !== undefined && !!oferta.bidder && oferta.bidder.id === currentUserId;
   }
 
   editarOferta(oferta: OfertaListaDTO) {
-    if (!this.canEditOferta(oferta)) {
+    if (!this.canEditOferta(oferta) || !oferta.bidder) {
       this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 3000 });
       return;
     }
@@ -484,18 +485,20 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
     confirmDialogRef.afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.isLoading.set(true);
-        this.ofertasLaboralesService.desactivarOferta(oferta.id).subscribe({
-          next: () => {
-            this.isLoading.set(false);
-            this.cargarOfertas();
-            this.snackBar.open('Oferta desactivada exitosamente', 'Cerrar', { duration: 3000 });
-          },
-          error: (error) => {
-            this.isLoading.set(false);
-            console.error('Error al desactivar oferta:', error);
-            this.snackBar.open('Error al desactivar la oferta', 'Cerrar', { duration: 3000 });
-          }
-        });
+
+        this.ofertasLaboralesService.desactivarOferta(oferta.id)
+          .subscribe(
+            (res: OfertaLaboralDTO) => {
+              this.isLoading.set(false);
+              this.cargarOfertas();
+              this.snackBar.open('Oferta desactivada exitosamente', 'Cerrar', { duration: 3000 });
+            },
+            (error: unknown): void => {
+              this.isLoading.set(false);
+              console.error('Error al desactivar oferta:', error);
+              this.snackBar.open('Error al desactivar la oferta', 'Cerrar', { duration: 3000 });
+            }
+          );
       }
     });
   }
