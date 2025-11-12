@@ -72,6 +72,25 @@ export class offersService {
   }
 
   /**
+   * Actualiza una oferta existente
+   * PUT /api/offers/{id}
+   */
+  updateOferta(id: number, oferta: CrearOfertaDTO | any): Observable<any> {
+    // Mapear los campos del DTO de la UI (spanish) al payload esperado por el backend
+    const payload: any = {
+      title: oferta.titulo || oferta.title,
+      description: oferta.descripcion || oferta.description,
+      requirements: oferta.requisitos || oferta.requirements,
+      modality: oferta.modalidad || oferta.modality,
+      location: oferta.locacion || oferta.location,
+      estimatedPayment: oferta.pagoAprox || oferta.estimatedPayment,
+      attributes: oferta.atributos || oferta.attributes || []
+    };
+
+    return this.http.put(`${this.apiUrl}/offers/${id}`, payload);
+  }
+
+  /**
    * Elimina una oferta por ID
    * @param id ID de la oferta a eliminar
    * @returns Observable<void>
