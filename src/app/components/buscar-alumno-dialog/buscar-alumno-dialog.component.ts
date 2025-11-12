@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil, catchError } from 'rxjs/operators';
-import { EmpresasService } from '../../services/empresas.service';
+import { UsuarioService } from '../../services/usuario.service';
 import { of } from 'rxjs';
 
 export interface StudentSearchResult {
@@ -397,7 +397,7 @@ export class BuscarAlumnoDialogComponent implements OnInit, OnDestroy {
 
   constructor(
     public dialogRef: MatDialogRef<BuscarAlumnoDialogComponent>,
-    private empresasService: EmpresasService
+    private usuarioService: UsuarioService
   ) {}
 
   ngOnInit() {
@@ -426,7 +426,7 @@ export class BuscarAlumnoDialogComponent implements OnInit, OnDestroy {
     this.isSearching.set(true);
     this.searchError.set(null);
 
-    this.empresasService.buscarEstudiantes(searchTerm)
+    this.usuarioService.searchUsers(searchTerm, 0, 20)
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {
@@ -436,7 +436,7 @@ export class BuscarAlumnoDialogComponent implements OnInit, OnDestroy {
           return of({ content: [] });
         })
       )
-      .subscribe(response => {
+      .subscribe((response: any) => {
         const students = response.content || [];
         const studentsFiltered = students.filter((user: any) => 
           user.role && user.role.toLowerCase() === 'student'
