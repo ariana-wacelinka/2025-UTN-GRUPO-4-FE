@@ -97,6 +97,7 @@ export interface AssociatedCompanyDTO {
 
 export interface WorkExperienceDTO {
   id?: number;
+  studentId?: number;
   company: string;
   position: string;
   startDate: string; 
@@ -105,11 +106,53 @@ export interface WorkExperienceDTO {
   isCurrentJob?: boolean;
 }
 
+export interface CreateWorkExperienceDTO {
+  studentId: number;
+  company: string;
+  position: string;
+  startDate: string;
+  endDate?: string;
+  description: string;
+  isCurrentJob?: boolean;
+}
+
+export interface UpdateWorkExperienceDTO {
+  studentId?: number;
+  company?: string;
+  position?: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
+  isCurrentJob?: boolean;
+}
+
 export interface PersonalProjectDTO {
   id?: number;
   title: string;
   description: string;
   technologies: string[]; 
+  projectUrl?: string;
+  imageUrl?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface CreatePersonalProjectDTO {
+  studentId: number;
+  title: string;
+  description: string;
+  technologies: string[];
+  projectUrl?: string;
+  imageUrl?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface UpdatePersonalProjectDTO {
+  studentId?: number;
+  title?: string;
+  description?: string;
+  technologies?: string[];
   projectUrl?: string;
   imageUrl?: string;
   startDate?: string;
