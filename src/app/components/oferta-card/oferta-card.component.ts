@@ -1,18 +1,22 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { OfertaListaDTO } from '../../models/oferta.dto';
+import { CommonModule } from '@angular/common';
+import { OfertaListaDTO, VoteResponseDTO } from '../../models/oferta.dto';
+import { offersService } from '../../services/ofertas.service';
+import { AuthService } from '../../services/auth.service';
+import { KeycloakUser } from '../../models/keycloak-user.model';
 
 @Component({
   selector: 'app-oferta-card',
   standalone: true,
-  imports: [MatCardModule, MatChipsModule, MatIconModule, MatButtonModule],
+  imports: [MatCardModule, MatChipsModule, MatIconModule, MatButtonModule, CommonModule],
   template: `
-    <mat-card class="oferta-card modern-card" (click)="verDetalle()">
-      <div class="card-header">
+    <mat-card class="oferta-card modern-card">
+      <div class="card-header" (click)="verDetalle()">
         <div class="title-section">
           <h3 class="job-title">{{ oferta.title }}</h3>
           <div class="location">
@@ -25,7 +29,7 @@ import { OfertaListaDTO } from '../../models/oferta.dto';
         </div>
       </div>
 
-      <mat-card-content class="card-content">
+      <mat-card-content class="card-content" (click)="verDetalle()">
         <div class="job-details">
           <div class="detail-item">
             <mat-icon class="detail-icon">work</mat-icon>
@@ -44,21 +48,55 @@ import { OfertaListaDTO } from '../../models/oferta.dto';
       </mat-card-content>
 
       <div class="card-footer">
-        <button mat-button class="view-details-btn">
-          Ver detalles
-          <mat-icon>arrow_forward</mat-icon>
-        </button>
+        <div class="footer-actions">
+          @if (canVote()) {
+            <div class="vote-buttons">
+              <button 
+                mat-icon-button 
+                class="vote-button like-button"
+                [class.active]="oferta.userVote === true"
+                (click)="onLike($event)"
+                [disabled]="isVoting">
+                <mat-icon>thumb_up</mat-icon>
+                @if (oferta.positiveVotes !== undefined) {
+                  <span class="vote-count">{{ oferta.positiveVotes }}</span>
+                }
+              </button>
+              
+              <button 
+                mat-icon-button 
+                class="vote-button dislike-button"
+                [class.active]="oferta.userVote === false"
+                (click)="onDislike($event)"
+                [disabled]="isVoting">
+                <mat-icon>thumb_down</mat-icon>
+                @if (oferta.negativeVotes !== undefined) {
+                  <span class="vote-count">{{ oferta.negativeVotes }}</span>
+                }
+              </button>
+            </div>
+          }
+          
+          <button mat-button class="view-details-btn" (click)="verDetalle($event)">
+            Ver detalles
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
       </div>
     </mat-card>
   `,
   styles: [`
     .oferta-card {
-      cursor: pointer;
       margin: 16px 0;
       background: linear-gradient(135deg, var(--white) 0%, var(--background-light) 100%);
       border: 1px solid var(--shadow-black);
       position: relative;
       overflow: hidden;
+    }
+
+    .card-header,
+    .card-content {
+      cursor: pointer;
     }
 
     .oferta-card::before {
@@ -172,6 +210,69 @@ import { OfertaListaDTO } from '../../models/oferta.dto';
       background: rgba(248, 250, 252, 0.5);
     }
 
+    .footer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .vote-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .vote-button {
+      display: flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+      padding: 8px !important;
+      border-radius: 8px !important;
+      transition: all 0.3s ease !important;
+      color: var(--text-muted) !important;
+      position: relative;
+    }
+
+    .vote-button:hover {
+      background: var(--chip-bg) !important;
+      transform: scale(1.05);
+    }
+
+    .like-button.active {
+      background: rgba(76, 175, 80, 0.1) !important;
+      color: #4caf50 !important;
+    }
+
+    .like-button.active mat-icon {
+      color: #4caf50 !important;
+    }
+
+    .dislike-button.active {
+      background: rgba(244, 67, 54, 0.1) !important;
+      color: #f44336 !important;
+    }
+
+    .dislike-button.active mat-icon {
+      color: #f44336 !important;
+    }
+
+    .vote-count {
+      font-size: 0.75rem;
+      font-weight: 600;
+      min-width: 14px;
+      text-align: center;
+    }
+
+    .vote-button:disabled {
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+    }
+
+    .vote-button:disabled:hover {
+      transform: none !important;
+      background: transparent !important;
+    }
+
     .view-details-btn {
       color: var(--primary-color) !important;
       font-weight: 500 !important;
@@ -225,16 +326,129 @@ import { OfertaListaDTO } from '../../models/oferta.dto';
     }
   `]
 })
-export class OfertaCardComponent {
+export class OfertaCardComponent implements OnInit {
   @Input() oferta!: OfertaListaDTO;
 
-  constructor(private router: Router) {}
+  isVoting = false;
+  keycloakUser?: KeycloakUser;
+
+  constructor(
+    private router: Router,
+    private ofertasService: offersService,
+    private authService: AuthService
+  ) { }
+
+  ngOnInit(): void {
+    // Obtener información del usuario
+    this.authService.waitForUserLoad().subscribe(() => {
+      this.keycloakUser = this.authService.keycloakUser || undefined;
+      // Cargar votos iniciales si el usuario puede votar
+      if (this.canVote()) {
+        this.loadVotes();
+      }
+    });
+  }
 
   get atributosLimitados(): string[] {
     return this.oferta.attributes?.slice(0, 5) || [];
   }
 
-  verDetalle(): void {
+  verDetalle(event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+    }
     this.router.navigate(['/oferta', this.oferta.id]);
+  }
+
+  canVote(): boolean {
+    // Solo los usuarios logueados pueden votar
+    // Las organizaciones no pueden votar, solo estudiantes
+    return !!this.keycloakUser && this.keycloakUser.role === 'Student' && this.oferta.bidder.id !== this.keycloakUser.id;
+  }
+
+  loadVotes(): void {
+    if (!this.canVote()) return;
+
+    this.ofertasService.getVotesOferta(this.oferta.id).subscribe({
+      next: (voteResponse: VoteResponseDTO) => {
+        this.updateOfertaVotes(voteResponse);
+      },
+      error: (error) => {
+        console.error('Error al cargar votos:', error);
+      }
+    });
+  }
+
+  onLike(event: MouseEvent): void {
+    event.stopPropagation();
+    if (!this.canVote() || this.isVoting) return;
+
+    this.isVoting = true;
+
+    // Si ya tiene like, quitar el voto
+    if (this.oferta.userVote === true) {
+      this.ofertasService.removeVoteOferta(this.oferta.id).subscribe({
+        next: (voteResponse: VoteResponseDTO) => {
+          this.updateOfertaVotes(voteResponse);
+          this.isVoting = false;
+        },
+        error: (error) => {
+          console.error('Error al quitar voto:', error);
+          this.isVoting = false;
+        }
+      });
+    } else {
+      // Dar like
+      this.ofertasService.likeOferta(this.oferta.id).subscribe({
+        next: (voteResponse: VoteResponseDTO) => {
+          this.updateOfertaVotes(voteResponse);
+          this.isVoting = false;
+        },
+        error: (error) => {
+          console.error('Error al dar like:', error);
+          this.isVoting = false;
+        }
+      });
+    }
+  }
+
+  onDislike(event: MouseEvent): void {
+    event.stopPropagation();
+    if (!this.canVote() || this.isVoting) return;
+
+    this.isVoting = true;
+
+    // Si ya tiene dislike, quitar el voto
+    if (this.oferta.userVote === false) {
+      this.ofertasService.removeVoteOferta(this.oferta.id).subscribe({
+        next: (voteResponse: VoteResponseDTO) => {
+          this.updateOfertaVotes(voteResponse);
+          this.isVoting = false;
+        },
+        error: (error) => {
+          console.error('Error al quitar voto:', error);
+          this.isVoting = false;
+        }
+      });
+    } else {
+      // Dar dislike
+      this.ofertasService.dislikeOferta(this.oferta.id).subscribe({
+        next: (voteResponse: VoteResponseDTO) => {
+          this.updateOfertaVotes(voteResponse);
+          this.isVoting = false;
+        },
+        error: (error) => {
+          console.error('Error al dar dislike:', error);
+          this.isVoting = false;
+        }
+      });
+    }
+  }
+
+  private updateOfertaVotes(voteResponse: VoteResponseDTO): void {
+    this.oferta.userVote = voteResponse.userVote;
+    this.oferta.positiveVotes = voteResponse.positiveVotes;
+    this.oferta.negativeVotes = voteResponse.negativeVotes;
+    this.oferta.totalScore = voteResponse.totalScore;
   }
 }

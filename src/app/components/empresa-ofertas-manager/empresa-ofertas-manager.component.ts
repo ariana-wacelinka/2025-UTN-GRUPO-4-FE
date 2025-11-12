@@ -255,7 +255,6 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
 
   constructor(
     private ofertasService: offersService,
-    private ofertasLaboralesService: OfertasLaboralesService,
     private empresasService: EmpresasService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
@@ -276,7 +275,7 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
 
     // Si se proporcionó un empresaId, usarlo directamente
     if (this.empresaId) {
-      this.ofertasService.getoffers({bidderId: this.empresaId})
+      this.ofertasService.getoffers({ bidderId: this.empresaId })
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response: PagedResponseDTO<OfertaListaDTO>) => {
@@ -294,7 +293,7 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
       this.authService.getCurrentUserId()
         .pipe(
           takeUntil(this.destroy$),
-          switchMap(userId => this.ofertasService.getoffers({bidderId: userId}))
+          switchMap(userId => this.ofertasService.getoffers({ bidderId: userId }))
         )
         .subscribe({
           next: (response: PagedResponseDTO<OfertaListaDTO>) => {
@@ -339,7 +338,7 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
    * Obtiene todas las aplicaciones agrupadas por oferta
    * @returns Array de objetos con información de la oferta y sus aplicaciones
    */
-  getAplyListsByOffer(): Array<{oferta: OfertaListaDTO, aplicaciones: any[]}> {
+  getAplyListsByOffer(): Array<{ oferta: OfertaListaDTO, aplicaciones: any[] }> {
     return this.ofertas().map(oferta => ({
       oferta: oferta,
       aplicaciones: oferta.applyList || []
