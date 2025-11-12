@@ -6,7 +6,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { OfertaListaDTO, EstadoAplicacion } from '../../models/oferta.dto';
+import { OfertaListaDTO, EstadoAplicacion, VoteResponseDTO } from '../../models/oferta.dto';
 import { offersService } from '../../services/ofertas.service';
 import { KeycloakUser } from '../../models/keycloak-user.model';
 import { AuthService } from '../../services/auth.service';
@@ -31,7 +31,7 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../compo
           </button>
           <div class="header-info">
             <h1 class="job-title">{{ oferta.title }}</h1>
-            <div class="company-name">{{ oferta.bidder.name }} {{ oferta.bidder.surname }}</div>
+            <div class="company-name">{{ oferta.bidder?.name }} {{ oferta.bidder?.surname }}</div>
             <div class="job-meta">
               <div class="meta-item">
                 <mat-icon>location_on</mat-icon>
@@ -90,6 +90,49 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../compo
               </div>
             </mat-card-content>
           </mat-card>
+
+          @if (canVote()) {
+          <mat-card class="modern-card vote-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>poll</mat-icon>
+                Tu Valoración
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="vote-section">
+                <p class="vote-description">¿Qué te parece esta oferta? Tu valoración ayuda a mejorar las recomendaciones.</p>
+                <div class="vote-buttons-large">
+                  <button 
+                    mat-raised-button 
+                    class="vote-button-large like-button"
+                    [class.active]="oferta.userVote === true"
+                    (click)="onLike()"
+                    [disabled]="isVoting">
+                    <mat-icon>thumb_up</mat-icon>
+                    <span>Me gusta</span>
+                    @if (oferta.positiveVotes !== undefined) {
+                      <span class="vote-count-large">({{ oferta.positiveVotes }})</span>
+                    }
+                  </button>
+                  
+                  <button 
+                    mat-raised-button 
+                    class="vote-button-large dislike-button"
+                    [class.active]="oferta.userVote === false"
+                    (click)="onDislike()"
+                    [disabled]="isVoting">
+                    <mat-icon>thumb_down</mat-icon>
+                    <span>No me gusta</span>
+                    @if (oferta.negativeVotes !== undefined) {
+                      <span class="vote-count-large">({{ oferta.negativeVotes }})</span>
+                    }
+                  </button>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+          }
         </div>
 
         <div class="sidebar">
@@ -605,6 +648,106 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../compo
         color: var(--text-muted);
       }
 
+      /* Estilos para la sección de votación */
+      .vote-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: 2px solid var(--border-light);
+      }
+
+      .vote-section {
+        text-align: center;
+      }
+
+      .vote-description {
+        margin: 10px 0 24px 0;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+      }
+
+      .vote-buttons-large {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .vote-button-large {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 16px 24px !important;
+        border-radius: 12px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        text-transform: none !important;
+        transition: all 0.3s ease !important;
+        min-width: 140px !important;
+        border: 2px solid transparent !important;
+      }
+
+      .vote-button-large.like-button {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-light) !important;
+      }
+
+      .vote-button-large.like-button:hover {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+        border-color: #4ade80 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(74, 222, 128, 0.3) !important;
+      }
+
+      .vote-button-large.like-button.active {
+        background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%) !important;
+        color: var(--white) !important;
+        border-color: #16a34a !important;
+        box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4) !important;
+      }
+
+      .vote-button-large.dislike-button {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-light) !important;
+      }
+
+      .vote-button-large.dislike-button:hover {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+        border-color: #f87171 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(248, 113, 113, 0.3) !important;
+      }
+
+      .vote-button-large.dislike-button.active {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        color: var(--white) !important;
+        border-color: #b91c1c !important;
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4) !important;
+      }
+
+      .vote-button-large:disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+      }
+
+      .vote-button-large:disabled:hover {
+        transform: none !important;
+        box-shadow: none !important;
+      }
+
+      .vote-count-large {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        font-weight: 500;
+      }
+
+      .vote-button-large.active .vote-count-large {
+        opacity: 1;
+        font-weight: 600;
+      }
+
       @media (max-width: 1024px) {
         .content-container {
           grid-template-columns: 1fr;
@@ -656,6 +799,7 @@ export class OfertaDetalleComponent implements OnInit {
   loadingApplicationStatus = true; // Estado de carga para verificar si ya aplicó
   dataLoaded = false; // Para controlar si los datos necesarios ya están cargados
   isApplying = false; // Para mostrar cuando se está enviando la aplicación
+  isVoting = false; // Para el sistema de votación
 
   constructor(
     private route: ActivatedRoute,
@@ -664,7 +808,7 @@ export class OfertaDetalleComponent implements OnInit {
     private authService: AuthService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -699,32 +843,32 @@ export class OfertaDetalleComponent implements OnInit {
       console.log('Carta de presentación:', cartaPresentacion);
       console.log('Oferta ID:', this.oferta?.id);
       console.log('Usuario ID:', this.keycloakUser?.id);
-        console.log('Enviando aplicación...');
-        // Mostrar estado de carga mientras se aplica
-        this.isApplying = true;
-        this.loadingApplicationStatus = true;
+      console.log('Enviando aplicación...');
+      // Mostrar estado de carga mientras se aplica
+      this.isApplying = true;
+      this.loadingApplicationStatus = true;
 
-        this.ofertasService.aplicarAOferta({
-          offerId: this.oferta!.id,
-          studentId: this.keycloakUser!.id,
-          customCoverLetter: cartaPresentacion,
-        }).subscribe({
-          next: (response) => {
-            console.log('✅ Aplicación enviada exitosamente:', response);
-            // Actualizar el estado inmediatamente después de aplicar
-            if (this.oferta) {
-              this.oferta.estado = EstadoAplicacion.APLICADO;
-            }
-            this.isApplying = false;
-            this.loadingApplicationStatus = false;
-          },
-          error: (error) => {
-            console.error('❌ Error al aplicar a la oferta:', error);
-            this.isApplying = false;
-            this.loadingApplicationStatus = false;
-            // Aquí puedes agregar manejo de errores, como mostrar un mensaje al usuario
+      this.ofertasService.aplicarAOferta({
+        offerId: this.oferta!.id,
+        studentId: this.keycloakUser!.id,
+        customCoverLetter: cartaPresentacion,
+      }).subscribe({
+        next: (response) => {
+          console.log('✅ Aplicación enviada exitosamente:', response);
+          // Actualizar el estado inmediatamente después de aplicar
+          if (this.oferta) {
+            this.oferta.estado = EstadoAplicacion.APLICADO;
           }
-        });
+          this.isApplying = false;
+          this.loadingApplicationStatus = false;
+        },
+        error: (error) => {
+          console.error('❌ Error al aplicar a la oferta:', error);
+          this.isApplying = false;
+          this.loadingApplicationStatus = false;
+          // Aquí puedes agregar manejo de errores, como mostrar un mensaje al usuario
+        }
+      });
     });
   }
 
@@ -735,7 +879,7 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   editarOferta(): void {
-    if (!this.oferta || !this.isMyOffer()) {
+    if (!this.oferta || !this.oferta.bidder || !this.isMyOffer()) {
       this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 3000 });
       return;
     }
@@ -820,14 +964,14 @@ export class OfertaDetalleComponent implements OnInit {
   }
 
   isMyOffer(): boolean {
-    return this.oferta?.bidder.id === this.keycloakUser?.id;
+    return !!this.oferta?.bidder && this.oferta.bidder.id === this.keycloakUser?.id;
   }
 
   /**
    * Verifica si la oferta fue publicada por un alumno
    */
   isOfertaDeAlumno(): boolean {
-    return this.oferta?.bidder.role === 'Student';
+    return !!this.oferta?.bidder && this.oferta.bidder.role === 'Student';
   }
 
   /**
@@ -878,6 +1022,10 @@ export class OfertaDetalleComponent implements OnInit {
     if (this.oferta && this.keycloakUser && !this.dataLoaded) {
       this.dataLoaded = true;
       this.verificarEstadoAplicacion();
+      // Cargar votos si el usuario puede votar
+      if (this.canVoteOnOffer()) {
+        this.loadVotes();
+      }
     }
   }
 
@@ -920,5 +1068,123 @@ export class OfertaDetalleComponent implements OnInit {
         }
       }
     });
+  }
+
+  /**
+   * Verifica si el usuario puede votar en esta oferta
+   */
+  canVoteOnOffer(): boolean {
+    // Solo los usuarios logueados pueden votar
+    // Las organizaciones no pueden votar, solo estudiantes
+    // No pueden votar en sus propias ofertas
+    return !!this.keycloakUser &&
+      this.keycloakUser.role === 'Student' &&
+      !!this.oferta?.bidder &&
+      this.oferta.bidder.id !== this.keycloakUser.id;
+  }
+
+  /**
+   * Alias para mantener compatibilidad con el template
+   */
+  canVote(): boolean {
+    return this.canVoteOnOffer();
+  }
+
+  /**
+   * Carga los votos iniciales de la oferta
+   */
+  loadVotes(): void {
+    if (!this.oferta || !this.canVoteOnOffer()) return;
+
+    this.ofertasService.getVotesOferta(this.oferta.id).subscribe({
+      next: (voteResponse: VoteResponseDTO) => {
+        this.updateOfertaVotes(voteResponse);
+      },
+      error: (error) => {
+        console.error('Error al cargar votos:', error);
+      }
+    });
+  }
+
+  /**
+   * Maneja el voto positivo (like)
+   */
+  onLike(): void {
+    if (!this.oferta || !this.canVoteOnOffer() || this.isVoting) return;
+
+    this.isVoting = true;
+
+    // Si ya tiene like, quitar el voto
+    if (this.oferta.userVote === true) {
+      this.ofertasService.removeVoteOferta(this.oferta.id).subscribe({
+        next: (voteResponse: VoteResponseDTO) => {
+          this.updateOfertaVotes(voteResponse);
+          this.isVoting = false;
+        },
+        error: (error) => {
+          console.error('Error al quitar voto:', error);
+          this.isVoting = false;
+        }
+      });
+    } else {
+      // Dar like
+      this.ofertasService.likeOferta(this.oferta.id).subscribe({
+        next: (voteResponse: VoteResponseDTO) => {
+          this.updateOfertaVotes(voteResponse);
+          this.isVoting = false;
+        },
+        error: (error) => {
+          console.error('Error al dar like:', error);
+          this.isVoting = false;
+        }
+      });
+    }
+  }
+
+  /**
+   * Maneja el voto negativo (dislike)
+   */
+  onDislike(): void {
+    if (!this.oferta || !this.canVoteOnOffer() || this.isVoting) return;
+
+    this.isVoting = true;
+
+    // Si ya tiene dislike, quitar el voto
+    if (this.oferta.userVote === false) {
+      this.ofertasService.removeVoteOferta(this.oferta.id).subscribe({
+        next: (voteResponse: VoteResponseDTO) => {
+          this.updateOfertaVotes(voteResponse);
+          this.isVoting = false;
+        },
+        error: (error) => {
+          console.error('Error al quitar voto:', error);
+          this.isVoting = false;
+        }
+      });
+    } else {
+      // Dar dislike
+      this.ofertasService.dislikeOferta(this.oferta.id).subscribe({
+        next: (voteResponse: VoteResponseDTO) => {
+          this.updateOfertaVotes(voteResponse);
+          this.isVoting = false;
+        },
+        error: (error) => {
+          console.error('Error al dar dislike:', error);
+          this.isVoting = false;
+        }
+      });
+    }
+  }
+
+  /**
+   * Actualiza los datos de votación de la oferta
+   */
+  private updateOfertaVotes(voteResponse: VoteResponseDTO): void {
+    if (!this.oferta) return;
+
+    this.oferta.userVote = voteResponse.userVote;
+    this.oferta.positiveVotes = voteResponse.positiveVotes;
+    this.oferta.negativeVotes = voteResponse.negativeVotes;
+    this.oferta.totalScore = voteResponse.totalScore;
   }
 }

@@ -255,8 +255,8 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
 
   constructor(
     private ofertasService: offersService,
-    private ofertasLaboralesService: OfertasLaboralesService,
     private empresasService: EmpresasService,
+    private ofertasLaboralesService: OfertasLaboralesService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private router: Router
@@ -276,7 +276,7 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
 
     // Si se proporcionó un empresaId, usarlo directamente
     if (this.empresaId) {
-      this.ofertasService.getoffers({bidderId: this.empresaId})
+      this.ofertasService.getoffers({ bidderId: this.empresaId })
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response: PagedResponseDTO<OfertaListaDTO>) => {
@@ -294,7 +294,7 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
       this.authService.getCurrentUserId()
         .pipe(
           takeUntil(this.destroy$),
-          switchMap(userId => this.ofertasService.getoffers({bidderId: userId}))
+          switchMap(userId => this.ofertasService.getoffers({ bidderId: userId }))
         )
         .subscribe({
           next: (response: PagedResponseDTO<OfertaListaDTO>) => {
@@ -339,7 +339,7 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
    * Obtiene todas las aplicaciones agrupadas por oferta
    * @returns Array de objetos con información de la oferta y sus aplicaciones
    */
-  getAplyListsByOffer(): Array<{oferta: OfertaListaDTO, aplicaciones: any[]}> {
+  getAplyListsByOffer(): Array<{ oferta: OfertaListaDTO, aplicaciones: any[] }> {
     return this.ofertas().map(oferta => ({
       oferta: oferta,
       aplicaciones: oferta.applyList || []
@@ -416,11 +416,11 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
 
   canEditOferta(oferta: OfertaListaDTO): boolean {
     const currentUserId = this.authService.keycloakUser?.id;
-    return currentUserId !== undefined && oferta.bidder.id === currentUserId;
+    return currentUserId !== undefined && !!oferta.bidder && oferta.bidder.id === currentUserId;
   }
 
   editarOferta(oferta: OfertaListaDTO) {
-    if (!this.canEditOferta(oferta)) {
+    if (!this.canEditOferta(oferta) || !oferta.bidder) {
       this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 3000 });
       return;
     }
@@ -485,18 +485,20 @@ export class EmpresaOfertasManagerComponent implements OnInit, OnDestroy {
     confirmDialogRef.afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.isLoading.set(true);
-        this.ofertasLaboralesService.desactivarOferta(oferta.id).subscribe({
-          next: () => {
-            this.isLoading.set(false);
-            this.cargarOfertas();
-            this.snackBar.open('Oferta desactivada exitosamente', 'Cerrar', { duration: 3000 });
-          },
-          error: (error) => {
-            this.isLoading.set(false);
-            console.error('Error al desactivar oferta:', error);
-            this.snackBar.open('Error al desactivar la oferta', 'Cerrar', { duration: 3000 });
-          }
-        });
+
+        this.ofertasLaboralesService.desactivarOferta(oferta.id)
+          .subscribe(
+            (res: OfertaLaboralDTO) => {
+              this.isLoading.set(false);
+              this.cargarOfertas();
+              this.snackBar.open('Oferta desactivada exitosamente', 'Cerrar', { duration: 3000 });
+            },
+            (error: unknown): void => {
+              this.isLoading.set(false);
+              console.error('Error al desactivar oferta:', error);
+              this.snackBar.open('Error al desactivar la oferta', 'Cerrar', { duration: 3000 });
+            }
+          );
       }
     });
   }

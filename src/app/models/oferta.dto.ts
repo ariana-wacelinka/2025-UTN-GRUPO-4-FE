@@ -37,9 +37,13 @@ export interface OfertaListaDTO {
   location: string;
   estimatedPayment: string;
   applyList: any[];
-  bidder: Bidder;
+  bidder: Bidder | null;
   estado?: EstadoAplicacion;
   attributes?: string[];
+  userVote?: boolean | null;
+  positiveVotes?: number;
+  negativeVotes?: number;
+  totalScore?: number;
 }
 
 export interface CrearOfertaDTO {
@@ -63,4 +67,11 @@ export interface PagedResponseDTO<T> {
   numberOfElements: number;
   first: boolean;
   empty: boolean;
+}
+
+export interface VoteResponseDTO {
+  userVote: boolean;
+  positiveVotes: number;
+  negativeVotes: number;
+  totalScore: number;
 }

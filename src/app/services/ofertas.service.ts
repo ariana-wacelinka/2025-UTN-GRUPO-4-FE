@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, delay, tap, map } from 'rxjs';
-import { OfertaListaDTO, EstadoAplicacion, AplicacionDTO, CrearOfertaDTO, PagedResponseDTO } from '../models/oferta.dto';
+import { OfertaListaDTO, EstadoAplicacion, AplicacionDTO, CrearOfertaDTO, PagedResponseDTO, VoteResponseDTO } from '../models/oferta.dto';
 import { AplicanteDTO, AplicantesPagedResponse, StudentDTO } from '../models/aplicante.dto';
 import { API_URL } from '../app.config';
 
@@ -14,7 +14,7 @@ export class offersService {
   constructor(
     private http: HttpClient,
     @Inject(API_URL) private apiUrl: string
-  ) {}
+  ) { }
 
   getoffers(params?: {
     title?: string;
@@ -121,6 +121,54 @@ export class offersService {
             yaAplico
           )
         )
+      );
+  }
+
+  /**
+   * Da un voto positivo (like) a una oferta
+   * @param offerId ID de la oferta
+   * @returns Observable<VoteResponseDTO> respuesta con información de votación
+   */
+  likeOferta(offerId: number): Observable<VoteResponseDTO> {
+    return this.http.post<VoteResponseDTO>(`${this.apiUrl}/offers/${offerId}/votes/like`, {})
+      .pipe(
+        tap((response) => console.log(`👍 Like enviado para oferta ${offerId}:`, response))
+      );
+  }
+
+  /**
+   * Da un voto negativo (dislike) a una oferta
+   * @param offerId ID de la oferta
+   * @returns Observable<VoteResponseDTO> respuesta con información de votación
+   */
+  dislikeOferta(offerId: number): Observable<VoteResponseDTO> {
+    return this.http.post<VoteResponseDTO>(`${this.apiUrl}/offers/${offerId}/votes/dislike`, {})
+      .pipe(
+        tap((response) => console.log(`👎 Dislike enviado para oferta ${offerId}:`, response))
+      );
+  }
+
+  /**
+   * Obtiene el estado de votación de una oferta
+   * @param offerId ID de la oferta
+   * @returns Observable<VoteResponseDTO> información de votación actual
+   */
+  getVotesOferta(offerId: number): Observable<VoteResponseDTO> {
+    return this.http.get<VoteResponseDTO>(`${this.apiUrl}/offers/${offerId}/votes`)
+      .pipe(
+        tap((response) => console.log(`📊 Votos obtenidos para oferta ${offerId}:`, response))
+      );
+  }
+
+  /**
+   * Elimina el voto actual del usuario en una oferta
+   * @param offerId ID de la oferta
+   * @returns Observable<VoteResponseDTO> nuevo estado de votación
+   */
+  removeVoteOferta(offerId: number): Observable<VoteResponseDTO> {
+    return this.http.delete<VoteResponseDTO>(`${this.apiUrl}/offers/${offerId}/votes`)
+      .pipe(
+        tap((response) => console.log(`🗑️ Voto removido para oferta ${offerId}:`, response))
       );
   }
 }

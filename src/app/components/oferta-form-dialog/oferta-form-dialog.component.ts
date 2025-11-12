@@ -256,13 +256,13 @@ export class OfertaFormDialogComponent implements OnInit {
   private validateEditPermissions() {
     const currentUserId = this.authService.keycloakUser?.id;
     const oferta = this.data.oferta!;
-    
+
     if (!currentUserId || !this.ofertasLaboralesService.canEditOferta(oferta, currentUserId)) {
       this.snackBar.open('No tienes permisos para editar esta oferta', 'Cerrar', { duration: 5000 });
       this.dialogRef.close();
       return;
     }
-    
+
     this.loadOfertaData();
   }
 
@@ -280,10 +280,10 @@ export class OfertaFormDialogComponent implements OnInit {
 
   private loadOfertaData() {
     const oferta = this.data.oferta!;
-    
+
     // Mapear modalidad al enum correcto
     const modalityValue = this.mapModalityToEnum(oferta.modality);
-    
+
     this.ofertaForm.patchValue({
       title: oferta.title,
       description: oferta.description,
@@ -428,8 +428,16 @@ export class OfertaFormDialogComponent implements OnInit {
   private updateOferta(ofertaData: UpdateOfertaDTO) {
     const ofertaId = this.data.oferta!.id;
     const currentUserId = this.authService.keycloakUser!.id;
-    const bidderId = this.data.oferta!.bidder.id;
-    
+    const bidder = this.data.oferta!.bidder;
+
+    if (!bidder) {
+      this.snackBar.open('Error: No se puede editar la oferta - información del publicador no disponible', 'Cerrar', { duration: 3000 });
+      this.isSubmitting.set(false);
+      return;
+    }
+
+    const bidderId = bidder.id;
+
     if (!currentUserId) {
       this.snackBar.open('Debes estar autenticado para editar ofertas', 'Cerrar', { duration: 3000 });
       this.isSubmitting.set(false);
