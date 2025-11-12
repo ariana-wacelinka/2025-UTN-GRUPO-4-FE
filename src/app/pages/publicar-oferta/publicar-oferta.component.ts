@@ -293,6 +293,45 @@ export class PublicarOfertaComponent implements OnInit {
     }
   }
 
+  private isFormValid(): boolean {
+    return !!(
+      this.oferta.titulo &&
+      this.oferta.descripcion &&
+      this.oferta.requisitos &&
+      this.oferta.modalidad &&
+      this.oferta.locacion &&
+      this.oferta.atributos.length > 0
+    );
+  }
+
+  private buildPayload(): any {
+    return {
+      bidderId: this.oferta.bidderId,
+      titulo: this.oferta.titulo,
+      descripcion: this.oferta.descripcion,
+      requisitos: this.oferta.requisitos,
+      modalidad: this.oferta.modalidad,
+      locacion: this.oferta.locacion,
+      pagoAprox: this.oferta.pagoAprox,
+      atributos: this.oferta.atributos
+    };
+  }
+
+  private prefillFromOferta(ofertaApi: any) {
+    // Mapear campos de la API (ingles) a la forma del formulario (español)
+    this.oferta.titulo = ofertaApi.title || ofertaApi.titulo || '';
+    this.oferta.descripcion = ofertaApi.description || ofertaApi.descripcion || '';
+    this.oferta.requisitos = ofertaApi.requirements || ofertaApi.requisitos || '';
+    this.oferta.modalidad = (ofertaApi.modality || ofertaApi.modalidad) as any;
+    this.oferta.locacion = ofertaApi.location || ofertaApi.locacion || '';
+    this.oferta.pagoAprox = ofertaApi.estimatedPayment || ofertaApi.pagoAprox || '';
+    this.oferta.atributos = ofertaApi.attributes || ofertaApi.atributos || [];
+    // bidderId si viene en el payload
+    if (ofertaApi.bidder?.id) {
+      this.oferta.bidderId = ofertaApi.bidder.id;
+    }
+  }
+
   cancelar(): void {
     this.router.navigate(['/busqueda']);
   }
