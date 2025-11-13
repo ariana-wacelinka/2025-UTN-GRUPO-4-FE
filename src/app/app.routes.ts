@@ -12,6 +12,7 @@ import { authGuard } from './guards/auth.guard';
 import { organizationGuard } from './guards/organization.guard';
 import { PerfilEmpresaComponent } from './pages/perfil/perfil-empresa/perfil-empresa.component';
 import { EmpresasComponent } from './pages/empresas/empresas.component';
+import { OfertasRecomendadasComponent } from './pages/ofertas-recomendadas/ofertas-recomendadas.component';
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent },
@@ -27,4 +28,5 @@ export const routes: Routes = [
   { path: 'perfil-empresa', component: PerfilEmpresaComponent, canActivate: [authGuard] },
   { path: 'perfil-empresa/:id', component: PerfilEmpresaComponent, canActivate: [authGuard] }
   ,{ path: 'empresas', component: EmpresasComponent }
+  ,{ path: 'ofertas-recomendadas', component: OfertasRecomendadasComponent, canActivate: [authGuard] }
 ];
