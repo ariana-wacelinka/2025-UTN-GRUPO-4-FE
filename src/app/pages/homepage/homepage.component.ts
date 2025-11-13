@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,7 +11,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [MatButtonModule, MatCardModule, MatIconModule],
+  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule],
   template: `
     <div class="homepage-container">
       <section class="hero-section animate-fade-in">
@@ -59,12 +60,19 @@ import { Router } from '@angular/router';
           @for (empresa of empresas; track empresa.id) {
           <div class="empresa-card">
             <div class="empresa-logo">
-              <img [src]="empresa.imageUrl" [alt]="empresa.name" class="empresa-img" />
-            </div>
+                <ng-container *ngIf="empresa.imageUrl; else noLogo">
+                  <img [src]="empresa.imageUrl" [alt]="empresa.name" class="empresa-img" />
+                </ng-container>
+                <ng-template #noLogo>
+                  <div class="empresa-placeholder">
+                    <mat-icon>business</mat-icon>
+                  </div>
+                </ng-template>
+              </div>
             <div class="empresa-info">
               <h3 class="empresa-nombre">{{ empresa.name }}</h3>
               <p class="empresa-sector">{{ empresa.industry }}</p>
-              <span class="empresa-tamanio">{{ getSizeLabel(empresa.size) }}</span>
+              <span class="empresa-tamanio" *ngIf="empresa.size">{{ getSizeLabel(empresa.size) }}</span>
             </div>
           </div>
           }
@@ -77,6 +85,15 @@ import { Router } from '@angular/router';
           >
             Ver todas las ofertas
             <mat-icon>arrow_forward</mat-icon>
+          </button>
+          <span style="display:inline-block;width:16px"></span>
+          <button
+            mat-stroked-button
+            class="view-all-button"
+            (click)="verTodasEmpresas()"
+          >
+            Ver todas las empresas
+            <mat-icon>business</mat-icon>
           </button>
         </div>
       </section>
@@ -312,6 +329,20 @@ import { Router } from '@angular/router';
       border-radius: 50%;
     }
 
+    .empresa-placeholder {
+      width: 60px;
+      height: 60px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary-color);
+      color: var(--white);
+      border-radius: 50%;
+      font-size: 28px;
+      border: 1px solid rgba(255,255,255,0.08);
+      margin: 0 auto 16px;
+    }
+
     .empresa-nombre {
       font-size: 1.3rem;
       font-weight: 600;
@@ -426,6 +457,10 @@ export class HomepageComponent implements OnInit {
 
   verTodasOfertas(): void {
     this.router.navigate(['/busqueda']);
+  }
+
+  verTodasEmpresas(): void {
+    this.router.navigate(['/empresas']);
   }
 
   getSizeLabel(size: CompanySize): string {
