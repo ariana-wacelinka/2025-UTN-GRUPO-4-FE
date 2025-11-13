@@ -11,6 +11,7 @@ import { BusquedaComponent } from './pages/busqueda/busqueda.component';
 import { authGuard } from './guards/auth.guard';
 import { organizationGuard } from './guards/organization.guard';
 import { PerfilEmpresaComponent } from './pages/perfil/perfil-empresa/perfil-empresa.component';
+import { EmpresasComponent } from './pages/empresas/empresas.component';
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent },
@@ -25,4 +26,5 @@ export const routes: Routes = [
   { path: 'perfil/:id', component: PerfilAlumnoComponent, canActivate: [authGuard] },
   { path: 'perfil-empresa', component: PerfilEmpresaComponent, canActivate: [authGuard] },
   { path: 'perfil-empresa/:id', component: PerfilEmpresaComponent, canActivate: [authGuard] }
+  ,{ path: 'empresas', component: EmpresasComponent }
 ];
