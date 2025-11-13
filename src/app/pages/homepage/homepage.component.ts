@@ -456,7 +456,7 @@ export class HomepageComponent implements OnInit {
   }
 
   verTodasOfertas(): void {
-    this.router.navigate(['/busqueda']);
+    this.router.navigate(['/ofertas-recomendadas']);
   }
 
   verTodasEmpresas(): void {

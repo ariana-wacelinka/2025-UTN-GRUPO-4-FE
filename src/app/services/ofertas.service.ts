@@ -190,4 +190,14 @@ export class offersService {
         tap((response) => console.log(`🗑️ Voto removido para oferta ${offerId}:`, response))
       );
   }
+
+  /**
+   * Obtiene ofertas recomendadas para el usuario actual.
+   * Endpoint: GET /offers/recommended
+   */
+  getRecommendedOffers(): Observable<OfertaListaDTO[]> {
+    return this.http.get<OfertaListaDTO[]>(`${this.apiUrl}/offers/recommended`).pipe(
+      tap((result) => console.log('Recommended offers:', result))
+    );
+  }
 }
